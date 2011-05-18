@@ -4,14 +4,14 @@ using namespace std;
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-struct D3DVertex {
+struct SimpleVertex {
 	float x;
 	float y;
 	float z;
 	float rhw;
 };
 
-struct Vertex : public D3DVertex {
+struct Vertex : public SimpleVertex {
 	Vertex();
 	Vertex(float, float, float);
 	friend bool operator == (Vertex, Vertex);
@@ -54,7 +54,7 @@ public:
 	// functionality
 	void dropRedundant();
 	virtual void Triangulate(); // generate vertexes, edges and polygons lists
-	void FillBuff(D3DVertex* vs);
+	void FillBuff(SimpleVertex* vs);
 	// add some modifying functionality here
 
 	// getters

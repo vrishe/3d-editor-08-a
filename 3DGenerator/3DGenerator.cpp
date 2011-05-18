@@ -90,15 +90,15 @@ void Primitive::dropRedundant() {
 }
 
 void Primitive::Triangulate() {}
-void Primitive::FillBuff(D3DVertex* vs) {
+void Primitive::FillBuff(SimpleVertex* vs) {
 	for (int i = 0; i < pCount; i++) {
 		int j = i*3;
-		vs[j]	= (D3DVertex)vertexes[polygons[i].first];
-		vs[j+1] = (D3DVertex)vertexes[polygons[i].second];
-		vs[j+2] = (D3DVertex)vertexes[polygons[i].third];
+		vs[j]	= (SimpleVertex)vertexes[polygons[i].first];
+		vs[j+1] = (SimpleVertex)vertexes[polygons[i].second];
+		vs[j+2] = (SimpleVertex)vertexes[polygons[i].third];
 	}
 
-	D3DVertex a[1000];
+	SimpleVertex a[1000];
 	for (int i = 0; i < pCount * 3; i++)
 		a[i] = vs[i];
 	a[999];
