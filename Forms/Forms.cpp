@@ -31,27 +31,27 @@ namespace Forms
 	}
 
 // ============================================================================
-// Control class implementation
+// clsControl class implementation
 // ============================================================================
 
 	// Abusive code here: 
-	HWND Control::gethWnd()
+	HWND clsControl::gethWnd()
 	{
 		return hWnd;
 	}
 
 	// ************************
 
-	HINSTANCE Control::hInst = NULL;
+	HINSTANCE clsControl::hInst = NULL;
 
-	LRESULT CALLBACK Control::CtrlProc ( 
+	LRESULT CALLBACK clsControl::CtrlProc ( 
 		HWND hWnd, 
 		UINT Event, 
 		WPARAM wParam, 
 		LPARAM lParam 
 	) {
 		EVENT_FUNC_MAP::const_iterator finder;
-		Control *ctrlHandled = (Form *)GetWindowLongPtr(hWnd, GWL_USERDATA),
+		clsControl *ctrlHandled = (clsForm*)GetWindowLongPtr(hWnd, GWL_USERDATA),
 				*ctrlChildHandled;
 
 		UINT	uChildrenCount = ctrlHandled->ChildrenList.size();
@@ -183,7 +183,7 @@ namespace Forms
 		return finder->second(ctrlHandled, wParam, lParam);	
 	}
 
-	UINT Control::findFirstChild(Control *lpCtrlChild)
+	UINT clsControl::findFirstChild(clsControl *lpCtrlChild)
 	{
 		UINT	vCount	= ChildrenList.size(),
 				i		= 0;
@@ -199,7 +199,7 @@ namespace Forms
 		return i;
 	}
 
-	BOOL Control::removeFirstChildFound(Control *lpCtrlChild)
+	BOOL clsControl::removeFirstChildFound(clsControl *lpCtrlChild)
 	{
 		UINT	vCount	= ChildrenList.size(),
 				i		= findFirstChild(lpCtrlChild);
@@ -212,13 +212,13 @@ namespace Forms
 		return FALSE;
 	}
 
-	BOOL Control::manageWindowState(INT nCmdShow)
+	BOOL clsControl::manageWindowState(INT nCmdShow)
 	{
 		ShowWindow(hWnd, nCmdShow);
 		return UpdateWindow(hWnd);
 	}
 
-	Control::Control( ATOM wCls ) {
+	clsControl::clsControl( ATOM wCls ) {
 		if ( hInst == NULL ) hInst = GetModuleHandle(NULL);
 		wndCls = wCls;
 
@@ -232,13 +232,13 @@ namespace Forms
 		Height		= 0;
 	}
 
-	Control::~Control() { Destroy(); }
+	clsControl::~clsControl() { Destroy(); }
 
-	DWORD Control::Create(
+	DWORD clsControl::Create(
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
 			RECT		ctrlDim,
-			Control*	ctrlParent
+			clsControl*	ctrlParent
 	) {
 		RECT rcRealDimentions;
 		if ( hInst == NULL )	return E_FAIL;
@@ -286,13 +286,13 @@ namespace Forms
 		return S_OK;
 	}
 
-	DWORD Control::Create(
+	DWORD clsControl::Create(
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
 			POINT		ctrlPos,
 			UINT		ctrlWidth,
 			UINT		ctrlHeight,
-			Control*	ctrlParent
+			clsControl*	ctrlParent
 	) {
 		RECT ctrlDim;
 		return SetRect(
@@ -310,14 +310,14 @@ namespace Forms
 					);
 	}
 
-	DWORD Control::Create(
+	DWORD clsControl::Create(
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
 			INT			ctrlPosX,
 			INT			ctrlPosY,
 			UINT		ctrlWidth,
 			UINT		ctrlHeight,
-			Control*	ctrlParent
+			clsControl*	ctrlParent
 	) {
 		RECT ctrlDim;
 		return SetRect(
@@ -335,7 +335,7 @@ namespace Forms
 					);
 	}
 
-	DWORD Control::Destroy()
+	DWORD clsControl::Destroy()
 	{
 		if ( hWnd == NULL ) return E_DOES_NOT_EXIST;
 		while ( ChildrenList.size() != 0 )
@@ -357,7 +357,7 @@ namespace Forms
 		return S_OK;
 	}
 
-	DWORD Control::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Replace )
+	DWORD clsControl::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Replace )
 	{
 		EVENT_FUNC_MAP::iterator finder = EventHandlers.find(Event); 
 		ELEMENT NewEventHandler;
@@ -381,9 +381,9 @@ namespace Forms
 		return S_OK;
 	}
 
-	VOID Control::ResetEventHandlers() { EventHandlers.clear(); }
+	VOID clsControl::ResetEventHandlers() { EventHandlers.clear(); }
 
-	BOOL Control::Show(BOOL bRecursive)		
+	BOOL clsControl::Show(BOOL bRecursive)		
 	{
 		BOOL bResult = manageWindowState(SW_SHOWNORMAL); ;
 		for ( UINT i = 0; 
@@ -395,13 +395,13 @@ namespace Forms
 		return bResult;
 	}
 
-	BOOL Control::Hide()		{ return manageWindowState(SW_HIDE); }
+	BOOL clsControl::Hide()		{ return manageWindowState(SW_HIDE); }
 
-	BOOL Control::Enable()		{ return EnableWindow(hWnd, TRUE); }
+	BOOL clsControl::Enable()		{ return EnableWindow(hWnd, TRUE); }
 
-	BOOL Control::Disable()		{ return EnableWindow(hWnd, FALSE); }
+	BOOL clsControl::Disable()		{ return EnableWindow(hWnd, FALSE); }
 
-	BOOL Control::MoveTo(POINT ptDest) 
+	BOOL clsControl::MoveTo(POINT ptDest) 
 	{ 
 		BOOL bResult = SetWindowPos(
 							hWnd, 
@@ -416,7 +416,7 @@ namespace Forms
 		return bResult;
 	}
 
-	BOOL Control::MoveTo(INT ptDestX, INT ptDestY)
+	BOOL clsControl::MoveTo(INT ptDestX, INT ptDestY)
 	{
 		POINT ptDest;
 		ptDest.x = ptDestX;
@@ -424,7 +424,7 @@ namespace Forms
 		return MoveTo(ptDest);
 	}
 
-	BOOL Control::SizeTo(UINT cWidth, UINT cHeight)
+	BOOL clsControl::SizeTo(UINT cWidth, UINT cHeight)
 	{
 		BOOL bResult = SetWindowPos(
 							hWnd, 
@@ -443,7 +443,7 @@ namespace Forms
 		return bResult;
 	}
 
-	BOOL Control::MoveSizeTo(RECT ctrlSizePos)
+	BOOL clsControl::MoveSizeTo(RECT ctrlSizePos)
 	{
 		INT		ctrlPosX	= ctrlSizePos.left < ctrlSizePos.right ? 
 									ctrlSizePos.left : ctrlSizePos.right,
@@ -462,7 +462,7 @@ namespace Forms
 				); 
 	}
 
-	BOOL Control::MoveSizeTo(POINT ptDest, UINT cWidth, UINT cHeight)
+	BOOL clsControl::MoveSizeTo(POINT ptDest, UINT cWidth, UINT cHeight)
 	{
 		RECT ctrlSizePos;
 
@@ -476,7 +476,7 @@ namespace Forms
 			&& MoveSizeTo(ctrlSizePos);
 	}
 
-	BOOL Control::MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight)
+	BOOL clsControl::MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight)
 	{
 		RECT ctrlSizePos;
 
@@ -490,12 +490,12 @@ namespace Forms
 			&& MoveSizeTo(ctrlSizePos);
 	}
 
-	BOOL Control::setText(LPCTSTR ctrlText)
+	BOOL clsControl::setText(LPCTSTR ctrlText)
 	{
 		return SetWindowText(hWnd, ctrlText);
 	}
 
-	DWORD Control::setParent(Control *lpCtrlsParent)
+	DWORD clsControl::setParent(clsControl *lpCtrlsParent)
 	{
 		DWORD ctrlStyle = 0;
 		HWND hWndParent = NULL;
@@ -540,19 +540,19 @@ namespace Forms
 		return S_OK;
 	}
 
-	VOID Control::setAnchors(BYTE ctrlAnchors) { Anchors = ctrlAnchors; } 
+	VOID clsControl::setAnchors(BYTE ctrlAnchors) { Anchors = ctrlAnchors; } 
 
 
-	Control *Control::getParent() { return Parent; }
+	clsControl *clsControl::getParent() { return Parent; }
 
-	UINT Control::getText(LPTSTR ctrlText, UINT nLengthToCopy)
+	UINT clsControl::getText(LPTSTR ctrlText, UINT nLengthToCopy)
 	{
 		return GetWindowText(hWnd, ctrlText, nLengthToCopy);
 	}
 
-	BYTE Control::getAnchors() { return Anchors; }
+	BYTE clsControl::getAnchors() { return Anchors; }
 
-	VOID Control::getBoundaries(LPRECT rcDims)
+	VOID clsControl::getBoundaries(LPRECT rcDims)
 	{
 		if ( rcDims != NULL )
 		{
@@ -563,7 +563,7 @@ namespace Forms
 		}
 	}
 
-	VOID Control::getPos(LPINT pWhereX, LPINT pWhereY)
+	VOID clsControl::getPos(LPINT pWhereX, LPINT pWhereY)
 	{
 		RECT rcDims;
 		getBoundaries(&rcDims);	
@@ -571,7 +571,7 @@ namespace Forms
 		if ( pWhereY != NULL ) { *pWhereY = rcDims.top; }
 	}
 
-	VOID Control::getPos(LPPOINT ptWhere)
+	VOID clsControl::getPos(LPPOINT ptWhere)
 	{
 		RECT rcDims;
 		getBoundaries(&rcDims);	
@@ -582,7 +582,7 @@ namespace Forms
 		}
 	}
 
-	VOID Control::getSize(LPUINT pWidth, LPUINT pHeight)
+	VOID clsControl::getSize(LPUINT pWidth, LPUINT pHeight)
 	{
 		RECT rcDims;
 		getBoundaries(&rcDims);	
@@ -591,42 +591,42 @@ namespace Forms
 		if ( pHeight != NULL ) { *pHeight = rcDims.bottom - rcDims.top; }
 	}
 
-	UINT Control::getWidth()
+	UINT clsControl::getWidth()
 	{
 		UINT cWidth;
 		getSize(&cWidth, NULL);
 		return cWidth;
 	}
 
-	UINT Control::getHeight()
+	UINT clsControl::getHeight()
 	{
 		UINT cHeight;
 		getSize(NULL, &cHeight);
 		return cHeight;
 	}
 
-	INT Control::getWidthMnemonic() { return Width; }
+	INT clsControl::getWidthMnemonic() { return Width; }
 
-	INT Control::getHeightMnemonic() { return Height; }
+	INT clsControl::getHeightMnemonic() { return Height; }
 
-	BOOL Control::isVisible()	{ return IsWindowVisible(hWnd); }
+	BOOL clsControl::isVisible()	{ return IsWindowVisible(hWnd); }
 
-	BOOL Control::isEnabled()	{ return IsWindowEnabled(hWnd); }
+	BOOL clsControl::isEnabled()	{ return IsWindowEnabled(hWnd); }
 
-	BOOL Control::isActive()	{ return GetActiveWindow() == hWnd; }
+	BOOL clsControl::isActive()	{ return GetActiveWindow() == hWnd; }
 
-	BOOL Control::isParent(Control *lpCtrlChild) 
+	BOOL clsControl::isParent(clsControl *lpCtrlChild) 
 	{ 
 		return ChildrenList.size() != findFirstChild(lpCtrlChild); 
 	} 
 
-	BOOL Control::isChild(Control *lpCtrlParent) { return Parent == lpCtrlParent; }
+	BOOL clsControl::isChild(clsControl *lpCtrlParent) { return Parent == lpCtrlParent; }
 
 // ============================================================================
-// Form class implementation
+// clsForm class implementation
 // ============================================================================
 
-	Form::Form(
+	clsForm::clsForm(
 			LPCTSTR clsName,
 			HBRUSH bgrColor,
 			HICON hIcon,
@@ -635,7 +635,7 @@ namespace Forms
 			DWORD clsStyle,
 			INT clsXtraBytes,
 			INT frmXtraBytes
-	) : Control( ClassRegister(
+	) : clsControl( ClassRegister(
 							clsName,
 							clsStyle,
 							clsXtraBytes,
@@ -647,21 +647,21 @@ namespace Forms
 						)
 	) { frmClsAutoUnreg = TRUE; }
 
-	Form::Form(ATOM frmCls) : Control(frmCls) { frmClsAutoUnreg = FALSE; }
+	clsForm::clsForm(ATOM frmCls) : clsControl(frmCls) { frmClsAutoUnreg = FALSE; }
 
-	Form::~Form() 
+	clsForm::~clsForm() 
 	{	
 		if ( frmClsAutoUnreg ) UnregisterClass((LPCTSTR)wndCls, hInst); 
 	}
 
-	DWORD Form::Create(
+	DWORD clsForm::Create(
 				FORM_TYPE	frmType,
 				DWORD		frmStyleEx,
 				RECT		frmDim,
-				Form*		frmParent,
+				clsForm*		frmParent,
 				HMENU		frmMenu
 	) {
-		DWORD dwResult = Control::Create(
+		DWORD dwResult = clsControl::Create(
 									frmType,
 									frmStyleEx,
 									frmDim,
@@ -671,13 +671,13 @@ namespace Forms
 		return dwResult;
 	}
 
-	DWORD Form::Create(
+	DWORD clsForm::Create(
 				FORM_TYPE	frmType,
 				DWORD		frmStyleEx,
 				POINT		frmPos,
 				UINT		frmWidth,
 				UINT		frmHeight,
-				Form*		frmParent,
+				clsForm*		frmParent,
 				HMENU		frmMenu
 	) {
 		RECT frmDim;
@@ -697,14 +697,14 @@ namespace Forms
 				);		
 	}
 
-	DWORD Form::Create(
+	DWORD clsForm::Create(
 				FORM_TYPE	frmType,
 				DWORD		frmStyleEx,
 				INT			frmPosX,
 				INT			frmPosY,
 				UINT		frmWidth,
 				UINT		frmHeight,
-				Form*		frmParent,
+				clsForm*		frmParent,
 				HMENU		frmMenu
 	) {
 		RECT frmDim;
@@ -724,33 +724,33 @@ namespace Forms
 				);	
 	}
 
-	BOOL Form::Validate(LPRECT pValidRect) 
+	BOOL clsForm::Validate(LPRECT pValidRect) 
 	{ 
 		return ValidateRect(hWnd, pValidRect); 
 	}
 
-	BOOL Form::Invalidate(LPRECT pInvalidRect, BOOL bErase) 
+	BOOL clsForm::Invalidate(LPRECT pInvalidRect, BOOL bErase) 
 	{ 
 		return InvalidateRect(hWnd, pInvalidRect, bErase); 
 	} 
 
-	BOOL Form::Maximize() { return ShowWindow(hWnd, SW_SHOWMAXIMIZED); }
+	BOOL clsForm::Maximize() { return ShowWindow(hWnd, SW_SHOWMAXIMIZED); }
 
-	BOOL Form::Minimize() { return ShowWindow(hWnd, SW_SHOWMINIMIZED); }
+	BOOL clsForm::Minimize() { return ShowWindow(hWnd, SW_SHOWMINIMIZED); }
 
-	BOOL Form::Restore()  { return ShowWindow(hWnd, SW_SHOWNORMAL); }
+	BOOL clsForm::Restore()  { return ShowWindow(hWnd, SW_SHOWNORMAL); }
 
-	INT_PTR Form::DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure)
+	INT_PTR clsForm::DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure)
 	{
 		return DialogBox(hInst, dbTemplate, hWnd, dbProcedure);
 	}
 
-	INT_PTR Form::MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType)
+	INT_PTR clsForm::MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType)
 	{
 		return MessageBox(hWnd, mbText, mbCaption, mbType);
 	}
 
-	BOOL Form::setMenu(HMENU frmMenu)
+	BOOL clsForm::setMenu(HMENU frmMenu)
 	{
 		DWORD wndStyle;
 		HMENU hMenuPrev;
@@ -763,8 +763,8 @@ namespace Forms
 		return DrawMenuBar(hWnd);
 	}
 
-	//HMENU Form::getMenu() { return GetWindowLongPtr(...) }
-	VOID Form::getFormClientSize(LPUINT fcWidth, LPUINT fcHeight)
+	//HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
+	VOID clsForm::getFormClientSize(LPUINT fcWidth, LPUINT fcHeight)
 	{
 		RECT clientRect;
 		BOOL bResult = GetClientRect(hWnd, &clientRect);
@@ -772,10 +772,10 @@ namespace Forms
 		if ( fcHeight != NULL) *fcHeight = bResult ? clientRect.bottom : 0U;
 	}
 
-	BOOL Form::isMaximized() { return IsZoomed(hWnd); }
+	BOOL clsForm::isMaximized() { return IsZoomed(hWnd); }
 
-	BOOL Form::isMinimized() { return IsIconic(hWnd); }
+	BOOL clsForm::isMinimized() { return IsIconic(hWnd); }
 
-	BOOL Form::isNormal() { return !(isMaximized() || isMinimized()); }
+	BOOL clsForm::isNormal() { return !(isMaximized() || isMinimized()); }
 };
 

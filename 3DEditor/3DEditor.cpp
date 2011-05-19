@@ -51,27 +51,27 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				CHILD_FORM,
 				NULL,
 				20, 20,
-				ufWidth / 2	- 5, 
-				ufHeight / 2 - 5,
+				ufWidth /*/ 2 - 5*/, 
+				ufHeight /*/ 2 - 5*/,
 				mainForm,
 				NULL
 			);
-	testForm2->Create(
-				CHILD_FORM,
-				NULL,
-				ufWidth / 2 + 25,
-				20,
-				ufWidth / 2	- 5, 
-				ufHeight / 2 - 5,
-				mainForm,
-				NULL
-			);
+	//testForm2->Create(
+	//			CHILD_FORM,
+	//			NULL,
+	//			ufWidth / 2 + 25,
+	//			20,
+	//			ufWidth / 2	- 5, 
+	//			ufHeight / 2 - 5,
+	//			mainForm,
+	//			NULL
+	//		);
 
 	mainForm->AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
 	mainForm->AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
 	//mainForm->AssignEventHandler(WM_CHAR, mainForm_keyPressed, TRUE);
 	testForm1->AssignEventHandler(WM_PAINT, testForm_OnPaint, TRUE);
-
+	testForm1->setAnchors( ANCR_ALL );
 	mainForm->Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
@@ -94,24 +94,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 // ============================================================================
 LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
-	HWND hWnd = ((LPFORM)Sender)->gethWnd();
-	HDC	hDC,
-		hDCForm,
-		hDCBitmap;
-	HBITMAP backBuffer;
-	HGDIOBJ oldBitmap;
+	HWND		hWnd;
+	HDC			hDC;
 	PAINTSTRUCT pStruct;
-	BOOL bResult;
 
-	hDC = BeginPaint(hWnd, &pStruct);
-		hDCForm = GetDC(hWnd);
-		hDCBitmap = CreateCompatibleDC(hDCForm);
-		backBuffer = CreateCompatibleBitmap(
-								hDCBitmap, 
-								pStruct.rcPaint.right, 
-								pStruct.rcPaint.bottom
-							); 
-		oldBitmap = SelectObject(hDCBitmap, backBuffer);
+	hWnd	= ((LPFORM)Sender)->gethWnd();
+	hDC		= BeginPaint(
+				hWnd, 
+				&pStruct
+			);
+
 		// Let's set triangle's vertices
 			testTriangle[0].x		= 10;
 			testTriangle[0].y		= 10;
@@ -120,15 +112,15 @@ LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 			testTriangle[0].Blue	= 0x0000;
 			testTriangle[0].Alpha	= 0x0000;
 
-			testTriangle[1].x		= 40;
-			testTriangle[1].y		= 300;
+			testTriangle[1].x		= 940;
+			testTriangle[1].y		= 450;
 			testTriangle[1].Red		= 0x0000;
 			testTriangle[1].Green	= 0xFFFF;
 			testTriangle[1].Blue	= 0x0000;
 			testTriangle[1].Alpha	= 0x0000;
 
-			testTriangle[2].x		= 450;
-			testTriangle[2].y		= 80;
+			testTriangle[2].x		= 320;
+			testTriangle[2].y		= 660;
 			testTriangle[2].Red		= 0x0000;
 			testTriangle[2].Green	= 0x0000;
 			testTriangle[2].Blue	= 0xFFFF;
@@ -138,8 +130,8 @@ LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 			grTestTriangle.Vertex2	= 1;
 			grTestTriangle.Vertex3	= 2;
 		// Draw here:
-			bResult = GradientFill(
-				hDCBitmap, 
+			GradientFill(
+				hDC, 
 				testTriangle, 
 				3, 
 				&grTestTriangle,
@@ -147,39 +139,23 @@ LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 				GRADIENT_FILL_TRIANGLE
 			);
 		// ================================================================
-		BitBlt(
-				hDCForm, 
-				0, 
-				0, 
-				pStruct.rcPaint.right, 
-				pStruct.rcPaint.bottom, 
-				hDCBitmap,
-				0,
-				0, 
-				SRCCOPY
-			);
-		SelectObject(hDCBitmap, oldBitmap);
-		DeleteObject(backBuffer);
-		DeleteObject(hDCBitmap);
-		ReleaseDC(hWnd, hDCForm);
 	EndPaint(hWnd, &pStruct);
 	return 0;
 }
 
-
-LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
-{
-	BYTE anchor = testForm1->getAnchors();
-	TCHAR number[20];
- 	if ( wParam == 32 )
-	{
-		if ( ++anchor == 16 ) anchor = 0;
-		_itow_s(anchor, number, 20, 10);
-		mainForm->MBShow(number, _T("Anchor changed"), MB_OK);
-		testForm1->setAnchors(anchor);
-	}
-	return 0L;
-}
+//LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+//{
+//	BYTE anchor = testForm1->getAnchors();
+//	TCHAR number[20];
+// 	if ( wParam == 32 )
+//	{
+//		if ( ++anchor == 16 ) anchor = 0;
+//		_itow_s(anchor, number, 20, 10);
+//		mainForm->MBShow(number, _T("Anchor changed"), MB_OK);
+//		testForm1->setAnchors(anchor);
+//	}
+//	return 0L;
+//}
 
 LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {

@@ -18,6 +18,7 @@ namespace Forms
 	using std::map;
 	using std::vector;
 
+	// Common library error codes
 	#define E_DOES_NOT_EXIST		0x80000001
 	#define E_BAD_ARGUMENTS			0x80000002
 	#define E_SUBCLASSING_FAILED	0x80000003
@@ -25,26 +26,6 @@ namespace Forms
 	#define S_ASSIGNED				0x10000000
 	#define S_REPLACED				0x10000001
 	#define S_ALREADY_EXISTS		0x10000002
-
-
-	enum ANCHOR {
-		ANCR_NONE	= 0x00,
-		ANCR_LEFT	= 0x01,
-		ANCR_TOP	= 0x02,
-		ANCR_RIGHT	= 0x04,
-		ANCR_BOTTOM	= 0x08
-	};
-
-	enum FORM_TYPE {
-		APP_FORM	= WS_OVERLAPPEDWINDOW,
-		CHILD_FORM	= WS_CHILDWINDOW,
-		POPUP_FORM	= WS_POPUPWINDOW
-	};
-
-	// Necessary class type definitions
-	typedef LRESULT(*EVENT_FUNC)(LPVOID, WPARAM, LPARAM);	// Typical event handler looks like this.
-	typedef map<UINT, EVENT_FUNC> EVENT_FUNC_MAP;			// Short map definition.
-	typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition.
 
 	// Use this stuff if you feel need to register your own window class
 	ATOM ClassRegister (
@@ -57,14 +38,34 @@ namespace Forms
 				HCURSOR hCur, 
 				HBRUSH bgrColor
 			);
+
+	// Necessary clsControl class type definitions
+	enum ANCHOR {
+		ANCR_NONE			= 0x00,
+		ANCR_LEFT			= 0x01,
+		ANCR_TOP			= 0x02,
+		ANCR_RIGHT			= 0x04,
+		ANCR_BOTTOM			= 0x08
+	};
+	#define ANCR_TOPLEFT		ANCR_TOP | ANCR_LEFT
+	#define ANCR_TOPRIGHT		ANCR_TOP | ANCR_RIGHT
+	#define ANCR_BOTTOMLEFT		ANCR_BOTTOM | ANCR_LEFT
+	#define ANCR_BOTTOMRIGHT	ANCR_BOTTOM | ANCR_RIGHT
+	#define ANCR_LEFTRIGHT		ANCR_LEFT | ANCR_RIGHT
+	#define	ANCR_BOTTOMTOP		ANCR_BOTTOM | ANCR_TOP
+	#define ANCR_ALL			ANCR_LEFTRIGHT | ANCR_BOTTOMTOP
+
+	typedef LRESULT(*EVENT_FUNC)(LPVOID, WPARAM, LPARAM);	// Typical event handler looks like this.
+	typedef map<UINT, EVENT_FUNC> EVENT_FUNC_MAP;			// Short map definition.
+	typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition.
 	
 	// This is a superclass which gives a ground to all
 	// derived classes, which implement alternative 
 	// functionality.
-	class Control {
+	class clsControl {
 	private:
-		Control *Parent;
-		vector<Control *>	ChildrenList;
+		clsControl *Parent;
+		vector<clsControl *>	ChildrenList;
 
 	
 	// Default window callback. Don't care about it!
@@ -78,8 +79,8 @@ namespace Forms
 	
 	// Do you really think you should know about
 	// these methods more than their prototypes? 
-		UINT findFirstChild(Control *lpCtrlChild);
-		BOOL removeFirstChildFound(Control *lpCtrlChild);
+		UINT findFirstChild(clsControl *lpCtrlChild);
+		BOOL removeFirstChildFound(clsControl *lpCtrlChild);
 		BOOL manageWindowState(INT nCmdShow);
 
 	protected:
@@ -95,15 +96,15 @@ namespace Forms
 		INT					Height;
 	public:
 	// Construct/Destruct
-		Control(ATOM wCls);
-		virtual ~Control();
+		clsControl(ATOM wCls);
+		virtual ~clsControl();
 
 	// Create/Destroy
 		virtual DWORD Create(
 					DWORD		ctrlStyle,
 					DWORD		ctrlStyleEx,
 					RECT		ctrlDim,
-					Control*	ctrlParent
+					clsControl*	ctrlParent
 				);
 		virtual DWORD Create(
 					DWORD		ctrlStyle,
@@ -111,7 +112,7 @@ namespace Forms
 					POINT		ctrlPos,
 					UINT		ctrlWidth,
 					UINT		ctrlHeight,
-					Control*	ctrlParent
+					clsControl*	ctrlParent
 				);
 		virtual DWORD Create(
 					DWORD		ctrlStyle,
@@ -120,7 +121,7 @@ namespace Forms
 					INT			ctrlPosY,
 					UINT		ctrlWidth,
 					UINT		ctrlHeight,
-					Control*	ctrlParent
+					clsControl*	ctrlParent
 				);
 
 		virtual DWORD Destroy();
@@ -156,12 +157,12 @@ namespace Forms
 
 	// Setters.
 		BOOL	setText(LPCTSTR ctrlText);
-		DWORD	setParent(Control *lpCtrlParent);						
+		DWORD	setParent(clsControl *lpCtrlParent);						
 		VOID	setAnchors(BYTE ctrlAnchors);
 
 	// Getters.
 		UINT		getText(LPTSTR ctrlText, UINT nLengthToCopy);
-		Control*	getParent();
+		clsControl*	getParent();
 		BYTE		getAnchors();
 		VOID		getBoundaries(LPRECT rcDims);
 		VOID		getPos(LPINT pWhereX, LPINT pWhereY);
@@ -176,9 +177,10 @@ namespace Forms
 		BOOL isVisible();
 		BOOL isEnabled();
 		BOOL isActive();
-		BOOL isParent(Control *lpCtrlChild);
-		BOOL isChild(Control *lpCtrlParent);
+		BOOL isParent(clsControl *lpCtrlChild);
+		BOOL isChild(clsControl *lpCtrlParent);
 	};
+	typedef clsControl CONTROL, *LPCONTROL;
 
 	//class Menu {
 	//private:
@@ -194,16 +196,23 @@ namespace Forms
 	//};
 
 
+	// Necessary clsForm class structs/definitions/enums
+	enum FORM_TYPE {
+		APP_FORM	= WS_OVERLAPPEDWINDOW,
+		CHILD_FORM	= WS_CHILDWINDOW,
+		POPUP_FORM	= WS_POPUPWINDOW
+	};
+
 	// This is a class designed for easy form management. 
 	// Forget about WNDPROC because of window subclassing. 
 	// Use the event-assigned handler functions!
-	class Form : public Control	{
+	class clsForm : public clsControl	{
 	private:
 		BOOL	frmClsAutoUnreg;
 
 	public:
 	// Construct/Destruct.
-		Form(
+		clsForm(
 			LPCTSTR clsName,
 			HBRUSH bgrColor		= (HBRUSH)(COLOR_WINDOW + 1),
 			HICON hIcon			= NULL,
@@ -213,15 +222,15 @@ namespace Forms
 			INT clsXtraBytes	= 0,
 			INT frmXtraBytes	= 0
 		);
-		Form(ATOM frmCls);
-		virtual ~Form();
+		clsForm(ATOM frmCls);
+		virtual ~clsForm();
 
 	// Create/Destroy.
 		virtual DWORD Create(
 					FORM_TYPE	frmType,
 					DWORD		frmStyleEx,
 					RECT		frmDim,
-					Form*		frmParent	= NULL,
+					clsForm*		frmParent	= NULL,
 					HMENU		frmMenu		= NULL
 				);
 		virtual DWORD Create(
@@ -230,7 +239,7 @@ namespace Forms
 					POINT		frmPos,
 					UINT		frmWidth,
 					UINT		frmHeight,
-					Form*		frmParent	= NULL,
+					clsForm*		frmParent	= NULL,
 					HMENU		frmMenu		= NULL
 				);
 		virtual DWORD Create(
@@ -240,7 +249,7 @@ namespace Forms
 					INT			frmPosY,
 					UINT		frmWidth,
 					UINT		frmHeight,
-					Form*		frmParent	= NULL,
+					clsForm*		frmParent	= NULL,
 					HMENU		frmMenu		= NULL
 				);
 
@@ -267,6 +276,6 @@ namespace Forms
 	};
 
 	// This is for those who trudges of CAPITAL LETTER TYPE DEFINITIONS.
-	typedef Form FORM, *LPFORM; 
+	typedef clsForm FORM, *LPFORM; 
 };
 
