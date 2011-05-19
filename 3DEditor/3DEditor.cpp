@@ -95,7 +95,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
 	HWND		hWnd;
-	HDC			hDC;
+	HDC			hDC,
+				hDCForm;
+	HBITMAP		hBmp;
 	PAINTSTRUCT pStruct;
 
 	hWnd	= ((LPFORM)Sender)->gethWnd();
@@ -103,6 +105,13 @@ LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 				hWnd, 
 				&pStruct
 			);
+		hDCForm = CreateCompatibleDC(hDC);
+		hBmp	= CreateCompatibleBitmap(
+									hDC,
+									pStruct.rcPaint.right,
+									pStruct.rcPaint.bottom
+								);
+		SelectObject(hDCForm, hBmp);
 
 		// Let's set triangle's vertices
 			testTriangle[0].x		= 10;
@@ -130,15 +139,30 @@ LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 			grTestTriangle.Vertex2	= 1;
 			grTestTriangle.Vertex3	= 2;
 		// Draw here:
+			((LPFORM)Sender)->MBShow(_T("Before"), NULL, MB_OK);
 			GradientFill(
-				hDC, 
+				hDCForm, 
 				testTriangle, 
 				3, 
 				&grTestTriangle,
 				1, 
 				GRADIENT_FILL_TRIANGLE
 			);
+			((LPFORM)Sender)->MBShow(_T("After"), NULL, MB_OK);
 		// ================================================================
+		BitBlt(
+			hDC,
+			0, 
+			0,
+			pStruct.rcPaint.right,
+			pStruct.rcPaint.bottom,
+			hDCForm,
+			0,
+			0,
+			SRCCOPY
+		);
+		DeleteObject(hBmp);
+		DeleteObject(hDCForm);
 	EndPaint(hWnd, &pStruct);
 	return 0;
 }

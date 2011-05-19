@@ -17,7 +17,6 @@ namespace Forms
 	using namespace std;
 	using std::map;
 	using std::vector;
-
 	// Common library error codes
 	#define E_DOES_NOT_EXIST		0x80000001
 	#define E_BAD_ARGUMENTS			0x80000002
@@ -57,14 +56,14 @@ namespace Forms
 
 	typedef LRESULT(*EVENT_FUNC)(LPVOID, WPARAM, LPARAM);	// Typical event handler looks like this.
 	typedef map<UINT, EVENT_FUNC> EVENT_FUNC_MAP;			// Short map definition.
-	typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition.
+	typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition
 	
 	// This is a superclass which gives a ground to all
 	// derived classes, which implement alternative 
 	// functionality.
 	class clsControl {
 	private:
-		clsControl *Parent;
+		clsControl				*Parent;
 		vector<clsControl *>	ChildrenList;
 
 	

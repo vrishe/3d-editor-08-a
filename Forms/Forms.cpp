@@ -3,7 +3,6 @@
 
 namespace Forms
 {
-
 	ATOM ClassRegister(
 			LPCTSTR clsName, 
 			UINT clsStyle, 
