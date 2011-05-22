@@ -8,11 +8,14 @@ TCHAR szTitle[MAX_LOADSTRING];					// “екст строки заголовка
 TCHAR szWindowClass[MAX_LOADSTRING];			// им€ класса главного окна
 
 // Remove this stuff:
-LPFORM	mainForm, testForm1, testForm2;
-UINT	ufWidth, ufHeight;
-TRIVERTEX	testTriangle[3];
-GRADIENT_TRIANGLE	grTestTriangle;
+FORM				mainForm;
+UINT				ufWidth, ufHeight;
+RENDER_POOL			testPool;
+SCENE3D				testScene;
+CAMERA3D			testCamera;
 
+TRIVERTEX			testTriangle[3];
+GRADIENT_TRIANGLE	grTestTriangle;
 
 // Win API entry point:
 // ===================================
@@ -32,11 +35,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, IDC_MY3DEDITOR, szWindowClass, MAX_LOADSTRING);
 
 	// Get this stuff below out of here!
-	mainForm = new FORM( szWindowClass );
-	testForm1 = new FORM( _T("testForm class"), (HBRUSH)(COLOR_WINDOW + 3) );
-	testForm2 = new FORM( _T("testForm2 class"), (HBRUSH)(COLOR_WINDOW + 3) );
-
-	mainForm->Create(
+	mainForm.Create(
+				_T("Main form class"),
 				APP_FORM, 
 				NULL,
 				CW_USEDEFAULT, 0,
@@ -44,35 +44,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				NULL,
 				LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR))
 			); 
-	mainForm->getFormClientSize(&ufWidth, &ufHeight);
+	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
+	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
+	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
+	mainForm.getClientSize(&ufWidth, &ufHeight);
 	ufWidth -= 40;
 	ufHeight -= 40;
-	testForm1->Create(
-				CHILD_FORM,
-				NULL,
-				20, 20,
-				ufWidth /*/ 2 - 5*/, 
-				ufHeight /*/ 2 - 5*/,
-				mainForm,
-				NULL
-			);
-	//testForm2->Create(
-	//			CHILD_FORM,
-	//			NULL,
-	//			ufWidth / 2 + 25,
-	//			20,
-	//			ufWidth / 2	- 5, 
-	//			ufHeight / 2 - 5,
-	//			mainForm,
-	//			NULL
-	//		);
-
-	mainForm->AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
-	mainForm->AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
-	//mainForm->AssignEventHandler(WM_CHAR, mainForm_keyPressed, TRUE);
-	testForm1->AssignEventHandler(WM_PAINT, testForm_OnPaint, TRUE);
-	testForm1->setAnchors( ANCR_ALL );
-	mainForm->Show();
+	testPool.assignScene(&testScene);
+	testScene.AddObject(&testCamera);
+	testPool.addViewport(
+					20, 20,
+					ufWidth / 2 - 20,
+					ufHeight,
+					0,
+					RM_WIREFRAME
+				);
+	testPool.addViewport(
+					ufWidth / 2 + 10, 20,
+					ufWidth / 2 - 20,
+					ufHeight,
+					0,
+					RM_WIREFRAME
+				);
+	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
 
@@ -85,85 +79,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}
 
-	delete mainForm;
-
+	mainForm.Destroy();
 	return (int) msg.wParam;
 }
 
-// Form event handler functions
-// ============================================================================
-LRESULT testForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+ //Form event handler functions
+ //============================================================================
+LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
-	HWND		hWnd;
-	HDC			hDC,
-				hDCForm;
-	HBITMAP		hBmp;
-	PAINTSTRUCT pStruct;
-
-	hWnd	= ((LPFORM)Sender)->gethWnd();
-	hDC		= BeginPaint(
-				hWnd, 
-				&pStruct
-			);
-		hDCForm = CreateCompatibleDC(hDC);
-		hBmp	= CreateCompatibleBitmap(
-									hDC,
-									pStruct.rcPaint.right,
-									pStruct.rcPaint.bottom
-								);
-		SelectObject(hDCForm, hBmp);
-
-		// Let's set triangle's vertices
-			testTriangle[0].x		= 10;
-			testTriangle[0].y		= 10;
-			testTriangle[0].Red		= 0xFFFF;
-			testTriangle[0].Green	= 0x0000;
-			testTriangle[0].Blue	= 0x0000;
-			testTriangle[0].Alpha	= 0x0000;
-
-			testTriangle[1].x		= 940;
-			testTriangle[1].y		= 450;
-			testTriangle[1].Red		= 0x0000;
-			testTriangle[1].Green	= 0xFFFF;
-			testTriangle[1].Blue	= 0x0000;
-			testTriangle[1].Alpha	= 0x0000;
-
-			testTriangle[2].x		= 320;
-			testTriangle[2].y		= 660;
-			testTriangle[2].Red		= 0x0000;
-			testTriangle[2].Green	= 0x0000;
-			testTriangle[2].Blue	= 0xFFFF;
-			testTriangle[2].Alpha	= 0x0000;
-
-			grTestTriangle.Vertex1	= 0;
-			grTestTriangle.Vertex2	= 1;
-			grTestTriangle.Vertex3	= 2;
-		// Draw here:
-			((LPFORM)Sender)->MBShow(_T("Before"), NULL, MB_OK);
-			GradientFill(
-				hDCForm, 
-				testTriangle, 
-				3, 
-				&grTestTriangle,
-				1, 
-				GRADIENT_FILL_TRIANGLE
-			);
-			((LPFORM)Sender)->MBShow(_T("After"), NULL, MB_OK);
-		// ================================================================
-		BitBlt(
-			hDC,
-			0, 
-			0,
-			pStruct.rcPaint.right,
-			pStruct.rcPaint.bottom,
-			hDCForm,
-			0,
-			0,
-			SRCCOPY
-		);
-		DeleteObject(hBmp);
-		DeleteObject(hDCForm);
-	EndPaint(hWnd, &pStruct);
+	HDC hDC;
+	((LPFORM)Sender)->Validate();
+	hDC		= ((LPFORM)Sender)->getDC();
+		testPool.RenderWorld(hDC);
+	((LPFORM)Sender)->dropDC();
 	return 0;
 }
 
