@@ -21,8 +21,7 @@ typedef struct tagColor
 	unsigned short Blue;
 } COLOR3D, *LPCOLOR3D;
 
-typedef struct tagVertexPure {
-	VECTOR3D	position;
+typedef struct tagVertexPure : VECTOR3D {
 	float		rhW;
 } VERTEX3D_PURE, *LPVERTEX3D_PURE;
 
@@ -141,6 +140,7 @@ protected:
 	unsigned int	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
 
 public:
+	clsMesh();
 	clsMesh(COLOR3D c);
 	clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps);
 

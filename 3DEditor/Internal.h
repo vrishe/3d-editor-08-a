@@ -6,3 +6,4 @@
 // TODO: include any new static libraries headers below.
 #include "..\Controls\Controls.h"
 #include "..\3DEngine\Renderer.h"
+#include "..\3DEngine\Primitives.h"

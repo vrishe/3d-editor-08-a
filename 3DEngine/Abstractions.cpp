@@ -6,23 +6,23 @@
 // Implementation of tagVertex struct:
 tagVertex::tagVertex() 
 { 
-	position.fX = 0; 
-	position.fY = 0; 
-	position.fZ = 0; 
+	fX = 0; 
+	fY = 0; 
+	fZ = 0; 
 	rhW			= 1.0f; 
 }
 tagVertex::tagVertex(float x, float y, float z, float rhw) 
 { 
-	position.fX = x; 
-	position.fY = y; 
-	position.fZ = z; 
+	fX = x; 
+	fY = y; 
+	fZ = z; 
 	rhW			= rhw; 
 }
 bool operator == (tagVertex a, tagVertex b) 
 {
-	return (a.position.fX == b.position.fX 
-			&& a.position.fY == b.position.fY 
-			&& a.position.fZ == b.position.fZ);
+	return (a.fX == b.fX 
+			&& a.fY == b.fY 
+			&& a.fZ == b.fZ);
 }
 
 // Implementation of tagPolygon struct:
@@ -264,6 +264,7 @@ unsigned int clsMesh::dropRedundantPolygons()
 	return result;
 }
 
+clsMesh::clsMesh() : clsObject(CLS_MESH) { setColor(COLOR3D()); }
 clsMesh::clsMesh(COLOR3D c) : clsObject(CLS_MESH) { setColor(c); }
 clsMesh::clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps)
 	: clsObject(CLS_MESH)
@@ -346,20 +347,17 @@ unsigned int clsMesh::delListOfVertices(VERT_LIST v) {
 }
 
 void clsMesh::addPolygon(POLY3D p) { polygons.push_back(p); }
-void clsMesh::addListOfPolygons(vector <POLY3D> p) 
-{ 
+void clsMesh::addListOfPolygons(vector <POLY3D> p) { 
 	polygons.insert(polygons.end(), p.begin(), p.end());
 }
-bool clsMesh::delPolygon(POLY3D p) 
-{
+bool clsMesh::delPolygon(POLY3D p) {
 	unsigned int pos = findPolygon(p);
 	if (pos == -1)
 		return false;
 	polygons.erase(polygons.begin() + pos);
 	return true;
 }
-bool clsMesh::delPolygon(unsigned int i) 
-{ 
+bool clsMesh::delPolygon(unsigned int i) { 
 	unsigned int pCount = polygons.size();
 
 	if ( i > -1 && i < pCount) {
@@ -368,8 +366,7 @@ bool clsMesh::delPolygon(unsigned int i)
 	}
 	return false; 
 }
-unsigned int clsMesh::delListOfPolygons(vector <POLY3D> p) 
-{
+unsigned int clsMesh::delListOfPolygons(vector <POLY3D> p) {
 	unsigned int	result = 0,
 					pCount = polygons.size(),
 					j;
