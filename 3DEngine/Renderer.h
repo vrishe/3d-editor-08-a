@@ -4,6 +4,7 @@
 
 #include "Abstractions.h"
 #include "..\Controls\Controls.h"
+#include "..\3DEngine\Primitives.h"
 
 
 // Custom error codes

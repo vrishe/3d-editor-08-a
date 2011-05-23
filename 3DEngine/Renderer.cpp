@@ -11,8 +11,13 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 	HDC			hDCForm;
 	HBITMAP		hBmp;
 	
-	TRIVERTEX			testTriangle[3];
-	GRADIENT_TRIANGLE	grTestTriangle;
+	TRIVERTEX			testVList[100];
+	GRADIENT_TRIANGLE	testPList[100];		
+	LPVERTEX3D_PURE		vs;
+	LPPOLY3D			ps;	
+	Pyramid				p(50, 60, 40, 50, 30);
+	Cone				c(50, 30, 15, 8);
+	ExCone				ec(50, 30, 15, 8, -20);
 
 	do {
 		dwWaitResult = WaitForMultipleObjects(
@@ -32,7 +37,7 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 		SelectObject(hDCForm, hBmp);
 
 		// Let's set triangle's vertices
-		testTriangle[0].x		= 10;
+		/*testTriangle[0].x		= 10;
 		testTriangle[0].y		= 10;
 		testTriangle[0].Red		= 0xFFFF;
 		testTriangle[0].Green	= 0x0000;
@@ -55,17 +60,36 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 
 		grTestTriangle.Vertex1	= 0;
 		grTestTriangle.Vertex2	= 1;
-		grTestTriangle.Vertex3	= 2;
+		grTestTriangle.Vertex3	= 2;*/
+		int n = p.getVCount(), m = p.getPCount();
+		vs = new VERTEX3D_PURE[n];
+		ps = new POLY3D[m];
+		c.FillBuff(vs, ps);
+		
+		for (int i =0; i<n; i++) {
+			testVList[i].x = vs[i].x + 150;
+			testVList[i].y = vs[i].y + 150;
+			testVList[i].Red		= 0xFFFF;
+			testVList[i].Green		= 0xFFFF;
+			testVList[i].Blue		= 0xFFFF;
+			testVList[i].Alpha		= 0x0000;
+		}
+		for (int i =0; i<m; i++) {
+			testPList[i].Vertex1 = ps[i].first;
+			testPList[i].Vertex2 = ps[i].second;
+			testPList[i].Vertex3 = ps[i].third;
+		}
 		// Draw here:
 		//((LPFORM)Sender)->MBShow(_T("Before"), NULL, MB_OK);
 		GradientFill(
 			hDCForm, 
-			testTriangle, 
-			3, 
-			&grTestTriangle,
-			1, 
+			testVList, 
+			n, 
+			&testPList,
+			m, 
 			GRADIENT_FILL_TRIANGLE
 		);
+		delete [] vs; delete[] ps;
 		//((LPFORM)Sender)->MBShow(_T("After"), NULL, MB_OK);
 		// ================================================================
 		BitBlt(

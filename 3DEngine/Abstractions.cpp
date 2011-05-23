@@ -6,23 +6,21 @@
 // Implementation of tagVertex struct:
 tagVertex::tagVertex() 
 { 
-	fX = 0; 
-	fY = 0; 
-	fZ = 0; 
-	rhW			= 1.0f; 
+	x = 0; 
+	y = 0; 
+	z = 0; 
+	rhW	= 1.0f; 
 }
-tagVertex::tagVertex(float x, float y, float z, float rhw) 
+tagVertex::tagVertex(float fx, float fy, float fz, float rhw)
 { 
-	fX = x; 
-	fY = y; 
-	fZ = z; 
-	rhW			= rhw; 
+	x = fx; 
+	y = fy; 
+	z = fz; 
+	rhW	= rhw; 
 }
 bool operator == (tagVertex a, tagVertex b) 
 {
-	return (a.fX == b.fX 
-			&& a.fY == b.fY 
-			&& a.fZ == b.fZ);
+	return (a.x == b.x && a.y == b.y && a.z == b.z);
 }
 
 // Implementation of tagPolygon struct:
@@ -40,9 +38,9 @@ bool operator == (tagPolygon a, tagPolygon b) {
 // Implementation of clsObject class:
 clsObject::clsObject(CLASS_ID clsID) : objClassID(clsID)
 {
-	Gizmo.fX = 0;
-	Gizmo.fY = 0;
-	Gizmo.fZ = 0;
+	Gizmo.x = 0;
+	Gizmo.y = 0;
+	Gizmo.z = 0;
 
 	Pitch	= 0;
 	Roll	= 0; 
@@ -70,29 +68,29 @@ CLASS_ID clsObject::clsID() { return objClassID; }
 void clsObject::MoveTo(VECTOR3D pt) { Gizmo = pt; }
 void clsObject::MoveTo(float pX, float pY, float pZ)
 {
-	Gizmo.fX = pX;
-	Gizmo.fY = pY;
-	Gizmo.fZ = pZ;
+	Gizmo.x = pX;
+	Gizmo.y = pY;
+	Gizmo.z = pZ;
 }
-void clsObject::MoveToX(float pX) { Gizmo.fX = pX; }
-void clsObject::MoveToY(float pY) { Gizmo.fY = pY; }
-void clsObject::MoveToZ(float pZ) { Gizmo.fZ = pZ; }
+void clsObject::MoveToX(float pX) { Gizmo.x = pX; }
+void clsObject::MoveToY(float pY) { Gizmo.y = pY; }
+void clsObject::MoveToZ(float pZ) { Gizmo.z = pZ; }
 
 void clsObject::MoveAt(VECTOR3D pt) 
 { 
-	Gizmo.fX += pt.fX;
-	Gizmo.fY += pt.fY;
-	Gizmo.fZ += pt.fZ;
+	Gizmo.x += pt.x;
+	Gizmo.y += pt.y;
+	Gizmo.z += pt.z;
 }
 void clsObject::MoveAt(float pX, float pY, float pZ)
 {
-	Gizmo.fX += pX;
-	Gizmo.fY += pY;
-	Gizmo.fZ += pZ;
+	Gizmo.x += pX;
+	Gizmo.y += pY;
+	Gizmo.z += pZ;
 }
-void clsObject::MoveAtX(float pX) { Gizmo.fX += pX; }
-void clsObject::MoveAtY(float pY) { Gizmo.fY += pY; }
-void clsObject::MoveAtZ(float pZ) { Gizmo.fZ += pZ; }
+void clsObject::MoveAtX(float pX) { Gizmo.x += pX; }
+void clsObject::MoveAtY(float pY) { Gizmo.y += pY; }
+void clsObject::MoveAtZ(float pZ) { Gizmo.z += pZ; }
 
 void clsObject::RotateTo(float pitch, float roll, float yaw)
 {
@@ -280,20 +278,30 @@ void clsMesh::dropRedundant()
 	dropUnusedVertices();
 }
 
-void clsMesh::FillBuff(LPVERTEX3D_PURE vs) 
+void clsMesh::FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps) 
 {
+	unsigned int vCount = vertices.size();
 	unsigned int pCount = polygons.size();
 
+	for (unsigned int i = 0; i < vCount; i++) {
+		vs[i].x = vertices[i].x;
+		vs[i].y = vertices[i].y;
+		vs[i].z = vertices[i].z;
+		vs[i].rhW = vertices[i].rhW;
+	}
+
 	for (unsigned int i = 0; i < pCount; i++) {
-		unsigned int j = i*3;
-		vs[j]	= (VERTEX3D_PURE)vertices[polygons[i].first];
-		vs[j+1] = (VERTEX3D_PURE)vertices[polygons[i].second];
-		vs[j+2] = (VERTEX3D_PURE)vertices[polygons[i].third];
+		ps[i].first = polygons[i].first;
+		ps[i].second = polygons[i].second;
+		ps[i].third = polygons[i].third;
 	}
 
 	VERTEX3D_PURE a[1000];
-	for (unsigned int i = 0; i < pCount * 3; i++)
+	POLY3D b[1000];
+	for (unsigned int i = 0; i < vCount; i++)
 		a[i] = vs[i];
+	for (unsigned int i = 0; i < pCount; i++)
+		b[i] = ps[i];
 	a[999];
 }
 

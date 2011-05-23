@@ -9,9 +9,9 @@ using namespace std;
 // Supporting structures
 typedef struct tagVECTOR3
 {
-	float fX;
-	float fY;
-	float fZ;
+	float x;
+	float y;
+	float z;
 } VECTOR3D, *LPVECTOR3D;
 
 typedef struct tagColor
@@ -146,7 +146,7 @@ public:
 
 	// functionality
 	void			dropRedundant();
-	void			FillBuff(LPVERTEX3D_PURE vs);
+	void			FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps);
 	// add some modifying functionality here
 
 	// getters

@@ -9,15 +9,15 @@
 
 void Pyramid::Triangulate() {
 		// setting base vertices
-	vertices.push_back(VERTEX3D(-bL/2 + 300,-bW/2 + 300, 0));	// 0
-	vertices.push_back(VERTEX3D(-bL/2 + 300,bW/2 + 300, 0));	// 1
-	vertices.push_back(VERTEX3D(bL/2 + 300,bW/2 + 300, 0));		// 2
-	vertices.push_back(VERTEX3D(bL/2 + 300,-bW/2 + 300, 0));	// 3
+	vertices.push_back(VERTEX3D(-bL/2,-bW/2, 0));	// 0
+	vertices.push_back(VERTEX3D(-bL/2,bW/2, 0));	// 1
+	vertices.push_back(VERTEX3D(bL/2,bW/2, 0));		// 2
+	vertices.push_back(VERTEX3D(bL/2,-bW/2, 0));	// 3
 		// setting top vertices
-	vertices.push_back(VERTEX3D(-tL/2 + 300,-tW/2 + 300, h));	// 4
-	vertices.push_back(VERTEX3D(-tL/2 + 300,tW/2 + 300, h));	// 5
-	vertices.push_back(VERTEX3D(tL/2 + 300,tW/2 + 300, h));		// 6
-	vertices.push_back(VERTEX3D(tL/2 + 300,-tW/2 + 300, h));	// 7
+	vertices.push_back(VERTEX3D(-tL/2,-tW/2, h));	// 4
+	vertices.push_back(VERTEX3D(-tL/2,tW/2, h));	// 5
+	vertices.push_back(VERTEX3D(tL/2,tW/2, h));		// 6
+	vertices.push_back(VERTEX3D(tL/2,-tW/2, h));	// 7
 
 		// setting base polygons
 	polygons.push_back(POLY3D(0,1,2));	// 0
