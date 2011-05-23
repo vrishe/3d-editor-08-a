@@ -4,7 +4,6 @@
 
 #include "Abstractions.h"
 #include "..\Controls\Controls.h"
-#include "..\3DEngine\Primitives.h"
 
 
 // Custom error codes
@@ -30,66 +29,86 @@ enum RENDER_MODE {
 };
 #define RM_WFSHADED RM_WIREFRAME | RM_SHADED
 
-#define MAX_VIEWPORT_COUNT	6
-#define MAX_RENDER_TIMEOUT	1000
-
-typedef struct tagVIEWPORT_INFO {
-	INT				PosX;
-	INT				PosY;
-	UINT			Width;
-	UINT			Height;
-	UINT			Camera;
-	RENDER_MODE		rMode;
-} VIEWPORT_INFO, *LPVIEWPORT_INFO;
+#define MAX_VIEWPORT_COUNT		6
+#define MAX_FRAMES_PRERENDERED	5
+#define THREAD_WAIT_TIMEOUT	5000
+#define VIEWPORT_CLASS_NAME	_T("RenderPool Viewport Class")
 
 typedef struct tagTHREAD_CONTROLS {
 	EVENT doRender;
 	EVENT shutDown;
-	EVENT renderComplete;
-} THREAD_CONTORLS, *LPTHREAD_CONTROLS;
+} THREAD_CONTROLS, *LPTHREAD_CONTROLS;
 
-typedef struct tagVIEWPORT : public VIEWPORT_INFO {
+class clsViewport : public clsForm {
+private:
+	UINT			cameraObjectID;
+	RENDER_MODE		rMode;
 	LPSCENE3D		*lppScene;
-	HDC				*lpHdc;
-	DWORD			ID;
 
-	THREAD			thOwner;
-	THREAD_CONTORLS thControls;
-} VIEWPORT, *LPVIEWPORT;
+public:
+	clsViewport();
+	clsViewport(
+		LPSCENE3D *lppSceneHost,
+		UINT uCameraObjectID = 0, 
+		RENDER_MODE renderMode = RM_WIREFRAME
+	);
+	virtual ~clsViewport();
 
-typedef vector<LPVIEWPORT> VIEWPORTS_LIST;
-typedef vector<EVENT> EVENTS_LIST;
+	DWORD SetUp(
+				LPFORM vpOwner,
+				INT	vpPosX,
+				INT vpPosY,
+				UINT vpWidth,
+				UINT vpHeight
+			);
 
+	LPSCENE3D	getLpScene();	
+	UINT		getCameraObjectID();
+	RENDER_MODE	getRenderMode();
+
+	VOID		setSceneHost(LPSCENE3D *lppSceneHost);
+	VOID		setCameraObjectID(UINT uCameraObjectID);
+	VOID		setRenderMode(RENDER_MODE renderMode);
+
+	THREAD			Thread;
+	THREAD_CONTROLS threadControls;
+};
+typedef clsViewport VIEWPORT, *LPVIEWPORT;
+
+typedef vector<LPVIEWPORT> LPVIEWPORTS_LIST;
+typedef vector<LPEVENT>	LPEVENTS_LIST;
 class clsRenderPool {
 private:
-	HDC	hDC;
-	LPSCENE3D		Scene;
-	VIEWPORTS_LIST	Viewports;
-	EVENTS_LIST		vpsRenderComplete;
+	LPFORM				Owner;
+	LPSCENE3D			Scene;
+	LPVIEWPORTS_LIST	Viewports;
 
-	EVENT renderSignal;
+	EVENT				renderEvent;
+
 	static DWORD WINAPI Render(LPVOID renderInfo);
-	UINT findViewport(DWORD vpID);
+	UINT				findViewport(DWORD vpID);
 public:
-	clsRenderPool();
-	clsRenderPool(LPSCENE3D lpScene);
+	clsRenderPool(LPFORM Owner);
+	clsRenderPool(LPFORM Owner, LPSCENE3D lpScene);
 	//clsRenderPool(LPSCENE3D, LPVIEWPORT_INFO vpInfo, UINT nToAdd, LPUINT nOfAdded);
 	~clsRenderPool();
 
 	BOOL assignScene(LPSCENE3D lpScene);
-	UINT addViewport(
+	DWORD addViewport(
 				INT			vpPosX,
 				INT			vpPosY,
 				UINT		vpWidth,
 				UINT		vpHeight,
-				UINT		vpCamera,
+				UINT		vpCameraObjectID,
 				RENDER_MODE vpRMode
 			);
 	BOOL delViewport(UINT vpIndex);
 	BOOL delViewport(DWORD vpID);
+
 	LPVIEWPORT getViewport(UINT vpIndex);
 	LPVIEWPORT getViewport(DWORD vpID);
+	UINT getViewportCount();
 
-	DWORD RenderWorld(HDC outputContext);
+	BOOL RenderWorld();
 };
 typedef clsRenderPool RENDER_POOL, *LPRENDER_POOL;

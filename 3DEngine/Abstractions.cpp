@@ -25,7 +25,7 @@ bool operator == (tagVertex a, tagVertex b)
 
 // Implementation of tagPolygon struct:
 tagPolygon::tagPolygon() { first = -1; second = -1; third = -1; }
-tagPolygon::tagPolygon(unsigned int a, unsigned int b, unsigned int c) { first = a; second = b; third = c; }
+tagPolygon::tagPolygon(size_t a, size_t b, size_t c) { first = a; second = b; third = c; }
 bool operator == (tagPolygon a, tagPolygon b) {
 	if (a.first == b.first && a.second == b.second && a.third == b.third)
 		return true;
@@ -36,8 +36,13 @@ bool operator == (tagPolygon a, tagPolygon b) {
 
 // ===========================================================================
 // Implementation of clsObject class:
-clsObject::clsObject(CLASS_ID clsID) : objClassID(clsID)
+size_t clsObject::Counter = 0;
+
+clsObject::clsObject(CLASS_ID clsID) 
+	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
+	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
+
 	Gizmo.x = 0;
 	Gizmo.y = 0;
 	Gizmo.z = 0;
@@ -53,17 +58,46 @@ clsObject::clsObject(
 			float roll, 
 			float yaw, 
 			CLASS_ID clsID) 
-: objClassID(clsID) 
+	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
+	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
+
 	Gizmo	= pt;
+
 	Pitch	= pitch;
 	Roll	= roll;
 	Yaw		= yaw;
 }
 
-clsObject::~clsObject() {}
+clsObject::clsObject(
+		float pX, 
+		float pY, 
+		float pZ, 
+		float pitch,
+		float roll,
+		float yaw, 
+		CLASS_ID clsID)
+	: ClassID(clsID), ID(Counter++), Name(NULL)
+{
+	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 
-CLASS_ID clsObject::clsID() { return objClassID; }
+	Gizmo.x = pX;
+	Gizmo.y = pY;
+	Gizmo.z = pZ;
+
+	Pitch	= pitch;
+	Roll	= roll;
+	Yaw		= yaw;
+}
+
+clsObject::~clsObject() 
+{
+	Counter--;
+	if ( Name != NULL ) delete[] Name;
+}
+
+CLASS_ID clsObject::clsID() { return ClassID; }
+size_t clsObject::objID() { return ID; }
 
 void clsObject::MoveTo(VECTOR3D pt) { Gizmo = pt; }
 void clsObject::MoveTo(float pX, float pY, float pZ)
@@ -112,22 +146,31 @@ void clsObject::RotateAtPitch(float pitch) { Pitch += pitch; }
 void clsObject::RotateAtRoll(float roll) { Roll += roll; }
 void clsObject::RotateAtYaw(float yaw) { Yaw += yaw; }
 
+void clsObject::getName(LPTSTR objName, size_t bufSize) 
+{ 
+	wcscpy_s(objName, bufSize, Name); 
+}
+
+void clsObject::setName(LPTSTR objName, size_t srcSize)
+{
+	wcscpy_s(Name, MAX_OBJECT_NAME_LEN, objName);
+}
 
 // ============================================================================
 // Inplementation of clsScene class:
-bool clsScene::findObject(LPOBJECT3D lpObject, unsigned int *objIndex)
+bool clsScene::findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex)
 {
 	CONTENT::iterator finder = objects.find(lpObject->clsID());
 	bool bResult 
 		= lpObject != NULL
 		&& finder != objects.end();
-	unsigned int objCount;
+	size_t objCount;
  	if ( bResult ) 
 	{
 		objCount	= finder->second.size();
 		bResult		= false;
 		for ( 
-			unsigned int i = 0;
+			size_t i = 0;
 			i < objCount;
 			i++ 
 		) {
@@ -142,14 +185,28 @@ bool clsScene::findObject(LPOBJECT3D lpObject, unsigned int *objIndex)
 	return bResult;
 }
 
-LPOBJECT3D clsScene::getObject(CLASS_ID clsID, unsigned int objIndex)
+bool clsScene::findObjectIndex(size_t objID, CLASS_ID *objClsID, size_t *objIndex)
 {
-	CONTENT::iterator finder = objects.find(clsID);
-	LPOBJECT3D found = NULL;
-	if ( finder != objects.end() 
-		&& objIndex < finder->second.size() ) 
-		found = finder->second[objIndex];
-	return found;
+	CONTENT::iterator finder = objects.begin();
+	size_t	i,
+			listCount;
+
+	while ( finder != objects.end() )
+	{
+		listCount = finder->second.size();
+		i = 0;
+		while ( i < listCount ) 
+		{
+			if ( finder->second[i]->objID() == objID ) 
+			{
+				if ( objClsID != NULL ) *objClsID	= finder->first;
+				if ( objIndex != NULL )	*objIndex	= i;
+				return true;
+			}
+		}
+		finder++;
+	}
+	return false;
 }
 
 clsScene::clsScene() 
@@ -173,7 +230,7 @@ bool clsScene::AddObject(LPOBJECT3D lpObject)
 	return bResult;
 }
 
-bool clsScene::DeleteObject(CLASS_ID clsID, unsigned int objIndex)
+bool clsScene::DeleteObject(CLASS_ID clsID, size_t objIndex)
 {
 	CONTENT::iterator finder = objects.find(clsID);
 	bool bResult 
@@ -184,43 +241,84 @@ bool clsScene::DeleteObject(CLASS_ID clsID, unsigned int objIndex)
 	return bResult;
 }
 
+bool clsScene::DeleteObject(size_t objID)
+{
+	CONTENT::iterator finder;
+	CLASS_ID objClsID;
+	size_t objIndex;
+	bool bResult 
+		= findObjectIndex(objID, &objClsID, &objIndex);
+	if ( bResult ) 
+	{
+		finder = objects.find(objClsID);
+		bResult = finder != objects.end();
+		if ( bResult ) 
+			finder->second.erase(finder->second.begin() + objIndex);
+	}
+	return bResult;
+}
+
 bool clsScene::DeleteObject(LPOBJECT3D lpObject)
 {
-	unsigned int objIndex;
-	return findObject(lpObject, &objIndex)
+	size_t objIndex;
+	return findObjectIndex(lpObject, &objIndex)
 			&& DeleteObject(lpObject->clsID(), objIndex);	
+}
+
+LPOBJECT3D clsScene::getObject(CLASS_ID clsID, size_t objIndex)
+{
+	CONTENT::iterator finder = objects.find(clsID);
+	LPOBJECT3D found = NULL;
+	if ( finder != objects.end() 
+		&& objIndex < finder->second.size() ) 
+		found = finder->second[objIndex];
+	return found;
+}
+
+LPOBJECT3D clsScene::getObject(size_t objID)
+{
+	CLASS_ID clsID; 
+	size_t objIndex;
+	LPOBJECT3D found = findObjectIndex(objID, &clsID, &objIndex) ?
+		objects[clsID][objIndex] : NULL;
+	return found;
+}
+
+size_t clsScene::getObjectClassCount(CLASS_ID clsID)
+{
+	return objects[clsID].size();
 }
 
 // ============================================================================
 // Implementation of clsMesh class:
-unsigned int clsMesh::findVertex(VERTEX3D v) 
+size_t clsMesh::findVertex(VERTEX3D v) 
 {
-	unsigned int vCount = vertices.size();
+	size_t vCount = vertices.size();
 
-	for (unsigned int i = 0; i < vCount; i++)
+	for (size_t i = 0; i < vCount; i++)
 		if (vertices[i] == v)
 			return i;
 	return -1;
 }
-unsigned int clsMesh::findPolygon(POLY3D p) 
+size_t clsMesh::findPolygon(POLY3D p) 
 {
-	unsigned int pCount = polygons.size();
+	size_t pCount = polygons.size();
 
-	for (unsigned int i = 0; i < pCount; i++)
+	for (size_t i = 0; i < pCount; i++)
 		if (polygons[i] == p)
 			return i;
 	return -1;
 }
 
-unsigned int clsMesh::dropUnusedVertices() 
+size_t clsMesh::dropUnusedVertices() 
 {
-	unsigned int result = 0,
+	size_t result = 0,
 				 vCount = vertices.size(),
 				 pCount = polygons.size();
 
-	for (unsigned int i  = 0; i < vCount; i++) {
+	for (size_t i  = 0; i < vCount; i++) {
 		bool found = false;
-		for (unsigned int j = 0; j < pCount; j++)
+		for (size_t j = 0; j < pCount; j++)
 			if (polygons[j].first == i || polygons[j].second == i || polygons[j].third) {
 				found = true;
 				break;
@@ -232,15 +330,15 @@ unsigned int clsMesh::dropUnusedVertices()
 	}
 	return result;
 }
-unsigned int clsMesh::dropRedundantPolygons() 
+size_t clsMesh::dropRedundantPolygons() 
 {
-	unsigned int result = 0,
+	size_t result = 0,
 				 vCount = vertices.size(),
 				 pCount = polygons.size();
 
-	for (unsigned int i = 0; i < pCount; i++) {
+	for (size_t i = 0; i < pCount; i++) {
 		bool firstFound = false, secondFound = false, thirdFound = false;
-		for (unsigned int j = 0; j < vCount; j++) {
+		for (size_t j = 0; j < vCount; j++) {
 			if (polygons[i].first == j) {
 				firstFound = true;
 				continue;
@@ -280,17 +378,17 @@ void clsMesh::dropRedundant()
 
 void clsMesh::FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps) 
 {
-	unsigned int vCount = vertices.size();
-	unsigned int pCount = polygons.size();
+	size_t vCount = vertices.size();
+	size_t pCount = polygons.size();
 
-	for (unsigned int i = 0; i < vCount; i++) {
+	for (size_t i = 0; i < vCount; i++) {
 		vs[i].x = vertices[i].x;
 		vs[i].y = vertices[i].y;
 		vs[i].z = vertices[i].z;
 		vs[i].rhW = vertices[i].rhW;
 	}
 
-	for (unsigned int i = 0; i < pCount; i++) {
+	for (size_t i = 0; i < pCount; i++) {
 		ps[i].first = polygons[i].first;
 		ps[i].second = polygons[i].second;
 		ps[i].third = polygons[i].third;
@@ -298,15 +396,15 @@ void clsMesh::FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps)
 
 	VERTEX3D_PURE a[1000];
 	POLY3D b[1000];
-	for (unsigned int i = 0; i < vCount; i++)
+	for (size_t i = 0; i < vCount; i++)
 		a[i] = vs[i];
-	for (unsigned int i = 0; i < pCount; i++)
+	for (size_t i = 0; i < pCount; i++)
 		b[i] = ps[i];
 	a[999];
 }
 
-unsigned int	clsMesh::getVCount() { return vertices.size(); }
-unsigned int	clsMesh::getPCount() { return polygons.size(); }
+size_t	clsMesh::getVCount() { return vertices.size(); }
+size_t	clsMesh::getPCount() { return polygons.size(); }
 VERT_LIST		clsMesh::getVertices() { return vertices; }
 POLY_LIST		clsMesh::getPolygons() { return polygons; }
 
@@ -318,16 +416,16 @@ void clsMesh::addListOfVertices(VERT_LIST v)
 }
 bool clsMesh::delVertex(VERTEX3D v) 
 {
-	unsigned int pos = findVertex(v);
+	size_t pos = findVertex(v);
 
 	if (pos == -1)
 		return false;
 	vertices.erase(vertices.begin() + pos);
 	return true;
 }
-bool clsMesh::delVertex(unsigned int i) 
+bool clsMesh::delVertex(size_t i) 
 { 
-	unsigned int vCount = vertices.size();
+	size_t vCount = vertices.size();
 
 	if ( i > -1 && i < vCount) {
 		vertices.erase(vertices.begin() + i);
@@ -335,13 +433,13 @@ bool clsMesh::delVertex(unsigned int i)
 	}
 	return false; 
 }
-unsigned int clsMesh::delListOfVertices(VERT_LIST v) {
-	unsigned int	result = 0,
+size_t clsMesh::delListOfVertices(VERT_LIST v) {
+	size_t	result = 0,
 					vCount = vertices.size(),
 					j;
 
-	const unsigned int N = v.size();
-	for (unsigned int i = 0; i < N; i++) {
+	const size_t N = v.size();
+	for (size_t i = 0; i < N; i++) {
 		for (j = 0; j < vCount; j++)
 			if (vertices[j] == v[i]) {
 				vertices.erase(vertices.begin() + j);
@@ -359,14 +457,14 @@ void clsMesh::addListOfPolygons(vector <POLY3D> p) {
 	polygons.insert(polygons.end(), p.begin(), p.end());
 }
 bool clsMesh::delPolygon(POLY3D p) {
-	unsigned int pos = findPolygon(p);
+	size_t pos = findPolygon(p);
 	if (pos == -1)
 		return false;
 	polygons.erase(polygons.begin() + pos);
 	return true;
 }
-bool clsMesh::delPolygon(unsigned int i) { 
-	unsigned int pCount = polygons.size();
+bool clsMesh::delPolygon(size_t i) { 
+	size_t pCount = polygons.size();
 
 	if ( i > -1 && i < pCount) {
 		polygons.erase(polygons.begin() + i);
@@ -374,13 +472,13 @@ bool clsMesh::delPolygon(unsigned int i) {
 	}
 	return false; 
 }
-unsigned int clsMesh::delListOfPolygons(vector <POLY3D> p) {
-	unsigned int	result = 0,
+size_t clsMesh::delListOfPolygons(vector <POLY3D> p) {
+	size_t	result = 0,
 					pCount = polygons.size(),
 					j;
 
-	const unsigned int N = p.size();
-	for (unsigned int i = 0; i < N; i++) {
+	const size_t N = p.size();
+	for (size_t i = 0; i < N; i++) {
 		for (j = 0; j < pCount; j++)
 			if (polygons[j] == p[i]) {
 				polygons.erase(polygons.begin() + j);

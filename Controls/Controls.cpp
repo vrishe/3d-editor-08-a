@@ -187,7 +187,6 @@ UINT clsControl::findFirstChild(clsControl *lpCtrlChild)
 		else
 			i++;
 	}
-	ChildrenList.shrink_to_fit();
 	return i;
 }
 
@@ -213,7 +212,6 @@ BOOL clsControl::manageWindowState(INT nCmdShow)
 clsControl::clsControl() {
 	clsName		= NULL;
 	hWnd		= NULL;
-	hDC			= NULL;
 
 	Parent		= NULL;
 	Anchors		= NULL;
@@ -329,17 +327,19 @@ DWORD clsControl::Create(
 
 VOID clsControl::Destroy()
 {
-	while ( ChildrenList.size() != 0 )
+	UINT ancestorIndex;
+	if ( Parent != NULL )
 	{
-		ChildrenList[0]->Destroy();
-		ChildrenList.erase(ChildrenList.begin());
+		ancestorIndex = Parent->findFirstChild(this);	
+		if ( ancestorIndex < Parent->ChildrenList.size() )
+			Parent->ChildrenList.erase(Parent->ChildrenList.begin() 
+													+ ancestorIndex);
 	}
-	dropDC();
+	while ( ChildrenList.size() != 0 )	ChildrenList[0]->Destroy();
 	DestroyWindow(hWnd);
 	EventHandlers.clear();
 
 	clsName		= NULL;
-	hDC			= NULL;
 	Parent		= NULL;
 	Anchors		= NULL;
 
@@ -600,9 +600,21 @@ INT clsControl::getWidthMnemonic() { return Width; }
 
 INT clsControl::getHeightMnemonic() { return Height; }
 
-HDC clsControl::getDC()	{ return hDC = GetDC(hWnd); }
+VOID clsControl::getDC(HDC *hDC) 
+{ 
+	if ( hDC != NULL ) *hDC = GetWindowDC(hWnd); 
+}
 
-BOOL clsControl::dropDC() { return ReleaseDC(hWnd, hDC) != 0; }
+BOOL clsControl::dropDC(HDC *hDC) 
+{ 
+	BOOL bResult = hDC != NULL;
+	if ( bResult ) 
+	{
+		bResult = ReleaseDC(hWnd, *hDC);
+		*hDC = NULL;
+	}
+	return  bResult; 
+}
 
 BOOL clsControl::isVisible()	{ return IsWindowVisible(hWnd); }
 
@@ -620,7 +632,8 @@ BOOL clsControl::isChild(clsControl *lpCtrlParent) { return Parent == lpCtrlPare
 // ============================================================================
 // clsForm class implementation
 // ============================================================================
-clsForm::clsForm() : clsControl() { frmClsAutoUnreg = FALSE; }
+clsForm::clsForm() 
+	: clsControl(), frmClsAutoUnreg(FALSE) { }
 
 clsForm::~clsForm() { }
 
@@ -778,6 +791,12 @@ VOID clsForm::getClientHeight(LPUINT fcHeight)
 {
 	getClientSize(NULL, fcHeight);
 }
+
+VOID clsForm::getClientDC(HDC *hDC) 
+{ 
+	if ( hDC != NULL ) *hDC = GetDC(hWnd); 
+}
+
 
 BOOL clsForm::isMaximized() { return IsZoomed(hWnd); }
 

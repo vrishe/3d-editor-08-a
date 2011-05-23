@@ -10,7 +10,7 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 // Remove this stuff:
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
-RENDER_POOL			testPool;
+LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera;
 
@@ -37,7 +37,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// Get this stuff below out of here!
 	mainForm.Create(
 				_T("Main form class"),
-				APP_FORM, 
+				(FORM_TYPE)(APP_FORM | WS_CLIPCHILDREN), 
 				NULL,
 				CW_USEDEFAULT, 0,
 				1024, 768,
@@ -50,22 +50,31 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 	ufWidth -= 40;
 	ufHeight -= 40;
-	testPool.assignScene(&testScene);
 	testScene.AddObject(&testCamera);
-	testPool.addViewport(
-					20, 20,
-					ufWidth / 2 - 20,
-					ufHeight,
-					0,
-					RM_WIREFRAME
-				);
-	testPool.addViewport(
-					ufWidth / 2 + 10, 20,
-					ufWidth / 2 - 20,
-					ufHeight,
-					0,
-					RM_WIREFRAME
-				);
+	testPool = new RENDER_POOL(&mainForm, &testScene);
+	testPool->addViewport(
+				20, 20,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				0,
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				20, 
+				25 + ufHeight / 2,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				0,
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				25 + ufWidth / 2, 
+				20,
+				ufWidth / 2 - 5,
+				ufHeight,
+				0,
+				RM_WIREFRAME
+			);
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
@@ -79,6 +88,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		}
 	}
 
+	delete testPool; 
 	mainForm.Destroy();
 	return (int) msg.wParam;
 }
@@ -87,12 +97,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
  //============================================================================
 LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
-	HDC hDC;
 	((LPFORM)Sender)->Validate();
-	hDC		= ((LPFORM)Sender)->getDC();
-		testPool.RenderWorld(hDC);
-	((LPFORM)Sender)->dropDC();
-	return 0;
+	testPool->RenderWorld();
+	return 0L;
 }
 
 //LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
@@ -118,6 +125,7 @@ LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 				MAKEINTRESOURCE(IDD_ABOUTBOX), 
 				About_DialogBox_Handler
 			);
+		testPool->delViewport(1U);
 		break;
 	case IDM_EXIT:
 		((LPFORM)Sender)->Destroy();

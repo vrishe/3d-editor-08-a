@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include <vector>
 #include <map>
 using namespace std;
@@ -32,12 +33,12 @@ typedef struct tagVertex : public VERTEX3D_PURE {
 } VERTEX3D, *LPVERTEX3D;
 
 typedef struct tagPolygon {
-	unsigned int first;
-	unsigned int second;
-	unsigned int third;
+	size_t first;
+	size_t second;
+	size_t third;
 
 	tagPolygon();
-	tagPolygon(unsigned int, unsigned int, unsigned int);
+	tagPolygon(size_t, size_t, size_t);
 	friend bool operator == (tagPolygon, tagPolygon);
 } POLY3D, *LPPOLY3D;
 
@@ -47,17 +48,21 @@ enum CLASS_ID {
 	CLS_MESH		= 2
 };
 
+#define MAX_OBJECT_NAME_LEN	256
 // ============================================================================
 // Object class that represents current object
 // space position
 class clsObject {
 private: 
-	CLASS_ID	objClassID;
+	static size_t	Counter;
+	CLASS_ID		ClassID;
+	size_t			ID;
 protected:
-	VECTOR3D Gizmo;
-	float	Pitch,
-			Roll,
-			Yaw;
+	LPTSTR			Name;
+	VECTOR3D		Gizmo;
+	float			Pitch,
+					Roll,
+					Yaw;
 
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
@@ -68,9 +73,18 @@ public:
 		float yaw, 
 		CLASS_ID clsID = CLS_OBJECT
 	);
-	clsObject(float pX, float pY, float pZ, float pitch, float roll, float yaw);
+	clsObject(
+		float pX, 
+		float pY, 
+		float pZ, 
+		float pitch,
+		float roll,
+		float yaw, 
+		CLASS_ID clsID = CLS_OBJECT
+	);
 	~clsObject();
 	CLASS_ID clsID();
+	size_t	 objID();
 
 	void MoveTo(VECTOR3D pt);
 	void MoveTo(float pX, float pY, float pZ);
@@ -93,6 +107,9 @@ public:
 	void RotateAtPitch(float pitch);
 	void RotateAtRoll(float roll);
 	void RotateAtYaw(float yaw);
+
+	void getName(LPTSTR objName, size_t bufSize);
+	void setName(LPTSTR objName, size_t srcSize);
 };
 typedef clsObject OBJECT3D, *LPOBJECT3D;
 
@@ -106,16 +123,25 @@ class clsScene {
 private:
 	CONTENT objects;
 
-	bool findObject(LPOBJECT3D lpObject, unsigned int *objIndex);
 public:
 	clsScene();
 	~clsScene();
 
 	bool AddObject(LPOBJECT3D lpObject);
-	bool DeleteObject(CLASS_ID clsID, unsigned int objIndex); 
+	bool DeleteObject(CLASS_ID clsID, size_t objIndex); 
+	bool DeleteObject(size_t objID);
 	bool DeleteObject(LPOBJECT3D lpObject);
 
-	LPOBJECT3D getObject(CLASS_ID clID, unsigned int objIndex);
+	bool findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex = NULL);
+	bool findObjectIndex(
+		size_t objID, 
+		CLASS_ID *objClsID	= NULL, 
+		size_t *objIndex	= NULL);
+
+	LPOBJECT3D getObject(CLASS_ID clsID, size_t objIndex);
+	LPOBJECT3D getObject(size_t objID);
+
+	size_t getObjectClassCount(CLASS_ID clsID);
 };
 typedef clsScene SCENE3D, *LPSCENE3D;
 
@@ -132,12 +158,12 @@ protected:
 
 	COLOR3D			color;
 
-	unsigned int findVertex(VERTEX3D);		// returns a vertex position
-	unsigned int findPolygon(POLY3D);		// returns a Polygon_ position
+	size_t findVertex(VERTEX3D);		// returns a vertex position
+	size_t findPolygon(POLY3D);		// returns a Polygon_ position
 
 	/// delete ver/edge/polys that can't be a part of the object no more
-	unsigned int	dropUnusedVertices();		// delete vertexes if no polygons use them	
-	unsigned int	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
+	size_t	dropUnusedVertices();		// delete vertexes if no polygons use them	
+	size_t	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
 
 public:
 	clsMesh();
@@ -150,8 +176,8 @@ public:
 	// add some modifying functionality here
 
 	// getters
-	unsigned int	getVCount();
-	unsigned int	getPCount();
+	size_t	getVCount();
+	size_t	getPCount();
 	VERT_LIST		getVertices();
 	POLY_LIST		getPolygons();
 
@@ -160,16 +186,16 @@ public:
 	void			addVertex(VERTEX3D);
 	void			addListOfVertices(VERT_LIST);
 	bool			delVertex(VERTEX3D);
-	bool			delVertex(unsigned int);
-	unsigned int	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
+	bool			delVertex(size_t);
+	size_t	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
 													// -n otherwise, where n - number of 
 													// undeleted elements
 
 	void			addPolygon(POLY3D);
 	void			addListOfPolygons(POLY_LIST);
 	bool			delPolygon(POLY3D);
-	bool			delPolygon(unsigned int);
-	unsigned int	delListOfPolygons(POLY_LIST);
+	bool			delPolygon(size_t);
+	size_t	delListOfPolygons(POLY_LIST);
 };
 typedef clsMesh MESH3D, *LPMESH3D;
 

@@ -86,10 +86,9 @@ private:
 	BOOL manageWindowState(INT nCmdShow);
 
 protected:
-	static HINSTANCE	hInst;	// Hinstance of an application that uses this class.
-	LPTSTR				clsName; // A class name that defines a window class which contol belongs to.
-	HWND				hWnd;	// A Window handler, specified to this control.
-	HDC					hDC;
+	static HINSTANCE	hInst;		// Hinstance of an application that uses this class.
+	LPTSTR				clsName;	// A class name that defines a window class which contol belongs to.
+	HWND				hWnd;		// A Window handler, specified to this control.
 
 // Some data field needed for stretching
 	BYTE				Anchors;
@@ -103,14 +102,14 @@ public:
 	virtual ~clsControl();
 
 // Create/Destroy
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		ctrlClsName,
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
 			RECT		ctrlDim,
 			clsControl*	ctrlParent
 		);
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		ctrlClsName,
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
@@ -119,7 +118,7 @@ public:
 			UINT		ctrlHeight,
 			clsControl*	ctrlParent
 		);
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		ctrlClsName,
 			DWORD		ctrlStyle,
 			DWORD		ctrlStyleEx,
@@ -177,9 +176,9 @@ public:
 	UINT		getHeight();
 	INT			getWidthMnemonic();
 	INT			getHeightMnemonic();
-	HDC			getDC();
+	VOID		getDC(HDC *hDC);
 
-	BOOL		dropDC();
+	BOOL		dropDC(HDC *hDC);
 // Checkers.
 	BOOL isVisible();
 	BOOL isEnabled();
@@ -226,7 +225,7 @@ public:
 	virtual ~clsForm();
 
 // Create/Destroy.
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		frmClassName,
 			FORM_TYPE	frmType,
 			DWORD		frmStyleEx,
@@ -234,7 +233,7 @@ public:
 			clsForm*	frmParent	= NULL,
 			HMENU		frmMenu		= NULL
 		);
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		frmClassName,
 			FORM_TYPE	frmType,
 			DWORD		frmStyleEx,
@@ -244,7 +243,7 @@ public:
 			clsForm*	frmParent	= NULL,
 			HMENU		frmMenu		= NULL
 		);
-	DWORD Create(
+	virtual DWORD Create(
 			LPCTSTR		frmClassName,
 			FORM_TYPE	frmType,
 			DWORD		frmStyleEx,
@@ -274,6 +273,7 @@ public:
 	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight); 
 	VOID	getClientWidth(LPUINT fcWidth);
 	VOID	getClientHeight(LPUINT fcHeight);
+	VOID	getClientDC(HDC *hDC);
 
 // Checkers.
 	BOOL	isMaximized();

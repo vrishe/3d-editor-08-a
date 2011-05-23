@@ -2,42 +2,122 @@
 #include "Renderer.h"
 
 // ============================================================================
+// clsViewport implementation
+LRESULT BkGndSaver(LPVOID Sender, WPARAM wParam, LPARAM lParam) { return 1L; }
+
+clsViewport::clsViewport()
+{
+	cameraObjectID		= 0;
+	rMode				= RM_WIREFRAME;
+	lppScene			= NULL;
+
+	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
+}
+
+clsViewport::clsViewport(
+	LPSCENE3D *lppSceneHost, 
+	UINT uCameraObjectID, 
+	RENDER_MODE renderMode
+) {
+	lppScene	= NULL;
+	rMode		= RM_WIREFRAME;
+	if ( lppSceneHost		!= NULL 
+		&& *lppSceneHost	!= NULL 
+		&& (*lppSceneHost)->getObject(uCameraObjectID)->clsID() == CLS_CAMERA
+	) {
+		lppScene	= lppSceneHost;
+		cameraObjectID = uCameraObjectID;
+	}
+	rMode				= renderMode;
+
+	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
+}
+
+clsViewport::~clsViewport() { }
+
+DWORD clsViewport::SetUp(
+				LPFORM vpOwner,
+				INT	vpPosX,
+				INT vpPosY,
+				UINT vpWidth,
+				UINT vpHeight
+) {
+	if ( lppScene == NULL ) return E_FAILED;
+	return 	clsForm::Create(	
+				VIEWPORT_CLASS_NAME,
+				(FORM_TYPE)(CHILD_FORM 
+						| WS_CLIPSIBLINGS
+						| WS_BORDER),
+				0,
+				vpPosX,
+				vpPosY,
+				vpWidth,
+				vpHeight,
+				vpOwner
+			);
+}
+
+LPSCENE3D clsViewport::getLpScene()			{ return *lppScene; }
+UINT clsViewport::getCameraObjectID()		{ return cameraObjectID; }
+RENDER_MODE clsViewport::getRenderMode()	{ return rMode; }
+
+VOID clsViewport::setSceneHost(LPSCENE3D *lppSceneHost)
+{
+	if ( lppSceneHost		!= NULL 
+		&& *lppSceneHost	!= NULL 
+		&& (*lppSceneHost)->getObjectClassCount(CLS_CAMERA) != 0
+	) lppScene = lppSceneHost;
+}
+
+VOID clsViewport::setCameraObjectID(UINT uCameraObjectID)
+{
+	if ( lppScene		!= NULL 
+		&& *lppScene	!= NULL 
+		&& (*lppScene )->getObject(uCameraObjectID)->clsID() == CLS_CAMERA
+	) cameraObjectID = uCameraObjectID;
+}
+
+VOID clsViewport::setRenderMode(RENDER_MODE renderMode) { rMode = renderMode; }
+
+// ============================================================================
 // clsRenderPool Implementation
 DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 {
-	LPVIEWPORT	vp			= (LPVIEWPORT)renderInfo;
-	BOOL		bAlive		= TRUE;
 	DWORD		dwWaitResult;
-	HDC			hDCForm;
-	HBITMAP		hBmp;
+	BOOL		bAlive;
+
+	LPVIEWPORT	vp				= (LPVIEWPORT)renderInfo;
+	HDC			hVpDC,
+				hMemDC;
+	HBITMAP		hBMP,
+				hBMPOld;
+	UINT		vpWidth,
+				vpHeight;
 	
-	TRIVERTEX			testVList[100];
-	GRADIENT_TRIANGLE	testPList[100];		
-	LPVERTEX3D_PURE		vs;
-	LPPOLY3D			ps;	
-	Pyramid				p(50, 60, 40, 50, 30);
-	Cone				c(50, 30, 15, 8);
-	ExCone				ec(50, 30, 15, 8, -20);
+	// For test purposes only
+	TRIVERTEX			testTriangle[3];
+	GRADIENT_TRIANGLE	grTestTriangle;
 
 	do {
 		dwWaitResult = WaitForMultipleObjects(
-							2,
-							(LPEVENT)&vp->thControls,
-							FALSE,
-							INFINITE
-							);
+						2,
+						(LPEVENT)&vp->threadControls,
+						FALSE,
+						INFINITE
+					);
 		bAlive = dwWaitResult != WAIT_OBJECT_0 + 1;
-
-		hDCForm = CreateCompatibleDC(*vp->lpHdc);
-		hBmp	= CreateCompatibleBitmap(
-									*vp->lpHdc,
-									vp->Width,
-									vp->Height
+		vp->getClientDC(&hVpDC);
+		vp->getClientSize(&vpWidth, &vpHeight);
+		hMemDC	= CreateCompatibleDC(hVpDC);
+		hBMP	= CreateCompatibleBitmap(
+									hVpDC,
+									vpWidth,
+									vpHeight
 								);
-		SelectObject(hDCForm, hBmp);
+		hBMPOld = (HBITMAP)SelectObject(hMemDC, hBMP);
 
 		// Let's set triangle's vertices
-		/*testTriangle[0].x		= 10;
+		testTriangle[0].x		= 10;
 		testTriangle[0].y		= 10;
 		testTriangle[0].Red		= 0xFFFF;
 		testTriangle[0].Green	= 0x0000;
@@ -60,53 +140,36 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 
 		grTestTriangle.Vertex1	= 0;
 		grTestTriangle.Vertex2	= 1;
-		grTestTriangle.Vertex3	= 2;*/
-		int n = p.getVCount(), m = p.getPCount();
-		vs = new VERTEX3D_PURE[n];
-		ps = new POLY3D[m];
-		c.FillBuff(vs, ps);
-		
-		for (int i =0; i<n; i++) {
-			testVList[i].x = vs[i].x + 150;
-			testVList[i].y = vs[i].y + 150;
-			testVList[i].Red		= 0xFFFF;
-			testVList[i].Green		= 0xFFFF;
-			testVList[i].Blue		= 0xFFFF;
-			testVList[i].Alpha		= 0x0000;
-		}
-		for (int i =0; i<m; i++) {
-			testPList[i].Vertex1 = ps[i].first;
-			testPList[i].Vertex2 = ps[i].second;
-			testPList[i].Vertex3 = ps[i].third;
-		}
-		// Draw here:
-		//((LPFORM)Sender)->MBShow(_T("Before"), NULL, MB_OK);
+		grTestTriangle.Vertex3	= 2;
+
+		// Won't change
 		GradientFill(
-			hDCForm, 
-			testVList, 
-			n, 
-			&testPList,
-			m, 
+			hMemDC, 
+			testTriangle, 
+			3, 
+			&grTestTriangle,
+			1, 
 			GRADIENT_FILL_TRIANGLE
 		);
-		delete [] vs; delete[] ps;
-		//((LPFORM)Sender)->MBShow(_T("After"), NULL, MB_OK);
-		// ================================================================
+
 		BitBlt(
-			*vp->lpHdc,
-			vp->PosX, 
-			vp->PosY,
-			vp->Width,
-			vp->Height,
-			hDCForm,
+			hVpDC,
+			0,
+			0,
+			vpWidth,
+			vpHeight,
+			hMemDC,
 			0,
 			0,
 			SRCCOPY
 		);
-		DeleteObject(hBmp);
-		DeleteObject(hDCForm);
-		SetEvent(vp->thControls.renderComplete);
-		ResetEvent(vp->thControls.doRender);
+		//vp->Validate();
+
+		SelectObject(hMemDC, hBMPOld);
+		DeleteObject(hBMP);
+		DeleteDC(hMemDC);
+		vp->dropDC(&hVpDC);
+		ResetEvent(vp->threadControls.doRender);
 	} while ( bAlive );
 
 	return SHUTDOWN_ON_DEMAND;
@@ -117,23 +180,25 @@ UINT clsRenderPool::findViewport(DWORD vpID)
 	UINT vpCount = Viewports.size();
 	for ( UINT i = 0; i < vpCount; i++ )
 	{
-		if ( Viewports[i]->ID == vpID ) return i;
+		if ( GetThreadId(Viewports[i]->Thread) == vpID ) return i;
 	}
 	return MAX_VIEWPORT_COUNT;
 }
 
-clsRenderPool::clsRenderPool() : Scene(NULL), hDC(NULL)
+clsRenderPool::clsRenderPool(LPFORM lpOwner) 
+	: Owner(lpOwner), Scene(NULL) 
 {
-	renderSignal = CreateEvent(0, TRUE, FALSE, NULL);
+	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
 }
-clsRenderPool::clsRenderPool(LPSCENE3D lpScene) : hDC(NULL)
+clsRenderPool::clsRenderPool(LPFORM lpOwner, LPSCENE3D lpScene) 
+	: Owner(lpOwner), Scene(NULL)
 {
-	renderSignal = CreateEvent(0, TRUE, FALSE, NULL);
+	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	assignScene(lpScene);
 }
 clsRenderPool::~clsRenderPool() 
 { 
-	if (renderSignal != NULL) CloseHandle(renderSignal);
+	if ( renderEvent != NULL )	CloseHandle(renderEvent);
 }
 
 BOOL clsRenderPool::assignScene(LPSCENE3D lpScene)
@@ -141,63 +206,60 @@ BOOL clsRenderPool::assignScene(LPSCENE3D lpScene)
 	return (Scene = lpScene) != NULL;
 }
 
-UINT clsRenderPool::addViewport(
+DWORD clsRenderPool::addViewport(
 						INT			vpPosX,
 						INT			vpPosY,
 						UINT		vpWidth,
 						UINT		vpHeight,
-						UINT		vpCamera,
+						UINT		vpCameraObjectID,
 						RENDER_MODE vpRMode
 ) {
-	LPVIEWPORT	vpInfo	= new VIEWPORT;
-	DWORD		vpID	= 0;
+	LPVIEWPORT	vpInfo;
+	DWORD		vpID		= 0,
+				dwResult;				
 	BOOL		bResult;
 	
 	bResult 
-		= Scene										!= NULL
-		&& renderSignal									!= NULL
-		&& Viewports.size()							!= MAX_VIEWPORT_COUNT
-		&& Scene->getObject(CLS_CAMERA, vpCamera)	!= NULL;
+		= Scene											!= NULL
+		&& Owner										!= NULL
+		&& renderEvent									!= NULL
+		&& Viewports.size()								!= MAX_VIEWPORT_COUNT
+		&& Scene->getObject(vpCameraObjectID)->clsID() 	== CLS_CAMERA;
 	if ( bResult )
 	{
-		vpInfo->PosX		= vpPosX;
-		vpInfo->PosY		= vpPosY;
-		vpInfo->Width		= vpWidth;
-		vpInfo->Height		= vpHeight;
-		vpInfo->lppScene	= &Scene;
-		vpInfo->Camera		= vpCamera;
-		vpInfo->rMode		= vpRMode;
-		vpInfo->lpHdc		= &hDC;
-		vpInfo->thOwner		= CreateThread(
-									0,
-									0,
-									Render,
-									vpInfo,
-									NULL,
-									&vpID
-								);
-		bResult = vpInfo->thOwner != NULL;
-		if ( bResult )
+		vpInfo = new VIEWPORT(&Scene, vpCameraObjectID, vpRMode);
+		dwResult = vpInfo->SetUp(
+							Owner,
+							vpPosX,
+							vpPosY,
+							vpWidth,
+							vpHeight
+						);
+		if ( bResult = SUCCEEDED(dwResult) )
 		{
-			vpInfo->thControls.doRender			= renderSignal;
-			vpInfo->thControls.shutDown			= CreateEvent(0, FALSE, FALSE, NULL);
-			vpInfo->thControls.renderComplete	= CreateEvent(0, FALSE, FALSE, NULL);
-			bResult 
-				= vpInfo->thControls.shutDown			!= NULL
-				&& vpInfo->thControls.renderComplete	!= NULL;
+			vpInfo->Thread		= CreateThread(
+										0,
+										0,
+										Render,
+										vpInfo,
+										CREATE_SUSPENDED,
+										&vpID
+									);
+			bResult = vpInfo->Thread != NULL;
 			if ( bResult )
 			{
-				//ResumeThread(vpInfo->thOwner);
-				vpInfo->ID = vpID;
-				vpsRenderComplete.push_back(vpInfo->thControls.renderComplete);
-				Viewports.push_back(vpInfo);
+				vpInfo->threadControls.doRender = renderEvent;
+				vpInfo->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
+				bResult = vpInfo->threadControls.shutDown != NULL;
+				if ( bResult ) 
+				{
+					Viewports.push_back(vpInfo);
+					ResumeThread(vpInfo->Thread);
+					vpInfo->Show();
+				}
 			}
 		}
-		if ( !bResult )	
-		{
-			vpID	= 0;
-			delete vpInfo;
-		}
+		if ( !bResult ) delete vpInfo;
 	}
 	return vpID;
 }
@@ -207,16 +269,19 @@ BOOL clsRenderPool::delViewport(UINT vpIndex)
 	BOOL bResult = vpIndex < Viewports.size();
 	if ( bResult ) 
 	{
+		SetEvent(Viewports[vpIndex]->threadControls.shutDown);
+		WaitForSingleObject(Viewports[vpIndex]->Thread, THREAD_WAIT_TIMEOUT);
+		CloseHandle(Viewports[vpIndex]->Thread);
+		CloseHandle(Viewports[vpIndex]->threadControls.shutDown);
 		delete Viewports[vpIndex];
 		Viewports.erase(Viewports.begin() + vpIndex);
-		vpsRenderComplete.erase(vpsRenderComplete.begin() + vpIndex);
 	}
 	return bResult;
 }
 
 BOOL clsRenderPool::delViewport(DWORD vpID)
 {
-	return delViewport( findViewport(vpID) );
+	return delViewport(findViewport(vpID));
 }
 
 LPVIEWPORT clsRenderPool::getViewport(UINT vpIndex)
@@ -230,14 +295,4 @@ LPVIEWPORT clsRenderPool::getViewport(DWORD vpID)
 	return Viewports[findViewport(vpID)];
 }
 
-DWORD clsRenderPool::RenderWorld(HDC outputContext)
-{
-	hDC = outputContext;
-	SetEvent(renderSignal);
-	return WaitForMultipleObjects(
-				vpsRenderComplete.size(),
-				vpsRenderComplete.data(),
-				TRUE,
-				MAX_RENDER_TIMEOUT
-			);
-}
+BOOL clsRenderPool::RenderWorld() { return SetEvent(renderEvent); }
