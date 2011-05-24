@@ -17,9 +17,9 @@ typedef struct tagVECTOR3
 
 typedef struct tagColor
 {
-	unsigned short Red;
-	unsigned short Green;
-	unsigned short Blue;
+	unsigned char Red;
+	unsigned char Green;
+	unsigned char Blue;
 } COLOR3D, *LPCOLOR3D;
 
 typedef struct tagVertexPure : VECTOR3D {
@@ -122,6 +122,7 @@ typedef pair<CLASS_ID, OBJECTS_LIST> CONTENT_CLASS;
 class clsScene {
 private:
 	CONTENT objects;
+	COLOR3D	ambientColor;
 
 public:
 	clsScene();
@@ -134,12 +135,18 @@ public:
 
 	bool findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex = NULL);
 	bool findObjectIndex(
-		size_t objID, 
-		CLASS_ID *objClsID	= NULL, 
-		size_t *objIndex	= NULL);
+				size_t objID, 
+				CLASS_ID *objClsID	= NULL, 
+				size_t *objIndex	= NULL
+			);
 
-	LPOBJECT3D getObject(CLASS_ID clsID, size_t objIndex);
-	LPOBJECT3D getObject(size_t objID);
+	LPOBJECT3D	getObject(CLASS_ID clsID, size_t objIndex);
+	LPOBJECT3D	getObject(size_t objID);
+	COLOR3D		getAmbientColor();
+	DWORD		getAmbientColorRef();
+
+	VOID		setAmbientColor(COLOR3D c);
+	VOID		setAmbientColor(BYTE red, BYTE green, BYTE blue);
 
 	size_t getObjectClassCount(CLASS_ID clsID);
 };
@@ -168,20 +175,42 @@ protected:
 public:
 	clsMesh();
 	clsMesh(COLOR3D c);
+	clsMesh(						
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue
+	);
 	clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps);
+	clsMesh(
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue, 
+		VERT_LIST vs, 
+		POLY_LIST ps
+	);
 
 	// functionality
 	void			dropRedundant();
-	void			FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps);
 	// add some modifying functionality here
 
 	// getters
-	size_t	getVCount();
-	size_t	getPCount();
+	COLOR3D			getColor();
+	size_t			getVCount();
+	size_t			getPCount();
+	LPVERTEX3D		getVerticesRaw();
+	LPPOLY3D		getPolygonsRaw();
 	VERT_LIST		getVertices();
 	POLY_LIST		getPolygons();
 
+	void			getBuffersRaw(LPVERTEX3D *vs, LPPOLY3D *ps);
+	void			getBuffers(LPVERT_LIST vs, LPPOLY_LIST ps);
+
 	// setters
+	void			setColor(
+						unsigned char red, 
+						unsigned char green, 
+						unsigned char blue
+					);
 	void			setColor(COLOR3D c);
 	void			addVertex(VERTEX3D);
 	void			addListOfVertices(VERT_LIST);

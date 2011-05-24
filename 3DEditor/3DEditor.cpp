@@ -13,9 +13,9 @@ UINT				ufWidth, ufHeight;
 LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera;
-
-TRIVERTEX			testTriangle[3];
-GRADIENT_TRIANGLE	grTestTriangle;
+Pyramid				testPyramid(50.0f, 25.0f, 35.0f, 20.0f, 30.0f);
+Cone				testCone(30.0f, 75.0f, 50.0f, 25);
+ExCone				testExCone(43.0f, 22.0f, 56.3f, 5.0f, 30);
 
 // Win API entry point:
 // ===================================
@@ -51,12 +51,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testScene.AddObject(&testCamera);
+	testScene.AddObject(&testPyramid);
+	testScene.AddObject(&testCone);
+	testScene.setAmbientColor(132, 128, 128);
+
 	testPool = new RENDER_POOL(&mainForm, &testScene);
 	testPool->addViewport(
 				20, 20,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				0,
+				testCamera.objID(),
 				RM_WIREFRAME
 			);
 	testPool->addViewport(
@@ -64,7 +68,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				25 + ufHeight / 2,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				0,
+				testCamera.objID(),
 				RM_WIREFRAME
 			);
 	testPool->addViewport(
@@ -72,7 +76,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				20,
 				ufWidth / 2 - 5,
 				ufHeight,
-				0,
+				testCamera.objID(),
 				RM_WIREFRAME
 			);
 	mainForm.Show();
@@ -125,7 +129,6 @@ LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 				MAKEINTRESOURCE(IDD_ABOUTBOX), 
 				About_DialogBox_Handler
 			);
-		testPool->delViewport(1U);
 		break;
 	case IDM_EXIT:
 		((LPFORM)Sender)->Destroy();

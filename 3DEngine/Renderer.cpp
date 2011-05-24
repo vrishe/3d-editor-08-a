@@ -7,30 +7,27 @@ LRESULT BkGndSaver(LPVOID Sender, WPARAM wParam, LPARAM lParam) { return 1L; }
 
 clsViewport::clsViewport()
 {
-	cameraObjectID		= 0;
-	rMode				= RM_WIREFRAME;
-	lppScene			= NULL;
+	cameraObjectID	= 0;
+	rMode			= RM_WIREFRAME;
+	Scene			= NULL;
 
 	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
 }
 
 clsViewport::clsViewport(
-	LPSCENE3D *lppSceneHost, 
+	LPSCENE3D lpSceneHost, 
 	UINT uCameraObjectID, 
 	RENDER_MODE renderMode
 ) {
-	lppScene	= NULL;
-	rMode		= RM_WIREFRAME;
-	if ( lppSceneHost		!= NULL 
-		&& *lppSceneHost	!= NULL 
-		&& (*lppSceneHost)->getObject(uCameraObjectID)->clsID() == CLS_CAMERA
-	) {
-		lppScene	= lppSceneHost;
-		cameraObjectID = uCameraObjectID;
-	}
-	rMode				= renderMode;
+	cameraObjectID	= 0;
+	Scene	= NULL;
+	rMode	= RM_WIREFRAME;
 
 	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
+	
+	setScene(lpSceneHost);
+	setCameraObjectID(uCameraObjectID);
+	setRenderMode(renderMode);
 }
 
 clsViewport::~clsViewport() { }
@@ -42,7 +39,7 @@ DWORD clsViewport::SetUp(
 				UINT vpWidth,
 				UINT vpHeight
 ) {
-	if ( lppScene == NULL ) return E_FAILED;
+	if ( Scene == NULL ) return E_DOES_NOT_EXIST;
 	return 	clsForm::Create(	
 				VIEWPORT_CLASS_NAME,
 				(FORM_TYPE)(CHILD_FORM 
@@ -57,27 +54,155 @@ DWORD clsViewport::SetUp(
 			);
 }
 
-LPSCENE3D clsViewport::getLpScene()			{ return *lppScene; }
+LPSCENE3D clsViewport::getScene()			{ return Scene; }
 UINT clsViewport::getCameraObjectID()		{ return cameraObjectID; }
 RENDER_MODE clsViewport::getRenderMode()	{ return rMode; }
 
-VOID clsViewport::setSceneHost(LPSCENE3D *lppSceneHost)
+BOOL clsViewport::setScene(LPSCENE3D lpSceneHost)
 {
-	if ( lppSceneHost		!= NULL 
-		&& *lppSceneHost	!= NULL 
-		&& (*lppSceneHost)->getObjectClassCount(CLS_CAMERA) != 0
-	) lppScene = lppSceneHost;
+	BOOL bResult 
+		= lpSceneHost	!= NULL 
+		&& lpSceneHost->getObjectClassCount(CLS_CAMERA) != 0;
+	if ( bResult ) { 
+		Scene = lpSceneHost;
+		if ( Scene->getObject(cameraObjectID) == NULL )
+			cameraObjectID = Scene->getObject(CLS_CAMERA, 0)->objID();
+	}
+	return bResult;
 }
 
-VOID clsViewport::setCameraObjectID(UINT uCameraObjectID)
-{
-	if ( lppScene		!= NULL 
-		&& *lppScene	!= NULL 
-		&& (*lppScene )->getObject(uCameraObjectID)->clsID() == CLS_CAMERA
-	) cameraObjectID = uCameraObjectID;
+BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID)
+{	
+	BOOL bResult 
+		= Scene		!= NULL 
+		&& Scene->getObject(uCameraObjectID)->clsID() == CLS_CAMERA;
+	if ( bResult ) cameraObjectID = uCameraObjectID;
+	return bResult;
 }
 
 VOID clsViewport::setRenderMode(RENDER_MODE renderMode) { rMode = renderMode; }
+
+BOOL clsViewport::Render() 
+{
+	BOOL				bResult			= Scene != NULL;
+	HDC					hVpDC,
+						hMemDC;
+	HBRUSH				hBrCurrent,
+						hBrOld;
+	HBITMAP				hBMP,
+						hBMPOld;
+	RECT				clientRect;
+	INT					centerX,
+						centerY;
+
+	UINT				sceneObjCount,
+						objVertCount,
+						objPolyCount;
+
+	HANDLE				procHeap		= GetProcessHeap();
+
+	LPMESH3D			objToRender;
+	LPVERTEX3D			objVertBuffer;
+	LPPOLY3D			objPolyBuffer;
+	COLOR3D				objColor;
+	LPTRIVERTEX			vertDrawBuffer;
+	LPGRADIENT_TRIANGLE polyDrawBuffer;
+
+	// Approaching viewport canvas for drawing
+	GetClientRect(hWnd, &clientRect);
+	centerX		= (INT)ceil((FLOAT)(clientRect.right / 2));
+	centerY		= (INT)ceil((FLOAT)(clientRect.bottom / 2));
+	hVpDC		= GetDC(hWnd);
+	hMemDC		= CreateCompatibleDC(hVpDC);
+	hBMP		= CreateCompatibleBitmap(
+								hVpDC,
+								clientRect.right,
+								clientRect.bottom
+							);
+	hBMPOld		= (HBITMAP)SelectObject(hMemDC, hBMP);
+
+	// Filling Viewport with scene ambient color
+	hBrCurrent	= CreateSolidBrush(Scene->getAmbientColorRef());
+	hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrCurrent);
+	FillRect(hMemDC, &clientRect, hBrCurrent);
+	SelectObject(hMemDC, hBrOld);
+	DeleteObject(hBrCurrent);
+
+	if ( bResult ) 
+	{
+		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
+
+		for ( UINT i = 0; i < sceneObjCount; i++ )
+		{
+			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
+			objColor		= objToRender->getColor();
+			objVertCount	= objToRender->getVCount();
+			objPolyCount	= objToRender->getPCount();	
+			objToRender->getBuffersRaw(&objVertBuffer, &objPolyBuffer);
+			vertDrawBuffer = (LPTRIVERTEX)HeapAlloc(
+											procHeap, 
+											HEAP_ZERO_MEMORY, 
+											sizeof(TRIVERTEX) 
+												* objPolyCount
+										);
+			polyDrawBuffer = (LPGRADIENT_TRIANGLE)HeapAlloc(
+											procHeap, 
+											HEAP_ZERO_MEMORY, 
+											sizeof(GRADIENT_TRIANGLE) 
+												* objPolyCount
+										);
+			for ( UINT j = 0; j < objPolyCount; j ++ )
+				CopyMemory(
+					polyDrawBuffer + j, 
+					objPolyBuffer + j, 
+					sizeof(GRADIENT_TRIANGLE)
+				);
+
+			// Transformation calculations here:
+			for ( UINT j = 0; j < objVertCount; j ++ )
+			{
+				(vertDrawBuffer + j)->x		= (LONG)((objVertBuffer + j)->x) + centerX;
+				(vertDrawBuffer + j)->y		= (LONG)((objVertBuffer + j)->y) + centerY;
+				(vertDrawBuffer + j)->Red	= MAKEWORD(0,objColor.Red);
+				(vertDrawBuffer + j)->Green = MAKEWORD(0,objColor.Green);
+				(vertDrawBuffer + j)->Blue	= MAKEWORD(0,objColor.Blue);
+			}
+
+			// Drawing here:
+			GradientFill(
+				hMemDC, 
+				vertDrawBuffer, 
+				objVertCount, 
+				polyDrawBuffer,
+				objPolyCount, 
+				GRADIENT_FILL_TRIANGLE
+			);
+
+			HeapFree(procHeap, NULL, vertDrawBuffer);
+			HeapFree(procHeap, NULL, polyDrawBuffer);
+		}
+	}
+
+	BitBlt(
+		hVpDC,
+		0,
+		0,
+		clientRect.right,
+		clientRect.bottom,
+		hMemDC,
+		0,
+		0,
+		SRCCOPY
+	);
+
+
+	SelectObject(hMemDC, hBMPOld);
+	DeleteObject(hBMP);
+	DeleteDC(hMemDC);
+	ReleaseDC(hWnd, hVpDC);
+
+	return bResult;
+}
 
 // ============================================================================
 // clsRenderPool Implementation
@@ -86,18 +211,8 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 	DWORD		dwWaitResult;
 	BOOL		bAlive;
 
-	LPVIEWPORT	vp				= (LPVIEWPORT)renderInfo;
-	HDC			hVpDC,
-				hMemDC;
-	HBITMAP		hBMP,
-				hBMPOld;
-	UINT		vpWidth,
-				vpHeight;
+	LPTHREAD_DATA	vp			= (LPTHREAD_DATA)renderInfo;
 	
-	// For test purposes only
-	TRIVERTEX			testTriangle[3];
-	GRADIENT_TRIANGLE	grTestTriangle;
-
 	do {
 		dwWaitResult = WaitForMultipleObjects(
 						2,
@@ -106,69 +221,7 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 						INFINITE
 					);
 		bAlive = dwWaitResult != WAIT_OBJECT_0 + 1;
-		vp->getClientDC(&hVpDC);
-		vp->getClientSize(&vpWidth, &vpHeight);
-		hMemDC	= CreateCompatibleDC(hVpDC);
-		hBMP	= CreateCompatibleBitmap(
-									hVpDC,
-									vpWidth,
-									vpHeight
-								);
-		hBMPOld = (HBITMAP)SelectObject(hMemDC, hBMP);
-
-		// Let's set triangle's vertices
-		testTriangle[0].x		= 10;
-		testTriangle[0].y		= 10;
-		testTriangle[0].Red		= 0xFFFF;
-		testTriangle[0].Green	= 0x0000;
-		testTriangle[0].Blue	= 0x0000;
-		testTriangle[0].Alpha	= 0x0000;
-
-		testTriangle[1].x		= 940;
-		testTriangle[1].y		= 450;
-		testTriangle[1].Red		= 0x0000;
-		testTriangle[1].Green	= 0xFFFF;
-		testTriangle[1].Blue	= 0x0000;
-		testTriangle[1].Alpha	= 0x0000;
-
-		testTriangle[2].x		= 320;
-		testTriangle[2].y		= 660;
-		testTriangle[2].Red		= 0x0000;
-		testTriangle[2].Green	= 0x0000;
-		testTriangle[2].Blue	= 0xFFFF;
-		testTriangle[2].Alpha	= 0x0000;
-
-		grTestTriangle.Vertex1	= 0;
-		grTestTriangle.Vertex2	= 1;
-		grTestTriangle.Vertex3	= 2;
-
-		// Won't change
-		GradientFill(
-			hMemDC, 
-			testTriangle, 
-			3, 
-			&grTestTriangle,
-			1, 
-			GRADIENT_FILL_TRIANGLE
-		);
-
-		BitBlt(
-			hVpDC,
-			0,
-			0,
-			vpWidth,
-			vpHeight,
-			hMemDC,
-			0,
-			0,
-			SRCCOPY
-		);
-		//vp->Validate();
-
-		SelectObject(hMemDC, hBMPOld);
-		DeleteObject(hBMP);
-		DeleteDC(hMemDC);
-		vp->dropDC(&hVpDC);
+		vp->Viewport->Render();
 		ResetEvent(vp->threadControls.doRender);
 	} while ( bAlive );
 
@@ -203,7 +256,11 @@ clsRenderPool::~clsRenderPool()
 
 BOOL clsRenderPool::assignScene(LPSCENE3D lpScene)
 {
-	return (Scene = lpScene) != NULL;
+	BOOL bResult
+		= lpScene != NULL
+		&& lpScene->getObjectClassCount(CLS_CAMERA);
+	if ( bResult ) Scene = lpScene;
+	return bResult;
 }
 
 DWORD clsRenderPool::addViewport(
@@ -214,52 +271,59 @@ DWORD clsRenderPool::addViewport(
 						UINT		vpCameraObjectID,
 						RENDER_MODE vpRMode
 ) {
-	LPVIEWPORT	vpInfo;
-	DWORD		vpID		= 0,
-				dwResult;				
-	BOOL		bResult;
+	LPTHREAD_DATA	thData;
+	LPOBJECT3D		camFound;
+	DWORD			vpID		= 0,
+					dwResult;				
+	BOOL			bResult;
 	
 	bResult 
-		= Scene											!= NULL
-		&& Owner										!= NULL
-		&& renderEvent									!= NULL
-		&& Viewports.size()								!= MAX_VIEWPORT_COUNT
-		&& Scene->getObject(vpCameraObjectID)->clsID() 	== CLS_CAMERA;
+		= Scene												!= NULL
+		&& Owner											!= NULL
+		&& renderEvent										!= NULL
+		&& Viewports.size()									!= MAX_VIEWPORT_COUNT
+		&& (camFound = Scene->getObject(vpCameraObjectID)) 	!= NULL
+		&& camFound->clsID()								== CLS_CAMERA;
 	if ( bResult )
 	{
-		vpInfo = new VIEWPORT(&Scene, vpCameraObjectID, vpRMode);
-		dwResult = vpInfo->SetUp(
-							Owner,
-							vpPosX,
-							vpPosY,
-							vpWidth,
-							vpHeight
-						);
+		thData				= new THREAD_DATA;
+		thData->Viewport	= new VIEWPORT(Scene, vpCameraObjectID, vpRMode);
+		dwResult = thData->Viewport->SetUp(
+										Owner,
+										vpPosX,
+										vpPosY,
+										vpWidth,
+										vpHeight
+									);
 		if ( bResult = SUCCEEDED(dwResult) )
 		{
-			vpInfo->Thread		= CreateThread(
-										0,
-										0,
-										Render,
-										vpInfo,
-										CREATE_SUSPENDED,
-										&vpID
-									);
-			bResult = vpInfo->Thread != NULL;
+			thData->Thread	= CreateThread(
+									0,
+									0,
+									Render,
+									thData,
+									CREATE_SUSPENDED,
+									&vpID
+								);
+			bResult = thData->Thread != NULL;
 			if ( bResult )
 			{
-				vpInfo->threadControls.doRender = renderEvent;
-				vpInfo->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
-				bResult = vpInfo->threadControls.shutDown != NULL;
+				thData->threadControls.doRender = renderEvent;
+				thData->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
+				bResult = thData->threadControls.shutDown != NULL;
 				if ( bResult ) 
 				{
-					Viewports.push_back(vpInfo);
-					ResumeThread(vpInfo->Thread);
-					vpInfo->Show();
+					Viewports.push_back(thData);
+					ResumeThread(thData->Thread);
+					thData->Viewport->Show();
 				}
 			}
 		}
-		if ( !bResult ) delete vpInfo;
+		if ( !bResult ) 
+		{
+			delete thData->Viewport;
+			delete thData;
+		}
 	}
 	return vpID;
 }
@@ -273,6 +337,7 @@ BOOL clsRenderPool::delViewport(UINT vpIndex)
 		WaitForSingleObject(Viewports[vpIndex]->Thread, THREAD_WAIT_TIMEOUT);
 		CloseHandle(Viewports[vpIndex]->Thread);
 		CloseHandle(Viewports[vpIndex]->threadControls.shutDown);
+		delete Viewports[vpIndex]->Viewport;
 		delete Viewports[vpIndex];
 		Viewports.erase(Viewports.begin() + vpIndex);
 	}
@@ -286,13 +351,13 @@ BOOL clsRenderPool::delViewport(DWORD vpID)
 
 LPVIEWPORT clsRenderPool::getViewport(UINT vpIndex)
 {
-	if ( vpIndex < Viewports.size() ) return Viewports[vpIndex];
+	if ( vpIndex < Viewports.size() ) return Viewports[vpIndex]->Viewport;
 	return NULL;
 }
 
 LPVIEWPORT clsRenderPool::getViewport(DWORD vpID)
 {
-	return Viewports[findViewport(vpID)];
+	return Viewports[findViewport(vpID)]->Viewport;
 }
 
 BOOL clsRenderPool::RenderWorld() { return SetEvent(renderEvent); }

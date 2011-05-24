@@ -44,10 +44,54 @@ void Pyramid::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-Pyramid::Pyramid() : clsMesh(), h(0), bL(0), bW(0), tL(0), tW(0) {}
-Pyramid::Pyramid(float height, float bLength, float bWidth, float tLength, float tWidth) :
-	clsMesh(), h(height), bL(bLength), bW(bWidth), tL(tLength), tW(tWidth) {
-		Triangulate();
+Pyramid::Pyramid(COLOR3D c) 
+	: clsMesh(c), h(0), bL(0), bW(0), tL(0), tW(0) { }
+
+Pyramid::Pyramid(
+		float height, 
+		float bLength, 
+		float bWidth, 
+		float tLength, 
+		float tWidth,
+		COLOR3D	c
+) : clsMesh(c)
+{ 
+	h  = height;
+	bL = bLength;
+	tL = tLength;
+	tW = tWidth;
+	Triangulate();
+}
+
+Pyramid::Pyramid(
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
+) : clsMesh( red, green, blue ) 
+{
+	h	= 0;
+	bL	= 0;
+	bW	= 0;
+	tL	= 0;
+	tW	= 0;
+}
+
+Pyramid::Pyramid(
+	float height, 
+	float bLength, 
+	float bWidth, 
+	float tLength, 
+	float tWidth,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue
+) : clsMesh( red, green, blue )
+{
+	h  = height;
+	bL = bLength;
+	tL = tLength;
+	tW = tWidth;
+	Triangulate();
 }
 
 
@@ -142,26 +186,66 @@ void Cone::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-Cone::Cone() : clsMesh(), h(0), bR(0), tR(0), precission(0) {}
-Cone::Cone(float height, float bRadius, float tRadius, int prec) : 
-	clsMesh(), h(height), bR(bRadius), tR(tRadius), precission(prec) {
+Cone::Cone(COLOR3D c) 
+	: clsMesh(c), h(0), bR(0), tR(0), precission(0) { }
+
+Cone::Cone(
+		float height, 
+		float bRadius, 
+		float tRadius, 
+		int	  prec,
+		COLOR3D	c
+) : clsMesh(c)
+{ 
+	h			= height;
+	bR			= bRadius;
+	tR			= tRadius;
+	precission	= prec;
 	Triangulate();
 }
 
+Cone::Cone(
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
+) : clsMesh( red, green, blue ) 
+{
+	h			= 0;
+	bR			= 0;
+	tR			= 0;
+	precission	= 0;
+}
+
+Cone::Cone(
+	float height, 
+	float bRadius, 
+	float tRadius, 
+	int	  prec,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue
+) : clsMesh( red, green, blue )
+{
+	h			= height;
+	bR			= bRadius;
+	tR			= tRadius;
+	precission	= prec;
+	Triangulate();
+}
 
 /* ------------------------ getters ------------------------ */
 
-float Cone::getHeight() { return h; }
-float Cone::getBRadius() { return bR; }
-float Cone::getTRadius() { return tR; }
-int Cone::getPrecission() { return precission; }
+float Cone::getHeight()		{ return h; }
+float Cone::getBRadius()	{ return bR; }
+float Cone::getTRadius()	{ return tR; }
+int Cone::getPrecission()	{ return precission; }
 
 
 /* ------------------------ setters ------------------------ */
 
-void Cone::setHeight(float n) { h = n; } 
-void Cone::setBRadius(float n) { bR = n; }
-void Cone::setTRadius(float n) { tR = n; }
+void Cone::setHeight(float n)	{ h = n; } 
+void Cone::setBRadius(float n)	{ bR = n; }
+void Cone::setTRadius(float n)	{ tR = n; }
 void Cone::setPrecission(int n) { precission = n; }
 
 
@@ -330,9 +414,48 @@ void ExCone::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-ExCone::ExCone() : Cone() { secant = max(bR, tR); }
-ExCone::ExCone(float height, float bRadius, float tRadius, int prec, float s) : secant(s) {
-	h = height; bR = bRadius; tR = tRadius; precission = prec;
+ExCone::ExCone(COLOR3D c) 
+	: Cone( c ) { secant = max(bR, tR); }
+
+ExCone::ExCone(
+		float height, 
+		float bRadius, 
+		float tRadius,
+		float s,
+		int	  prec,
+		COLOR3D	c
+) : Cone( c ) 
+{ 
+	secant		= s;
+	h			= height;
+	bR			= bRadius;
+	tR			= tRadius;
+	precission	= prec;
+	Triangulate();
+}
+
+ExCone::ExCone(
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
+) : Cone( red, green, blue ) { secant = max(bR, tR); }
+
+ExCone::ExCone(
+	float height, 
+	float bRadius, 
+	float tRadius,
+	float s,
+	int	  prec,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue
+) : Cone( red, green, blue ) 
+{ 
+	secant		= s;
+	h			= height;
+	bR			= bRadius;
+	tR			= tRadius;
+	precission	= prec;
 	Triangulate();
 }
 

@@ -14,11 +14,33 @@ protected:
 	float tW;	// top width
 
 public:
-	Pyramid();
-	Pyramid(float height, float bLength, float bWidth, float tLength, float tWidth);
+	Pyramid(COLOR3D c);
+	Pyramid(
+		float height, 
+		float bLength, 
+		float bWidth, 
+		float tLength, 
+		float tWidth,
+		COLOR3D	c
+	);
+	Pyramid(
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
+	Pyramid(
+		float height, 
+		float bLength, 
+		float bWidth, 
+		float tLength, 
+		float tWidth,
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
 
 	// functionality
-	void Triangulate(); // generate vertices, edges and polygons lists
+	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// getters
 	float getHeight();
@@ -48,11 +70,31 @@ protected:
 	int precission;	// precission of circle approximation in polygons
 
 public:
-	Cone();
-	Cone(float height, float bRadius, float tRadius, int prec);
+	Cone(COLOR3D c);
+	Cone(
+		float height, 
+		float bRadius, 
+		float tRadius, 
+		int	  prec,
+		COLOR3D	c
+	);
+	Cone(
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
+	Cone(
+		float height, 
+		float bRadius, 
+		float tRadius, 
+		int	  prec,
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
 
 	// functionality
-	void Triangulate(); // generate vertices, edges and polygons lists
+	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// getters
 	float getHeight();
@@ -79,11 +121,33 @@ class ExCone : public Cone {
 	float secant;
 
 public:
-	ExCone();
-	ExCone(float height, float bRadius, float tRadius, int prec, float s);
+	ExCone(COLOR3D c);
+	ExCone(
+		float height, 
+		float bRadius, 
+		float tRadius,
+		float s,
+		int	  prec,
+		COLOR3D	c
+	);
+	ExCone(
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
+	ExCone(
+		float height, 
+		float bRadius, 
+		float tRadius, 
+		float s,
+		int	  prec,
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
 
 	// functionality
-	void Triangulate(); // generate vertices, edges and polygons lists
+	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// getters
 	float getSecant();
@@ -111,7 +175,7 @@ public:
 	Hole(float height, float bRadius, float bRHole, float tRadius, float tRHole, int prec);
 
 	// functionality
-	void Triangulate(); // generate vertices, edges and polygons lists
+	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// getters
 	float getHeight();

@@ -29,8 +29,7 @@ enum RENDER_MODE {
 };
 #define RM_WFSHADED RM_WIREFRAME | RM_SHADED
 
-#define MAX_VIEWPORT_COUNT		6
-#define MAX_FRAMES_PRERENDERED	5
+#define MAX_VIEWPORT_COUNT	6
 #define THREAD_WAIT_TIMEOUT	5000
 #define VIEWPORT_CLASS_NAME	_T("RenderPool Viewport Class")
 
@@ -43,14 +42,14 @@ class clsViewport : public clsForm {
 private:
 	UINT			cameraObjectID;
 	RENDER_MODE		rMode;
-	LPSCENE3D		*lppScene;
+	LPSCENE3D		Scene;
 
 public:
 	clsViewport();
 	clsViewport(
-		LPSCENE3D *lppSceneHost,
-		UINT uCameraObjectID = 0, 
-		RENDER_MODE renderMode = RM_WIREFRAME
+		LPSCENE3D lpScene,
+		UINT uCameraObjectID		= 0, 
+		RENDER_MODE renderMode		= RM_WIREFRAME
 	);
 	virtual ~clsViewport();
 
@@ -62,21 +61,26 @@ public:
 				UINT vpHeight
 			);
 
-	LPSCENE3D	getLpScene();	
+	LPSCENE3D	getScene();	
 	UINT		getCameraObjectID();
 	RENDER_MODE	getRenderMode();
 
-	VOID		setSceneHost(LPSCENE3D *lppSceneHost);
-	VOID		setCameraObjectID(UINT uCameraObjectID);
+	BOOL		setScene(LPSCENE3D lpSceneHost);
+	BOOL		setCameraObjectID(UINT uCameraObjectID);
 	VOID		setRenderMode(RENDER_MODE renderMode);
 
-	THREAD			Thread;
-	THREAD_CONTROLS threadControls;
+	BOOL		Render();
 };
 typedef clsViewport VIEWPORT, *LPVIEWPORT;
 
-typedef vector<LPVIEWPORT> LPVIEWPORTS_LIST;
-typedef vector<LPEVENT>	LPEVENTS_LIST;
+typedef struct tagTHREAD_DATA {
+	LPVIEWPORT		Viewport;
+
+	THREAD			Thread;
+	THREAD_CONTROLS threadControls;
+} THREAD_DATA, *LPTHREAD_DATA;
+
+typedef vector<LPTHREAD_DATA> LPVIEWPORTS_LIST;
 class clsRenderPool {
 private:
 	LPFORM				Owner;

@@ -36,7 +36,7 @@ bool operator == (tagPolygon a, tagPolygon b) {
 
 // ===========================================================================
 // Implementation of clsObject class:
-size_t clsObject::Counter = 0;
+size_t clsObject::Counter = 1;
 
 clsObject::clsObject(CLASS_ID clsID) 
 	: ClassID(clsID), ID(Counter++), Name(NULL)
@@ -97,7 +97,7 @@ clsObject::~clsObject()
 }
 
 CLASS_ID clsObject::clsID() { return ClassID; }
-size_t clsObject::objID() { return ID; }
+size_t clsObject::objID()	{ return ID; }
 
 void clsObject::MoveTo(VECTOR3D pt) { Gizmo = pt; }
 void clsObject::MoveTo(float pX, float pY, float pZ)
@@ -203,6 +203,7 @@ bool clsScene::findObjectIndex(size_t objID, CLASS_ID *objClsID, size_t *objInde
 				if ( objIndex != NULL )	*objIndex	= i;
 				return true;
 			}
+			i++;
 		}
 		finder++;
 	}
@@ -217,6 +218,10 @@ clsScene::clsScene()
 	objects.insert(clsObjLst);
 	clsObjLst.first = CLS_MESH;
 	objects.insert(clsObjLst);
+
+	ambientColor.Red	= 0;
+	ambientColor.Green	= 0;
+	ambientColor.Blue	= 0;
 }
 clsScene::~clsScene() { }
 
@@ -282,6 +287,23 @@ LPOBJECT3D clsScene::getObject(size_t objID)
 	LPOBJECT3D found = findObjectIndex(objID, &clsID, &objIndex) ?
 		objects[clsID][objIndex] : NULL;
 	return found;
+}
+
+COLOR3D clsScene::getAmbientColor() { return ambientColor; }
+DWORD	clsScene::getAmbientColorRef()
+{ 
+	return RGB(
+			ambientColor.Red, 
+			ambientColor.Green,
+			ambientColor.Blue
+		);
+}
+VOID clsScene::setAmbientColor(COLOR3D c) { ambientColor = c; }
+VOID clsScene::setAmbientColor( BYTE red, BYTE green, BYTE blue )
+{
+	ambientColor.Red	= red;
+	ambientColor.Green	= green;
+	ambientColor.Blue	= blue;
 }
 
 size_t clsScene::getObjectClassCount(CLASS_ID clsID)
@@ -362,12 +384,29 @@ size_t clsMesh::dropRedundantPolygons()
 
 clsMesh::clsMesh() : clsObject(CLS_MESH) { setColor(COLOR3D()); }
 clsMesh::clsMesh(COLOR3D c) : clsObject(CLS_MESH) { setColor(c); }
+clsMesh::clsMesh(
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue
+) : clsObject(CLS_MESH) { setColor( red, green, blue ); }
 clsMesh::clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps)
 	: clsObject(CLS_MESH)
 { 
 	addListOfVertices(vs);
 	addListOfPolygons(ps);
 	setColor(c);
+}
+clsMesh::clsMesh(
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue,
+		VERT_LIST vs, 
+		POLY_LIST ps
+) : clsObject(CLS_MESH) 
+{ 
+	addListOfVertices(vs);
+	addListOfPolygons(ps);
+	setColor( red, green, blue ); 
 }
 
 void clsMesh::dropRedundant() 
@@ -376,39 +415,36 @@ void clsMesh::dropRedundant()
 	dropUnusedVertices();
 }
 
-void clsMesh::FillBuff(LPVERTEX3D_PURE vs, LPPOLY3D ps) 
+COLOR3D		clsMesh::getColor()			{ return color; }
+size_t		clsMesh::getVCount()		{ return vertices.size(); }
+size_t		clsMesh::getPCount()		{ return polygons.size(); }
+LPVERTEX3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
+LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }
+VERT_LIST	clsMesh::getVertices()		{ return vertices; }
+POLY_LIST	clsMesh::getPolygons()		{ return polygons; }
+
+void clsMesh::getBuffersRaw(LPVERTEX3D *vs, LPPOLY3D *ps) 
 {
-	size_t vCount = vertices.size();
-	size_t pCount = polygons.size();
-
-	for (size_t i = 0; i < vCount; i++) {
-		vs[i].x = vertices[i].x;
-		vs[i].y = vertices[i].y;
-		vs[i].z = vertices[i].z;
-		vs[i].rhW = vertices[i].rhW;
-	}
-
-	for (size_t i = 0; i < pCount; i++) {
-		ps[i].first = polygons[i].first;
-		ps[i].second = polygons[i].second;
-		ps[i].third = polygons[i].third;
-	}
-
-	VERTEX3D_PURE a[1000];
-	POLY3D b[1000];
-	for (size_t i = 0; i < vCount; i++)
-		a[i] = vs[i];
-	for (size_t i = 0; i < pCount; i++)
-		b[i] = ps[i];
-	a[999];
+	if ( vs != NULL ) *vs = vertices.data();
+	if ( ps != NULL ) *ps = polygons.data();
 }
 
-size_t	clsMesh::getVCount() { return vertices.size(); }
-size_t	clsMesh::getPCount() { return polygons.size(); }
-VERT_LIST		clsMesh::getVertices() { return vertices; }
-POLY_LIST		clsMesh::getPolygons() { return polygons; }
+void clsMesh::getBuffers(LPVERT_LIST vs, LPPOLY_LIST ps) 
+{
+	if ( vs != NULL ) *vs = vertices;
+	if ( ps != NULL ) *ps = polygons;
+}
 
-void clsMesh::setColor(COLOR3D c) {	color = c; }
+void clsMesh::setColor(
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue
+) {
+	color.Red	= red;
+	color.Green = green;
+	color.Blue	= blue;
+}
+void clsMesh::setColor(COLOR3D c)	{ color = c; }
 void clsMesh::addVertex(VERTEX3D v) { vertices.push_back(v); }
 void clsMesh::addListOfVertices(VERT_LIST v) 
 { 
