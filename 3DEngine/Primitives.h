@@ -73,7 +73,10 @@ public:
 #define EXCONE_H
 
 class ExCone : public Cone {
-	float secant; // secant plane || OX, bust be 0 < secant < R
+	/// конус, отсеченный плоскостью, паралельной OXZ и пересекающей OY в т. (0, secant, 0)
+	/// должно выполнятся неравенство -min(bR,tR) <= secant < max(bR, tR),
+	/// иначе фигура неопределена
+	float secant;
 
 public:
 	ExCone();
