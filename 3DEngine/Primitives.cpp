@@ -24,19 +24,19 @@ void Pyramid::Triangulate() {
 
 		// setting base polygons
 	polygons.push_back(POLY3D(0,1,2));	// 0
-	polygons.push_back(POLY3D(0,2,3));	// 1
-		// setting top polygons
-	polygons.push_back(POLY3D(4,5,7));	// 2
-	polygons.push_back(POLY3D(5,6,7));	// 3
-		// setting side polygons
-	polygons.push_back(POLY3D(0,4,5));	// 4
-	polygons.push_back(POLY3D(0,5,1));	// 5
-	polygons.push_back(POLY3D(1,5,2));	// 6
-	polygons.push_back(POLY3D(5,2,6));	// 7
-	polygons.push_back(POLY3D(2,7,6));	// 8
-	polygons.push_back(POLY3D(7,3,2));	// 9
-	polygons.push_back(POLY3D(0,7,3));	// 10
-	polygons.push_back(POLY3D(7,0,4));	// 11
+	//polygons.push_back(POLY3D(0,2,3));	// 1
+	//	// setting top polygons
+	//polygons.push_back(POLY3D(4,5,6));	// 2
+	//polygons.push_back(POLY3D(4,6,7));	// 3
+	//	// setting side polygons
+	//polygons.push_back(POLY3D(0,4,3));	// 4
+	//polygons.push_back(POLY3D(4,7,3));	// 5
+	//polygons.push_back(POLY3D(3,7,2));	// 6
+	//polygons.push_back(POLY3D(7,6,2));	// 7
+	//polygons.push_back(POLY3D(2,6,1));	// 8
+	//polygons.push_back(POLY3D(6,5,1));	// 9
+	//polygons.push_back(POLY3D(1,5,0));	// 10
+	//polygons.push_back(POLY3D(5,4,0));	// 11
 
 	vertices.shrink_to_fit();
 	polygons.shrink_to_fit();
@@ -58,6 +58,7 @@ Pyramid::Pyramid(
 { 
 	h  = height;
 	bL = bLength;
+	bW = bWidth;
 	tL = tLength;
 	tW = tWidth;
 	Triangulate();
@@ -89,6 +90,7 @@ Pyramid::Pyramid(
 {
 	h  = height;
 	bL = bLength;
+	bW = bWidth;
 	tL = tLength;
 	tW = tWidth;
 	Triangulate();
@@ -155,9 +157,9 @@ void Cone::Triangulate() {
 			double y = k * x;
 			vertices.push_back(VERTEX3D((float)x, (float)y, 0));
 			if (step*i < 90 || step*i > 270)
- 				x = sqrt(bR*bR / (1 + k*k));
+ 				x = sqrt(tR*tR / (1 + k*k));
 			else
-				x = -sqrt(bR*bR / (1 + k*k));
+				x = -sqrt(tR*tR / (1 + k*k));
 			y = k * x;
 			vertices.push_back(VERTEX3D((float)x, (float)y, h));
 		}

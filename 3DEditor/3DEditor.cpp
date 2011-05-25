@@ -51,8 +51,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testScene.AddObject(&testCamera);
-	//testScene.AddObject(&testPyramid);
-	testScene.AddObject(&testCone);
+	testScene.AddObject(&testPyramid);
+	//testScene.AddObject(&testCone);
 	testScene.setAmbientColor(132, 128, 128);
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);
