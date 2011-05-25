@@ -22,21 +22,24 @@ void Pyramid::Triangulate() {
 	vertices.push_back(VERTEX3D(tL/2,tW/2, h));		// 6
 	vertices.push_back(VERTEX3D(tL/2,-tW/2, h));	// 7
 
+		// setting edges
+
+
 		// setting base polygons
 	polygons.push_back(POLY3D(0,1,2));	// 0
-	//polygons.push_back(POLY3D(0,2,3));	// 1
-	//	// setting top polygons
-	//polygons.push_back(POLY3D(4,5,6));	// 2
-	//polygons.push_back(POLY3D(4,6,7));	// 3
-	//	// setting side polygons
-	//polygons.push_back(POLY3D(0,4,3));	// 4
-	//polygons.push_back(POLY3D(4,7,3));	// 5
-	//polygons.push_back(POLY3D(3,7,2));	// 6
-	//polygons.push_back(POLY3D(7,6,2));	// 7
-	//polygons.push_back(POLY3D(2,6,1));	// 8
-	//polygons.push_back(POLY3D(6,5,1));	// 9
-	//polygons.push_back(POLY3D(1,5,0));	// 10
-	//polygons.push_back(POLY3D(5,4,0));	// 11
+	polygons.push_back(POLY3D(0,2,3));	// 1
+		// setting top polygons
+	polygons.push_back(POLY3D(4,5,6));	// 2
+	polygons.push_back(POLY3D(4,6,7));	// 3
+		// setting side polygons
+	polygons.push_back(POLY3D(0,4,3));	// 4
+	polygons.push_back(POLY3D(4,7,3));	// 5
+	polygons.push_back(POLY3D(3,7,2));	// 6
+	polygons.push_back(POLY3D(7,6,2));	// 7
+	polygons.push_back(POLY3D(2,6,1));	// 8
+	polygons.push_back(POLY3D(6,5,1));	// 9
+	polygons.push_back(POLY3D(1,5,0));	// 10
+	polygons.push_back(POLY3D(5,4,0));	// 11
 
 	vertices.shrink_to_fit();
 	polygons.shrink_to_fit();
