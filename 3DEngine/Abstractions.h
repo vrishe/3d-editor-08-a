@@ -51,14 +51,25 @@ typedef struct tagVertex : public VERTEX_PURE {
 	bool operator==(const tagVertex &b);
 } VERTEX3D, *LPVERTEX3D;
 
+typedef struct tagEdge {
+	size_t first;
+	size_t second;
+
+	tagEdge();
+	tagEdge(size_t nFirst, size_t nSecond);
+	bool operator==(const tagEdge &b);
+	bool operator!=(const tagEdge &b);
+} EDGE3D, *LPEDGE3D;
+
 typedef struct tagPolygon {
 	size_t first;
 	size_t second;
 	size_t third;
 
 	tagPolygon();
-	tagPolygon(size_t, size_t, size_t);
+	tagPolygon(size_t a, size_t b, size_t c);
 	bool operator==(const tagPolygon &b);
+	bool operator!=(const tagPolygon &b);
 } POLY3D, *LPPOLY3D;
 
 typedef struct tagColor
@@ -182,12 +193,15 @@ typedef clsScene SCENE3D, *LPSCENE3D;
 // Abstract mesh class that represents EVERY POSSIBLE
 // 3d mesh object. Provides basic mesh operations.
 typedef vector<VERTEX3D> VERT_LIST, *LPVERT_LIST;
+typedef vector<EDGE3D> EDGE_LIST, *LPEDGE_LIST;
 typedef vector<POLY3D> POLY_LIST, *LPPOLY_LIST;
 
 class clsMesh : public clsObject {
 protected:
 	VERT_LIST		vertices;	// list of vertexes
+	EDGE_LIST		edges;		// list of edges
 	POLY_LIST		polygons;	// list of polygons
+	POLY_LIST		polyedges;	// list of links to edges
 
 	COLOR3D			color;
 
@@ -225,12 +239,14 @@ public:
 	size_t			getVCount();
 	size_t			getPCount();
 	LPVERTEX3D		getVerticesRaw();
+	LPEDGE3D		getEdgesRaw();
 	LPPOLY3D		getPolygonsRaw();
 	VERT_LIST		getVertices();
+	EDGE_LIST		getEdges();
 	POLY_LIST		getPolygons();
 
-	void			getBuffersRaw(LPVERTEX3D *vs, LPPOLY3D *ps);
-	void			getBuffers(LPVERT_LIST vs, LPPOLY_LIST ps);
+	void			getBuffersRaw(LPVERTEX3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
+	void			getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps);
 
 	// setters
 	void			setColor(

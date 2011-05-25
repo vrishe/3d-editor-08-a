@@ -108,14 +108,28 @@ bool tagVertex::operator== (const tagVertex &b)
 		&& z == b.z;
 }
 
+// Implementation of tagEdge struct:
+tagEdge::tagEdge() 
+	: first(-1), second(-1) { }
+tagEdge::tagEdge(size_t a, size_t b) 
+	: first(a), second(b) { }
+bool tagEdge::operator== (const tagEdge &b) {
+	return first == b.first 
+			&& second == b.second;
+}
+bool tagEdge::operator!= (const tagEdge &b) {	return !operator==(b); }
+
 // Implementation of tagPolygon struct:
-tagPolygon::tagPolygon() { first = -1; second = -1; third = -1; }
-tagPolygon::tagPolygon(size_t a, size_t b, size_t c) { first = a; second = b; third = c; }
+tagPolygon::tagPolygon() 
+	: first(UINT_MAX), second(UINT_MAX), third(UINT_MAX) { }
+tagPolygon::tagPolygon(size_t a, size_t b, size_t c) 
+	: first(a), second(b), third(c) { }
 bool tagPolygon::operator== (const tagPolygon &b) {
 	return first == b.first 
-		&& second == b.second 
-		&& third == b.third;
+			&& second == b.second 
+			&& third == b.third;
 }
+bool tagPolygon::operator!= (const tagPolygon &b) {	return !operator==(b); }
 
 
 
@@ -508,19 +522,23 @@ DWORD		clsMesh::getColorRef()		{ return RGB(
 size_t		clsMesh::getVCount()		{ return vertices.size(); }
 size_t		clsMesh::getPCount()		{ return polygons.size(); }
 LPVERTEX3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
+LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }
 LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }
 VERT_LIST	clsMesh::getVertices()		{ return vertices; }
+EDGE_LIST	clsMesh::getEdges()			{ return edges; }
 POLY_LIST	clsMesh::getPolygons()		{ return polygons; }
 
-void clsMesh::getBuffersRaw(LPVERTEX3D *vs, LPPOLY3D *ps) 
+void clsMesh::getBuffersRaw(LPVERTEX3D *vs, LPEDGE3D *es, LPPOLY3D *ps) 
 {
 	if ( vs != NULL ) *vs = vertices.data();
+	if ( es != NULL ) *es = edges.data();
 	if ( ps != NULL ) *ps = polygons.data();
 }
 
-void clsMesh::getBuffers(LPVERT_LIST vs, LPPOLY_LIST ps) 
+void clsMesh::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps) 
 {
 	if ( vs != NULL ) *vs = vertices;
+	if ( es != NULL ) *es = edges;
 	if ( ps != NULL ) *ps = polygons;
 }
 
