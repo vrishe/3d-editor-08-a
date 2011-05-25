@@ -77,14 +77,14 @@ Pyramid::Pyramid(
 }
 
 Pyramid::Pyramid(
-	float height, 
-	float bLength, 
-	float bWidth, 
-	float tLength, 
-	float tWidth,
-	unsigned char red,
-	unsigned char green,
-	unsigned char blue
+		float height, 
+		float bLength, 
+		float bWidth, 
+		float tLength, 
+		float tWidth,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
 ) : clsMesh( red, green, blue )
 {
 	h  = height;
@@ -217,13 +217,13 @@ Cone::Cone(
 }
 
 Cone::Cone(
-	float height, 
-	float bRadius, 
-	float tRadius, 
-	int	  prec,
-	unsigned char red,
-	unsigned char green,
-	unsigned char blue
+		float height, 
+		float bRadius, 
+		float tRadius, 
+		int	  prec,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
 ) : clsMesh( red, green, blue )
 {
 	h			= height;
@@ -441,14 +441,14 @@ ExCone::ExCone(
 ) : Cone( red, green, blue ) { secant = max(bR, tR); }
 
 ExCone::ExCone(
-	float height, 
-	float bRadius, 
-	float tRadius,
-	float s,
-	int	  prec,
-	unsigned char red,
-	unsigned char green,
-	unsigned char blue
+		float height, 
+		float bRadius, 
+		float tRadius,
+		float s,
+		int	  prec,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
 ) : Cone( red, green, blue ) 
 { 
 	secant		= s;
@@ -581,10 +581,60 @@ void Hole::Triangulate() {
 
 
 /* ---------------------- constructors --------------------- */
+Hole::Hole(COLOR3D c) 
+	: clsMesh(c), h(0), bR(0), bRh(0), tR(0), tRh(0), precission(0) { }
 
-Hole::Hole() : clsMesh(), h(0), bR(0), bRh(0), tR(0), tRh(0), precission(0) {}
-Hole::Hole(float height, float bRadius, float bHoleRadius, float tRadius, float tHoleRadius, int prec) : 
-	clsMesh(), h(height), bR(bRadius), bRh(bHoleRadius), tR(tRadius), tRh(tHoleRadius), precission(prec) {
+Hole::Hole(
+		float height, 
+		float bRadius, 
+		float bHoleRadius,
+		float tRadius,
+		float tHoleRadius,
+		int	  prec,
+		COLOR3D	c
+) : clsMesh(c)
+{ 
+	h			= height;
+	bR			= bRadius;
+	bRh			= bHoleRadius;
+	tR			= tRadius;
+	tRh			= tHoleRadius;
+	precission	= prec;
+	Triangulate();
+}
+
+Hole::Hole(
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
+) : clsMesh( red, green, blue ) 
+{
+	h			= 0;
+	bR			= 0;
+	bRh			= 0;
+	tR			= 0;
+	tRh			= 0;
+	precission	= 0;
+}
+
+Hole::Hole(
+		float height, 
+		float bRadius, 
+		float bHoleRadius,
+		float tRadius,
+		float tHoleRadius,
+		int	  prec,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue
+) : clsMesh( red, green, blue )
+{
+	h			= height;
+	bR			= bRadius;
+	bRh			= bHoleRadius;
+	tR			= tRadius;
+	tRh			= tHoleRadius;
+	precission	= prec;
 	Triangulate();
 }
 

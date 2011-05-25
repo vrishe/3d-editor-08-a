@@ -8,28 +8,47 @@ using namespace std;
 
 // ============================================================================
 // Supporting structures
-typedef struct tagVECTOR3
+#ifndef EPSILON
+#define EPSILON .0001f
+#endif // EPSILON
+
+typedef struct tagVECTOR
 {
 	float x;
 	float y;
 	float z;
-} VECTOR3D, *LPVECTOR3D;
+} VECTOR, *LPVECTOR;
 
-typedef struct tagColor
-{
-	unsigned char Red;
-	unsigned char Green;
-	unsigned char Blue;
-} COLOR3D, *LPCOLOR3D;
+typedef struct tagVECTOR3D : public VECTOR {
+public:
+	tagVECTOR3D();
+	tagVECTOR3D(float fX, float fY, float fZ);
 
-typedef struct tagVertexPure : VECTOR3D {
+	tagVECTOR3D		operator+ (const tagVECTOR3D& u) const;
+	tagVECTOR3D		operator- (const tagVECTOR3D& u) const;
+	tagVECTOR3D		operator* (float k) const;
+	tagVECTOR3D		operator/ (float k) const;
+	
+	tagVECTOR3D&	operator+= (const tagVECTOR3D& u);
+	tagVECTOR3D&	operator-= (const tagVECTOR3D& u);
+	tagVECTOR3D&	operator*= (float k);
+	tagVECTOR3D&	operator/= (float k);
+
+	tagVECTOR3D		operator+ () const;
+	tagVECTOR3D		operator- () const;
+
+	bool			operator== (const tagVECTOR3D& u) const;
+	bool			operator!= (const tagVECTOR3D& u) const;
+} VECTOR3D, LPVECTOR3D;
+
+typedef struct tagVERTEX_PURE : VECTOR {
 	float		rhW;
-} VERTEX3D_PURE, *LPVERTEX3D_PURE;
+} VERTEX_PURE, *LPVERTEX_PURE;
 
-typedef struct tagVertex : public VERTEX3D_PURE {
+typedef struct tagVertex : public VERTEX_PURE {
 	tagVertex();
 	tagVertex(float x, float y, float z, float rhw = 1.0f);
-	friend bool operator == (tagVertex, tagVertex);
+	bool operator==(const tagVertex &b);
 } VERTEX3D, *LPVERTEX3D;
 
 typedef struct tagPolygon {
@@ -39,8 +58,15 @@ typedef struct tagPolygon {
 
 	tagPolygon();
 	tagPolygon(size_t, size_t, size_t);
-	friend bool operator == (tagPolygon, tagPolygon);
+	bool operator==(const tagPolygon &b);
 } POLY3D, *LPPOLY3D;
+
+typedef struct tagColor
+{
+	unsigned char Red;
+	unsigned char Green;
+	unsigned char Blue;
+} COLOR3D, *LPCOLOR3D;
 
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
@@ -59,7 +85,7 @@ private:
 	size_t			ID;
 protected:
 	LPTSTR			Name;
-	VECTOR3D		Gizmo;
+	VECTOR		Gizmo;
 	float			Pitch,
 					Roll,
 					Yaw;
@@ -67,7 +93,7 @@ protected:
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
 	clsObject(
-		VECTOR3D pt, 
+		VECTOR pt, 
 		float pitch, 
 		float roll, 
 		float yaw, 
@@ -86,13 +112,13 @@ public:
 	CLASS_ID clsID();
 	size_t	 objID();
 
-	void MoveTo(VECTOR3D pt);
+	void MoveTo(VECTOR pt);
 	void MoveTo(float pX, float pY, float pZ);
 	void MoveToX(float pX);
 	void MoveToY(float pY);
 	void MoveToZ(float pZ);
 
-	void MoveAt(VECTOR3D pt);
+	void MoveAt(VECTOR pt);
 	void MoveAt(float pX, float pY, float pZ);
 	void MoveAtX(float pX);
 	void MoveAtY(float pY);
@@ -195,6 +221,7 @@ public:
 
 	// getters
 	COLOR3D			getColor();
+	DWORD			getColorRef();
 	size_t			getVCount();
 	size_t			getPCount();
 	LPVERTEX3D		getVerticesRaw();

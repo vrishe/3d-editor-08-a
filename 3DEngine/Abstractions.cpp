@@ -3,6 +3,89 @@
 
 // ============================================================================
 // Implementation of stuctures if necessary
+// Implementation of tagVector3D struct:
+tagVECTOR3D::tagVECTOR3D() { }
+tagVECTOR3D::tagVECTOR3D(float fX, float fY, float fZ)
+{
+	x = fX;
+	y = fY;
+	z = fZ;
+}
+tagVECTOR3D tagVECTOR3D::operator+ (const tagVECTOR3D& u) const
+{
+	tagVECTOR3D v(x+u.x, y+u.y, z+u.z);
+	return v;
+}
+tagVECTOR3D tagVECTOR3D::operator- (const tagVECTOR3D& u) const
+{
+	tagVECTOR3D v(x-u.x, y-u.y, z-u.z);
+	return v;
+}
+tagVECTOR3D tagVECTOR3D::operator* (float k) const
+{
+	tagVECTOR3D v(x*k, y*k, z*k);
+	return v;
+}
+tagVECTOR3D tagVECTOR3D::operator/ (float k) const
+{
+	tagVECTOR3D v(x/k, y/k, z/k);
+	return v;
+}
+tagVECTOR3D& tagVECTOR3D::operator+= (const tagVECTOR3D& u)
+{
+	x += u.x;
+	y += u.y;
+	z += u.z;
+	return *this;
+}
+tagVECTOR3D& tagVECTOR3D::operator-= (const tagVECTOR3D& u)
+{
+	x -= u.x;
+	y -= u.y;
+	z -= u.z;
+	return *this;
+}
+tagVECTOR3D& tagVECTOR3D::operator*= (float k)
+{
+	x *= k;
+	y *= k;
+	z *= k;
+	return *this;
+}
+tagVECTOR3D& tagVECTOR3D::operator/= (float k)
+{
+	x /= k;
+	y /= k;
+	z /= k;
+	return *this;
+}
+tagVECTOR3D tagVECTOR3D::operator+ () const
+{
+	tagVECTOR3D v(
+		x > 0 ? x : -x,
+		y > 0 ? y : -y,
+		z > 0 ? z : -z
+	);
+	return v;
+}
+tagVECTOR3D tagVECTOR3D::operator- () const
+{
+	tagVECTOR3D v(
+		x < 0 ? x : -x,
+		y < 0 ? y : -y,
+		z < 0 ? z : -z
+	);
+	return v;
+}
+bool tagVECTOR3D::operator== (const tagVECTOR3D& u) const
+{
+	return fabs(x - u.x) < EPSILON
+		&& fabs(y - u.y) < EPSILON
+		&& fabs(z - u.z) < EPSILON;
+}
+
+bool tagVECTOR3D::operator!= (const tagVECTOR3D& u) const {	return !operator==(u); }
+
 // Implementation of tagVertex struct:
 tagVertex::tagVertex() 
 { 
@@ -18,18 +101,20 @@ tagVertex::tagVertex(float fx, float fy, float fz, float rhw)
 	z = fz; 
 	rhW	= rhw; 
 }
-bool operator == (tagVertex a, tagVertex b) 
+bool tagVertex::operator== (const tagVertex &b) 
 {
-	return (a.x == b.x && a.y == b.y && a.z == b.z);
+	return x == b.x 
+		&& y == b.y 
+		&& z == b.z;
 }
 
 // Implementation of tagPolygon struct:
 tagPolygon::tagPolygon() { first = -1; second = -1; third = -1; }
 tagPolygon::tagPolygon(size_t a, size_t b, size_t c) { first = a; second = b; third = c; }
-bool operator == (tagPolygon a, tagPolygon b) {
-	if (a.first == b.first && a.second == b.second && a.third == b.third)
-		return true;
-	return false;
+bool tagPolygon::operator== (const tagPolygon &b) {
+	return first == b.first 
+		&& second == b.second 
+		&& third == b.third;
 }
 
 
@@ -53,7 +138,7 @@ clsObject::clsObject(CLASS_ID clsID)
 }
 
 clsObject::clsObject(
-			VECTOR3D pt, 
+			VECTOR pt, 
 			float pitch, 
 			float roll, 
 			float yaw, 
@@ -99,7 +184,7 @@ clsObject::~clsObject()
 CLASS_ID clsObject::clsID() { return ClassID; }
 size_t clsObject::objID()	{ return ID; }
 
-void clsObject::MoveTo(VECTOR3D pt) { Gizmo = pt; }
+void clsObject::MoveTo(VECTOR pt) { Gizmo = pt; }
 void clsObject::MoveTo(float pX, float pY, float pZ)
 {
 	Gizmo.x = pX;
@@ -110,7 +195,7 @@ void clsObject::MoveToX(float pX) { Gizmo.x = pX; }
 void clsObject::MoveToY(float pY) { Gizmo.y = pY; }
 void clsObject::MoveToZ(float pZ) { Gizmo.z = pZ; }
 
-void clsObject::MoveAt(VECTOR3D pt) 
+void clsObject::MoveAt(VECTOR pt) 
 { 
 	Gizmo.x += pt.x;
 	Gizmo.y += pt.y;
@@ -416,6 +501,10 @@ void clsMesh::dropRedundant()
 }
 
 COLOR3D		clsMesh::getColor()			{ return color; }
+DWORD		clsMesh::getColorRef()		{ return RGB(
+													color.Red, 
+													color.Green, 
+													color.Blue); }
 size_t		clsMesh::getVCount()		{ return vertices.size(); }
 size_t		clsMesh::getPCount()		{ return polygons.size(); }
 LPVERTEX3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }

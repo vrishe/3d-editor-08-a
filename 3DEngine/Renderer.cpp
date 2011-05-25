@@ -96,7 +96,7 @@ BOOL clsViewport::Render()
 						centerY;
 
 	UINT				sceneObjCount,
-						objVertCount,
+						//obj2DVertCount,
 						objPolyCount;
 
 	HANDLE				procHeap		= GetProcessHeap();
@@ -105,8 +105,7 @@ BOOL clsViewport::Render()
 	LPVERTEX3D			objVertBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
-	LPTRIVERTEX			vertDrawBuffer;
-	LPGRADIENT_TRIANGLE polyDrawBuffer;
+	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
 	GetClientRect(hWnd, &clientRect);
@@ -136,50 +135,44 @@ BOOL clsViewport::Render()
 		{
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
 			objColor		= objToRender->getColor();
-			objVertCount	= objToRender->getVCount();
 			objPolyCount	= objToRender->getPCount();	
 			objToRender->getBuffersRaw(&objVertBuffer, &objPolyBuffer);
-			vertDrawBuffer = (LPTRIVERTEX)HeapAlloc(
-											procHeap, 
-											HEAP_ZERO_MEMORY, 
-											sizeof(TRIVERTEX) 
-												* objPolyCount
-										);
-			polyDrawBuffer = (LPGRADIENT_TRIANGLE)HeapAlloc(
-											procHeap, 
-											HEAP_ZERO_MEMORY, 
-											sizeof(GRADIENT_TRIANGLE) 
-												* objPolyCount
-										);
-			for ( UINT j = 0; j < objPolyCount; j ++ )
-				CopyMemory(
-					polyDrawBuffer + j, 
-					objPolyBuffer + j, 
-					sizeof(GRADIENT_TRIANGLE)
-				);
+			//vert2DDrawBuffer = (LPPOINT)HeapAlloc(
+			//								procHeap, 
+			//								HEAP_ZERO_MEMORY, 
+			//								sizeof(POINT) * 3
+			//							);
 
+			
 			// Transformation calculations here:
-			for ( UINT j = 0; j < objVertCount; j ++ )
+			for ( UINT j = 0; j < objPolyCount; j ++ ) 
 			{
-				(vertDrawBuffer + j)->x		= (LONG)((objVertBuffer + j)->x) + centerX;
-				(vertDrawBuffer + j)->y		= (LONG)((objVertBuffer + j)->y) + centerY;
-				(vertDrawBuffer + j)->Red	= MAKEWORD(0,objColor.Red);
-				(vertDrawBuffer + j)->Green = MAKEWORD(0,objColor.Green);
-				(vertDrawBuffer + j)->Blue	= MAKEWORD(0,objColor.Blue);
+				vert2DDrawBuffer[0].x 
+					= (LONG)objVertBuffer[objPolyBuffer[j].first].x
+					+ centerX;
+				vert2DDrawBuffer[0].y 
+					= (LONG)objVertBuffer[objPolyBuffer[j].first].y
+					+ centerY;
+
+				vert2DDrawBuffer[1].x 
+					= (LONG)objVertBuffer[objPolyBuffer[j].second].x
+					+ centerX;
+				vert2DDrawBuffer[1].y 
+					= (LONG)objVertBuffer[objPolyBuffer[j].second].y
+					+ centerY;
+
+				vert2DDrawBuffer[2].x 
+					= (LONG)objVertBuffer[objPolyBuffer[j].third].x
+					+ centerX;
+				vert2DDrawBuffer[2].y 
+					= (LONG)objVertBuffer[objPolyBuffer[j].third].y
+					+ centerY;
+
+
+				Polyline( hMemDC, vert2DDrawBuffer, 3 );
 			}
 
-			// Drawing here:
-			GradientFill(
-				hMemDC, 
-				vertDrawBuffer, 
-				objVertCount, 
-				polyDrawBuffer,
-				objPolyCount, 
-				GRADIENT_FILL_TRIANGLE
-			);
-
-			HeapFree(procHeap, NULL, vertDrawBuffer);
-			HeapFree(procHeap, NULL, polyDrawBuffer);
+			//HeapFree(procHeap, NULL, vert2DDrawBuffer);
 		}
 	}
 

@@ -13,7 +13,7 @@ UINT				ufWidth, ufHeight;
 LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera;
-Pyramid				testPyramid(50.0f, 25.0f, 35.0f, 20.0f, 30.0f);
+Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 20.0f, 30.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 25);
 ExCone				testExCone(43.0f, 22.0f, 56.3f, 5.0f, 30);
 
@@ -51,7 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testScene.AddObject(&testCamera);
-	testScene.AddObject(&testPyramid);
+	//testScene.AddObject(&testPyramid);
 	testScene.AddObject(&testCone);
 	testScene.setAmbientColor(132, 128, 128);
 

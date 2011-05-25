@@ -171,8 +171,32 @@ protected:
 	int precission;	// precission of circle approximation in polygons
 
 public:
-	Hole();
-	Hole(float height, float bRadius, float bRHole, float tRadius, float tRHole, int prec);
+	Hole(COLOR3D c);
+	Hole(
+		float height, 
+		float bRadius, 
+		float bHoleRadius,
+		float tRadius,
+		float tHoleRadius,
+		int	  prec,
+		COLOR3D	c
+	);
+	Hole(
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
+	Hole(
+		float height, 
+		float bRadius, 
+		float bHoleRadius,
+		float tRadius,
+		float tHoleRadius,
+		int	  prec,
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+	);
 
 	// functionality
 	virtual void Triangulate(); // generate vertices, edges and polygons lists
