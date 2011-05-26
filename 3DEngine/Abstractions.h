@@ -1,55 +1,28 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+#define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+#include <math.h>
 #include <vector>
 #include <map>
+
+#include "Math3D.h"
 using namespace std;
 
 
 // ============================================================================
 // Supporting structures
-#ifndef EPSILON
-#define EPSILON .0001f
-#endif // EPSILON
 
-typedef struct tagVECTOR
-{
-	float x;
-	float y;
-	float z;
-} VECTOR, *LPVECTOR;
+//typedef struct tagVertexPure : tagVector {
+//	float		rhW;
+//} VERTEX_PURE, *LPVERTEX_PURE;
 
-typedef struct tagVECTOR3D : public VECTOR {
-public:
-	tagVECTOR3D();
-	tagVECTOR3D(float fX, float fY, float fZ);
-
-	tagVECTOR3D		operator+ (const tagVECTOR3D& u) const;
-	tagVECTOR3D		operator- (const tagVECTOR3D& u) const;
-	tagVECTOR3D		operator* (float k) const;
-	tagVECTOR3D		operator/ (float k) const;
-	
-	tagVECTOR3D&	operator+= (const tagVECTOR3D& u);
-	tagVECTOR3D&	operator-= (const tagVECTOR3D& u);
-	tagVECTOR3D&	operator*= (float k);
-	tagVECTOR3D&	operator/= (float k);
-
-	tagVECTOR3D		operator+ () const;
-	tagVECTOR3D		operator- () const;
-
-	bool			operator== (const tagVECTOR3D& u) const;
-	bool			operator!= (const tagVECTOR3D& u) const;
-} VECTOR3D, LPVECTOR3D;
-
-typedef struct tagVERTEX_PURE : VECTOR {
-	float		rhW;
-} VERTEX_PURE, *LPVERTEX_PURE;
-
-typedef struct tagVertex : public VERTEX_PURE {
-	tagVertex();
-	tagVertex(float x, float y, float z, float rhw = 1.0f);
-	bool operator==(const tagVertex &b);
-} VERTEX3D, *LPVERTEX3D;
+//typedef struct tagVertex : public tagVector3D {
+//	tagVertex();
+//	tagVertex(float x, float y, float z, float rhw = 1.0f);
+//	bool operator==(const tagVertex &b);
+//} VERTEX3D, *LPVERTEX3D;
 
 typedef struct tagEdge {
 	size_t first;
@@ -79,71 +52,75 @@ typedef struct tagColor
 	unsigned char Blue;
 } COLOR3D, *LPCOLOR3D;
 
+// ============================================================================
+// Object class that represents current object
+// space position
+#define MAX_OBJECT_NAME_LEN	256
+
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
 	CLS_CAMERA		= 1,
 	CLS_MESH		= 2
 };
 
-#define MAX_OBJECT_NAME_LEN	256
-// ============================================================================
-// Object class that represents current object
-// space position
+enum CONSTRAINTS {
+	C_FREE	= 0,
+	C_XY	= 1,	
+	C_ZX	= 2,
+	C_ZY	= 3
+};
+
 class clsObject {
 private: 
 	static size_t	Counter;
 	CLASS_ID		ClassID;
 	size_t			ID;
+
 protected:
 	LPTSTR			Name;
-	VECTOR		Gizmo;
-	float			Pitch,
-					Roll,
-					Yaw;
+
+	float			pitch,
+					yaw,
+					roll;
+
+	VECTOR3D		pos;
+	VECTOR3D		fWd;
+	VECTOR3D		rWd;
+	VECTOR3D		uWd;
+
+	CONSTRAINTS		moveConst;
 
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
 	clsObject(
-		VECTOR pt, 
-		float pitch, 
-		float roll, 
-		float yaw, 
-		CLASS_ID clsID = CLS_OBJECT
+		VECTOR3D	pt, 
+		float		p, 
+		float		y, 
+		float		r, 
+		CLASS_ID	clsID = CLS_OBJECT
 	);
 	clsObject(
 		float pX, 
 		float pY, 
 		float pZ, 
-		float pitch,
-		float roll,
-		float yaw, 
+		float p,
+		float y,
+		float r, 
 		CLASS_ID clsID = CLS_OBJECT
 	);
 	~clsObject();
 	CLASS_ID clsID();
 	size_t	 objID();
 
-	void MoveTo(VECTOR pt);
-	void MoveTo(float pX, float pY, float pZ);
-	void MoveToX(float pX);
-	void MoveToY(float pY);
-	void MoveToZ(float pZ);
+	VECTOR3D getPosition();
 
-	void MoveAt(VECTOR pt);
-	void MoveAt(float pX, float pY, float pZ);
-	void MoveAtX(float pX);
-	void MoveAtY(float pY);
-	void MoveAtZ(float pZ);
+	void Follow(float units);
+	void Strafe(float units);
+	void Fly(float units);
 
-	void RotateTo(float pitch, float roll, float yaw);
-	void RotateToPitch(float pitch);
-	void RotateToRoll(float roll);
-	void RotateToYaw(float yaw);
-
-	void RotateAt(float pitch, float roll, float yaw);
-	void RotateAtPitch(float pitch);
-	void RotateAtRoll(float roll);
-	void RotateAtYaw(float yaw);
+	void Pitch(float angle);
+	void Yaw(float angle);
+	void Roll(float angle);
 
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
@@ -192,7 +169,7 @@ typedef clsScene SCENE3D, *LPSCENE3D;
 // ============================================================================
 // Abstract mesh class that represents EVERY POSSIBLE
 // 3d mesh object. Provides basic mesh operations.
-typedef vector<VERTEX3D> VERT_LIST, *LPVERT_LIST;
+typedef vector<VECTOR3D> VERT_LIST, *LPVERT_LIST;
 typedef vector<EDGE3D> EDGE_LIST, *LPEDGE_LIST;
 typedef vector<POLY3D> POLY_LIST, *LPPOLY_LIST;
 
@@ -205,7 +182,7 @@ protected:
 
 	COLOR3D			color;
 
-	size_t findVertex(VERTEX3D);		// returns a vertex position
+	size_t findVertex(VECTOR3D);	// returns a vertex position
 	size_t findPolygon(POLY3D);		// returns a Polygon_ position
 
 	/// delete ver/edge/polys that can't be a part of the object no more
@@ -239,14 +216,14 @@ public:
 	size_t			getVCount();
 	size_t			getECount();
 	size_t			getPCount();
-	LPVERTEX3D		getVerticesRaw();
+	LPVECTOR3D		getVerticesRaw();
 	LPEDGE3D		getEdgesRaw();
 	LPPOLY3D		getPolygonsRaw();
 	VERT_LIST		getVertices();
 	EDGE_LIST		getEdges();
 	POLY_LIST		getPolygons();
 
-	void			getBuffersRaw(LPVERTEX3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
+	void			getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
 	void			getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps);
 
 	// setters
@@ -256,9 +233,9 @@ public:
 						unsigned char blue
 					);
 	void			setColor(COLOR3D c);
-	void			addVertex(VERTEX3D);
+	void			addVertex(VECTOR3D);
 	void			addListOfVertices(VERT_LIST);
-	bool			delVertex(VERTEX3D);
+	bool			delVertex(VECTOR3D);
 	bool			delVertex(size_t);
 	size_t	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
 													// -n otherwise, where n - number of 
@@ -274,10 +251,29 @@ typedef clsMesh MESH3D, *LPMESH3D;
 
 // ============================================================================
 // Camera class
+enum PROJECTION_TYPE {
+	PARALLEL	= 0,
+	CENTRAL		= 1
+};
+
 class clsCamera : public clsObject {
 private:
+	PROJECTION_TYPE projectionType;
+
+	float			screenMult;
+	float			FOV;		// FOV это угол. в радианах
 
 public:
 	clsCamera();
+
+	PROJECTION_TYPE	getProjectionType();
+	float			getScreenMult();
+	float			getFOV();
+
+	void			setProjectionType(PROJECTION_TYPE projType);
+	void			setScreenMult(float scrMult);
+	void			setFOV(float fieldOfView);
+
+	void			GetViewMatrix(LPMATRIX3D mOut);
 };
 typedef clsCamera CAMERA3D, *LPCAMERA3D;

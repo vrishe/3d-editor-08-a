@@ -96,18 +96,22 @@ BOOL clsViewport::Render()
 						centerY;
 
 	UINT				sceneObjCount,
-						//obj2DVertCount,
+						objVertCount,
 						objEdgeCount,
 						objPolyCount;
 
 	HANDLE				procHeap		= GetProcessHeap();
 
 	LPMESH3D			objToRender;
-	LPVERTEX3D			objVertBuffer;
+	LPVECTOR3D			objVertBuffer;
 	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
-	POINT				vert2DDrawBuffer[3];
+	POINT				vert2DDrawBuffer[2];
+
+	MATRIX3D			viewMatrix,
+						worldMatrix(true);
+	VECTOR3D			camPos;
 
 	// Approaching viewport canvas for drawing
 	GetClientRect(hWnd, &clientRect);
@@ -132,24 +136,38 @@ BOOL clsViewport::Render()
 	if ( bResult ) 
 	{
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
-
+		((LPCAMERA3D)Scene->getObject(cameraObjectID))->GetViewMatrix(&viewMatrix);
+		camPos = ((LPCAMERA3D)Scene->getObject(cameraObjectID))->getPosition();
 		for ( UINT i = 0; i < sceneObjCount; i++ )
 		{
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
 			objColor		= objToRender->getColor();
+			objVertCount	= objToRender->getVCount();
 			objPolyCount	= objToRender->getPCount();	
 			objEdgeCount	= objToRender->getECount();
-			objToRender->getBuffersRaw(&objVertBuffer, &objEdgeBuffer, &objPolyBuffer );
-			//vert2DDrawBuffer = (LPPOINT)HeapAlloc(
-			//								procHeap, 
-			//								HEAP_ZERO_MEMORY, 
-			//								sizeof(POINT) * 3
-			//							);
-
+			objEdgeBuffer	= objToRender->getEdgesRaw();
+			objPolyBuffer	= objToRender->getPolygonsRaw();
+			objVertBuffer	= (LPVECTOR3D)HeapAlloc(
+											procHeap, 
+											HEAP_ZERO_MEMORY, 
+											sizeof(VECTOR3D) * objVertCount
+										);
+			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
+			for ( UINT j = 0; j < objVertCount; j++ )
+			{
+				*((LPVECTOR3D)(objVertBuffer + j)) -= camPos;
+				Matrix3DTransformCoord(
+							&viewMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
+				*((LPVECTOR3D)(objVertBuffer + j)) += camPos;
+			}
 			
 			// Transformation calculations here:
 			for ( UINT j = 0; j < objEdgeCount; j++ ) 
 			{
+
 				vert2DDrawBuffer[0].x 
 					= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
 					+ centerX;
@@ -164,18 +182,10 @@ BOOL clsViewport::Render()
 					= (LONG)objVertBuffer[objEdgeBuffer[j].second].y
 					+ centerY;
 
-				//vert2DDrawBuffer[2].x 
-				//	= (LONG)objVertBuffer[objPolyBuffer[j].third].x
-				//	+ centerX;
-				//vert2DDrawBuffer[2].y 
-				//	= (LONG)objVertBuffer[objPolyBuffer[j].third].y
-				//	+ centerY;
-
-
 				Polyline( hMemDC, vert2DDrawBuffer, 2 );
 			}
 
-			//HeapFree(procHeap, NULL, vert2DDrawBuffer);
+			HeapFree(procHeap, NULL, objVertBuffer);
 		}
 	}
 
