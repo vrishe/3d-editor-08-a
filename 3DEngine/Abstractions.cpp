@@ -520,6 +520,7 @@ DWORD		clsMesh::getColorRef()		{ return RGB(
 													color.Green, 
 													color.Blue); }
 size_t		clsMesh::getVCount()		{ return vertices.size(); }
+size_t		clsMesh::getECount()		{ return edges.size(); }
 size_t		clsMesh::getPCount()		{ return polygons.size(); }
 LPVERTEX3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
 LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }

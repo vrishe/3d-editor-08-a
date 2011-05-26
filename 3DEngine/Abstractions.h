@@ -237,6 +237,7 @@ public:
 	COLOR3D			getColor();
 	DWORD			getColorRef();
 	size_t			getVCount();
+	size_t			getECount();
 	size_t			getPCount();
 	LPVERTEX3D		getVerticesRaw();
 	LPEDGE3D		getEdgesRaw();

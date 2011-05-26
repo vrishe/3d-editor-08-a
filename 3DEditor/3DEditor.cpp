@@ -14,8 +14,9 @@ LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 20.0f, 30.0f);
-Cone				testCone(30.0f, 75.0f, 50.0f, 25);
-ExCone				testExCone(43.0f, 22.0f, 56.3f, 5.0f, 30);
+Cone				testCone(30.0f, 75.0f, 50.0f, 24);
+ExCone				testExCone(86.0f, 150.0f, 100.0f, -38.0f, 8);
+Hole				testHole(30.0f, 75.0f, 50.0f, 75.0f, 50.0f, 24); 
 
 // Win API entry point:
 // ===================================
@@ -51,8 +52,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testScene.AddObject(&testCamera);
-	testScene.AddObject(&testPyramid);
+	//testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testCone);
+	testScene.AddObject(&testExCone);
+	//testScene.AddObject(&testHole);
 	testScene.setAmbientColor(132, 128, 128);
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);

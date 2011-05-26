@@ -97,12 +97,14 @@ BOOL clsViewport::Render()
 
 	UINT				sceneObjCount,
 						//obj2DVertCount,
+						objEdgeCount,
 						objPolyCount;
 
 	HANDLE				procHeap		= GetProcessHeap();
 
 	LPMESH3D			objToRender;
 	LPVERTEX3D			objVertBuffer;
+	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
 	POINT				vert2DDrawBuffer[3];
@@ -136,7 +138,8 @@ BOOL clsViewport::Render()
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
 			objColor		= objToRender->getColor();
 			objPolyCount	= objToRender->getPCount();	
-			objToRender->getBuffersRaw(&objVertBuffer, &objPolyBuffer);
+			objEdgeCount	= objToRender->getECount();
+			objToRender->getBuffersRaw(&objVertBuffer, &objEdgeBuffer, &objPolyBuffer );
 			//vert2DDrawBuffer = (LPPOINT)HeapAlloc(
 			//								procHeap, 
 			//								HEAP_ZERO_MEMORY, 
@@ -145,31 +148,31 @@ BOOL clsViewport::Render()
 
 			
 			// Transformation calculations here:
-			for ( UINT j = 0; j < objPolyCount; j ++ ) 
+			for ( UINT j = 0; j < objEdgeCount; j++ ) 
 			{
 				vert2DDrawBuffer[0].x 
-					= (LONG)objVertBuffer[objPolyBuffer[j].first].x
+					= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
 					+ centerX;
 				vert2DDrawBuffer[0].y 
-					= (LONG)objVertBuffer[objPolyBuffer[j].first].y
+					= (LONG)objVertBuffer[objEdgeBuffer[j].first].y
 					+ centerY;
 
 				vert2DDrawBuffer[1].x 
-					= (LONG)objVertBuffer[objPolyBuffer[j].second].x
+					= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
 					+ centerX;
 				vert2DDrawBuffer[1].y 
-					= (LONG)objVertBuffer[objPolyBuffer[j].second].y
+					= (LONG)objVertBuffer[objEdgeBuffer[j].second].y
 					+ centerY;
 
-				vert2DDrawBuffer[2].x 
-					= (LONG)objVertBuffer[objPolyBuffer[j].third].x
-					+ centerX;
-				vert2DDrawBuffer[2].y 
-					= (LONG)objVertBuffer[objPolyBuffer[j].third].y
-					+ centerY;
+				//vert2DDrawBuffer[2].x 
+				//	= (LONG)objVertBuffer[objPolyBuffer[j].third].x
+				//	+ centerX;
+				//vert2DDrawBuffer[2].y 
+				//	= (LONG)objVertBuffer[objPolyBuffer[j].third].y
+				//	+ centerY;
 
 
-				Polyline( hMemDC, vert2DDrawBuffer, 3 );
+				Polyline( hMemDC, vert2DDrawBuffer, 2 );
 			}
 
 			//HeapFree(procHeap, NULL, vert2DDrawBuffer);
