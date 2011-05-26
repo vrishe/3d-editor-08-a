@@ -116,7 +116,7 @@ public:
 
 class ExCone : public Cone {
 	/// конус, отсеченный плоскостью, паралельной OXZ и пересекающей OY в т. (0, secant, 0)
-	/// должно выполнятся неравенство -min(bR,tR) <= secant < max(bR, tR),
+	/// должно выполнятся неравенство -min(bR,tR) <= secant <= max(bR, tR),
 	/// иначе фигура неопределена
 	float secant;
 
