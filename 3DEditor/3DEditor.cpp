@@ -59,13 +59,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testCamera2.Pitch((float)(90.0*M_PI/180));
 	testCamera3.Pitch((float)(45.0*M_PI/180));
 	testScene.AddObject(&testPyramid);
-//	testScene.AddObject(&testCone);
+	//testScene.AddObject(&testCone);
 	testScene.AddObject(&testExCone);
 	testScene.AddObject(&testHole);
 	testPyramid.Strafe(95);
 	testPyramid.Follow(-38);
 	testPyramid.Fly(-70);
-	testPyramid.Yaw((float)(20.0*M_PI/180));
+	testPyramid.Yaw((float)(50.0*M_PI/180));
 	testExCone.Strafe(-75);
 	testExCone.Fly(40);
 	testExCone.Roll((float)(50.0*M_PI/180));
