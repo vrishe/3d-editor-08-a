@@ -13,15 +13,15 @@ void Pyramid::Triangulate() {
 	polygons.clear();
 
 		// setting base vertices
-	vertices.push_back(VERTEX3D(-bL/2,-bW/2, 0));	// 0
-	vertices.push_back(VERTEX3D(-bL/2,bW/2, 0));	// 1
-	vertices.push_back(VERTEX3D(bL/2,bW/2, 0));		// 2
-	vertices.push_back(VERTEX3D(bL/2,-bW/2, 0));	// 3
+	vertices.push_back(VECTOR3D(-bL/2,-bW/2, 0));	// 0
+	vertices.push_back(VECTOR3D(-bL/2,bW/2, 0));	// 1
+	vertices.push_back(VECTOR3D(bL/2,bW/2, 0));		// 2
+	vertices.push_back(VECTOR3D(bL/2,-bW/2, 0));	// 3
 		// setting top vertices
-	vertices.push_back(VERTEX3D(-tL/2,-tW/2, h));	// 4
-	vertices.push_back(VERTEX3D(-tL/2,tW/2, h));	// 5
-	vertices.push_back(VERTEX3D(tL/2,tW/2, h));		// 6
-	vertices.push_back(VERTEX3D(tL/2,-tW/2, h));	// 7
+	vertices.push_back(VECTOR3D(-tL/2,-tW/2, h));	// 4
+	vertices.push_back(VECTOR3D(-tL/2,tW/2, h));	// 5
+	vertices.push_back(VECTOR3D(tL/2,tW/2, h));		// 6
+	vertices.push_back(VECTOR3D(tL/2,-tW/2, h));	// 7
 
 		// setting edges
 	// setting base edges
@@ -154,25 +154,25 @@ void Cone::Triangulate() {
 
 	int step = 360 / precission;
 		// setting vertices
-	vertices.push_back(VERTEX3D(0, 0, 0));
-	vertices.push_back(VERTEX3D(0, 0, h));
+	vertices.push_back(VECTOR3D(0, 0, 0));
+	vertices.push_back(VECTOR3D(0, 0, h));
 	for (int i = 0; i < precission; i++) {
 		switch (step*i) {
 		case 0:
-			vertices.push_back(VERTEX3D(bR, 0, 0));
-			vertices.push_back(VERTEX3D(tR, 0, h));
+			vertices.push_back(VECTOR3D(bR, 0, 0));
+			vertices.push_back(VECTOR3D(tR, 0, h));
 			break;
 		case 90:
-			vertices.push_back(VERTEX3D(0, bR, 0));
-			vertices.push_back(VERTEX3D(0, tR, h));
+			vertices.push_back(VECTOR3D(0, bR, 0));
+			vertices.push_back(VECTOR3D(0, tR, h));
 			break;
 		case 180:
-			vertices.push_back(VERTEX3D(-bR, 0, 0));
-			vertices.push_back(VERTEX3D(-tR, 0, h));
+			vertices.push_back(VECTOR3D(-bR, 0, 0));
+			vertices.push_back(VECTOR3D(-tR, 0, h));
 			break;
 		case 270:
-			vertices.push_back(VERTEX3D(0, -bR, 0));
-			vertices.push_back(VERTEX3D(0, -tR, h));
+			vertices.push_back(VECTOR3D(0, -bR, 0));
+			vertices.push_back(VECTOR3D(0, -tR, h));
 			break;
 		default:
 			float k = (float)tan((step*i) * 3.1415926535 / 180), x;
@@ -181,13 +181,13 @@ void Cone::Triangulate() {
 			else
 				x = -sqrt(bR*bR / (1 + k*k));
 			float y = k * x;
-			vertices.push_back(VERTEX3D(x, y, 0));
+			vertices.push_back(VECTOR3D(x, y, 0));
 			if (step*i < 90 || step*i > 270)
  				x = sqrt(tR*tR / (1 + k*k));
 			else
 				x = -sqrt(tR*tR / (1 + k*k));
 			y = k * x;
-			vertices.push_back(VERTEX3D(x, y, h));
+			vertices.push_back(VECTOR3D(x, y, h));
 		}
 	}
 
@@ -315,34 +315,34 @@ void ExCone::Triangulate() {
 	int step = 360 / precission; // шаг между точками в градусах
 		// setting vertices
 	if ( secant >= 0 ) {
-		vertices.push_back(VERTEX3D(0, 0, 0));
-		vertices.push_back(VERTEX3D(0, 0, h));
+		vertices.push_back(VECTOR3D(0, 0, 0));
+		vertices.push_back(VECTOR3D(0, 0, h));
 	}
 	else { // нулевая вершина лежит на секущей плоскости т.к. центр конуса "отрезан"
-		vertices.push_back(VERTEX3D(0, secant, 0));
-		vertices.push_back(VERTEX3D(0, secant, h));
+		vertices.push_back(VECTOR3D(0, secant, 0));
+		vertices.push_back(VECTOR3D(0, secant, h));
 	}
 		// secant vertices
 	int secBaseLeft = 2, secTopLeft = 2; // кол-во еще недобавленных вершин пересачения плоскости сечения с реберами основания и верхней плоскости конуса
-	VERTEX3D bV1, bV2, tV1, tV2; // точки пересечения плоскости сечения с ребрами основания и верхней плоскости конуса
+	VECTOR3D bV1, bV2, tV1, tV2; // точки пересечения плоскости сечения с ребрами основания и верхней плоскости конуса
 	if ( abs(secant) >= bR ) // плоскость сечения не пересекается/касается основания конуса
 		secBaseLeft = 0; // отдельная обработка вершины касания не требуется
 	else {
-		bV1 = VERTEX3D((float)sqrt(bR*bR - secant * secant), secant, 0);
-		bV2 = VERTEX3D((float)-sqrt(bR*bR - secant * secant), secant, 0);
+		bV1 = VECTOR3D((float)sqrt(bR*bR - secant * secant), secant, 0);
+		bV2 = VECTOR3D((float)-sqrt(bR*bR - secant * secant), secant, 0);
 	}
 	if ( abs(secant) >= tR ) // аналогично основанию
 		secTopLeft = 0;
 	else {	
-		tV1 = VERTEX3D((float)sqrt(tR*tR - secant * secant), secant, h);
-		tV2 = VERTEX3D((float)-sqrt(tR*tR - secant * secant), secant, h);
+		tV1 = VECTOR3D((float)sqrt(tR*tR - secant * secant), secant, h);
+		tV2 = VECTOR3D((float)-sqrt(tR*tR - secant * secant), secant, h);
 	}
 	for (int i = 0; i < precission; i++) { // нахождение вершин кривых основания и верхней плоскости конуса
 		switch (step*i) {
 		case 0:
 			if ( secant >= 0 ) {
-				vertices.push_back(VERTEX3D(bR, 0, 0));
-				vertices.push_back(VERTEX3D(tR, 0, h));
+				vertices.push_back(VECTOR3D(bR, 0, 0));
+				vertices.push_back(VECTOR3D(tR, 0, h));
 			}
 			else { // вершина не лежит на оси OX, т.к. центр конуса "отрезан"
 				if (secBaseLeft) // проверки для сохранения правильного порядка добавления вершин (аналогично не усеченному конусу)
@@ -367,37 +367,37 @@ void ExCone::Triangulate() {
 						vertices.push_back(tV2);
 					}
 					else { // в верхней плоскости конуса дублируем вершину для быстрого построения полигонов
-						vertices.push_back(VERTEX3D(0, tR, h));
+						vertices.push_back(VECTOR3D(0, tR, h));
 						vertices.push_back(bV2);
-						vertices.push_back(VERTEX3D(0, tR, h));
+						vertices.push_back(VECTOR3D(0, tR, h));
 					}	
 					secBaseLeft = secTopLeft = 0; // все вершины пересечения добавлены
 					break;
 				case 1: // добвление одной вершины на оси ОУ
 					if ( secant < bR )
-						vertices.push_back(VERTEX3D(0, secant, 0));
+						vertices.push_back(VECTOR3D(0, secant, 0));
 					else
-						vertices.push_back(VERTEX3D(0, bR, h));
+						vertices.push_back(VECTOR3D(0, bR, h));
 					if ( secant < tR )
-						vertices.push_back(VERTEX3D(0, secant, h));
+						vertices.push_back(VECTOR3D(0, secant, h));
 					else
-						vertices.push_back(VERTEX3D(0, tR, h));
+						vertices.push_back(VECTOR3D(0, tR, h));
 					break;
 				//default:
-				//	vertices.push_back(VERTEX3D(0, bR, h));
-				//	vertices.push_back(VERTEX3D(0, tR, h));
+				//	vertices.push_back(VECTOR3D(0, bR, h));
+				//	vertices.push_back(VECTOR3D(0, tR, h));
 				}
 			}
 			break;
 		case 180:
 			if ( secant >= 0 ) {
-				vertices.push_back(VERTEX3D(-bR, 0, 0));
-				vertices.push_back(VERTEX3D(-tR, 0, h));
+				vertices.push_back(VECTOR3D(-bR, 0, 0));
+				vertices.push_back(VECTOR3D(-tR, 0, h));
 			}
 			break;
 		case 270:
-			vertices.push_back(VERTEX3D(0, -bR, 0));
-			vertices.push_back(VERTEX3D(0, -tR, h));
+			vertices.push_back(VECTOR3D(0, -bR, 0));
+			vertices.push_back(VECTOR3D(0, -tR, h));
 			break;
 		default:
 			/// находим точку пересечения окружности и очередной прямой в плоскости ОУ,
@@ -423,7 +423,7 @@ void ExCone::Triangulate() {
 				}
 			}
 			else {
-				vertices.push_back(VERTEX3D(x, y, 0));
+				vertices.push_back(VECTOR3D(x, y, 0));
 				pushed = true;
 			}
 			/// аналогично добавляем вершину для верхней плоскости конуса
@@ -462,7 +462,7 @@ void ExCone::Triangulate() {
 						vertices.push_back(bV1);
 					else
 						vertices.push_back(bV2);
-				vertices.push_back(VERTEX3D(x, y, h));
+				vertices.push_back(VECTOR3D(x, y, h));
 			}
 
 		}
@@ -589,20 +589,20 @@ void Hole::Triangulate() {
 	for (int i = 0; i < precission; i++) { // setting outter circle
 		switch (step*i) {
 		case 0:
-			vertices.push_back(VERTEX3D(bR, 0, 0));
-			vertices.push_back(VERTEX3D(tR, 0, h));
+			vertices.push_back(VECTOR3D(bR, 0, 0));
+			vertices.push_back(VECTOR3D(tR, 0, h));
 			break;
 		case 90:
-			vertices.push_back(VERTEX3D(0, bR, 0));
-			vertices.push_back(VERTEX3D(0, tR, h));
+			vertices.push_back(VECTOR3D(0, bR, 0));
+			vertices.push_back(VECTOR3D(0, tR, h));
 			break;
 		case 180:
-			vertices.push_back(VERTEX3D(-bR, 0, 0));
-			vertices.push_back(VERTEX3D(-tR, 0, h));
+			vertices.push_back(VECTOR3D(-bR, 0, 0));
+			vertices.push_back(VECTOR3D(-tR, 0, h));
 			break;
 		case 270:
-			vertices.push_back(VERTEX3D(0, -bR, 0));
-			vertices.push_back(VERTEX3D(0, -tR, h));
+			vertices.push_back(VECTOR3D(0, -bR, 0));
+			vertices.push_back(VECTOR3D(0, -tR, h));
 			break;
 		default:
 			float k = tan((step*i) * 3.1415926535 / 180), x;
@@ -611,33 +611,33 @@ void Hole::Triangulate() {
 			else
 				x = -sqrt(bR*bR / (1 + k*k));
 			float y = k * x;
-			vertices.push_back(VERTEX3D(x, y, 0));
+			vertices.push_back(VECTOR3D(x, y, 0));
 
 			if (step*i < 90 || step*i > 270)
  				x = sqrt(tR*tR / (1 + k*k));
 			else
 				x = -sqrt(tR*tR / (1 + k*k));
 			y = k * x;
-			vertices.push_back(VERTEX3D(x, y, h));
+			vertices.push_back(VECTOR3D(x, y, h));
 		}
 	}
 	for (int i = 0; i < precission; i++) { // setting inner circle
 		switch (step*i) {
 		case 0:
-			vertices.push_back(VERTEX3D(bRh, 0, 0));
-			vertices.push_back(VERTEX3D(tRh, 0, h));
+			vertices.push_back(VECTOR3D(bRh, 0, 0));
+			vertices.push_back(VECTOR3D(tRh, 0, h));
 			break;
 		case 90:
-			vertices.push_back(VERTEX3D(0, bRh, 0));
-			vertices.push_back(VERTEX3D(0, tRh, h));
+			vertices.push_back(VECTOR3D(0, bRh, 0));
+			vertices.push_back(VECTOR3D(0, tRh, h));
 			break;
 		case 180:
-			vertices.push_back(VERTEX3D(-bRh, 0, 0));
-			vertices.push_back(VERTEX3D(-tRh, 0, h));
+			vertices.push_back(VECTOR3D(-bRh, 0, 0));
+			vertices.push_back(VECTOR3D(-tRh, 0, h));
 			break;
 		case 270:
-			vertices.push_back(VERTEX3D(0, -bRh, 0));
-			vertices.push_back(VERTEX3D(0, -tRh, h));
+			vertices.push_back(VECTOR3D(0, -bRh, 0));
+			vertices.push_back(VECTOR3D(0, -tRh, h));
 			break;
 		default:
 			float k = tan((step*i) * 3.1415926535 / 180), x;
@@ -646,13 +646,13 @@ void Hole::Triangulate() {
 			else
 				x = -sqrt(bRh*bRh / (1 + k*k));
 			float y = k * x;
-			vertices.push_back(VERTEX3D(x, y, 0));
+			vertices.push_back(VECTOR3D(x, y, 0));
 			if (step*i < 90 || step*i > 270)
  				x = sqrt(tRh*tRh / (1 + k*k));
 			else
 				x = -sqrt(tRh*tRh / (1 + k*k));
 			y = k * x;
-			vertices.push_back(VERTEX3D(x, y, h));
+			vertices.push_back(VECTOR3D(x, y, h));
 		}
 	}
 
