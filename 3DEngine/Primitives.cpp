@@ -469,22 +469,22 @@ void ExCone::Triangulate() {
 	}
 
 		// setting base edges
-	int N = (vertices.size() - 2) / 2, index = ( N == precission / 2 + 1 ? 1 : 1 ); // ???????
-	for (int i = index; i < N; i++) {
+	int N = (vertices.size() - 2) / 2;
+	for (int i = 1; i < N; i++) {
 		edges.push_back(EDGE3D(0, i*2));
 		edges.push_back(EDGE3D(i*2, i*2 + 2));
 	}
 	edges.push_back(EDGE3D(0, N*2));
 	edges.push_back(EDGE3D(N*2, 2));
 		// setting top edges
-	for (int i = index; i < N; i++) {
+	for (int i = 1; i < N; i++) {
 		edges.push_back(EDGE3D(1, i*2 + 1));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 3));
 	}
 	edges.push_back(EDGE3D(1, N*2 + 1));
 	edges.push_back(EDGE3D(N*2 + 1, 3));
 		// setting side edges
-	for (int i = index; i < N; i++) {
+	for (int i = 1; i < N; i++) {
 		edges.push_back(EDGE3D(i*2, i*2 + 1));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 2));
 	}
@@ -492,7 +492,7 @@ void ExCone::Triangulate() {
 	edges.push_back(EDGE3D(N*2 + 1, 2));
 
 		// setting base polygons
-	N = (vertices.size() - 2) / 2, index = ( N == precission / 2 + 1 ? 2 : 1 );
+	N = (vertices.size() - 2) / 2; int index = ( N == precission / 2 + 1 ? 2 : 1 );
 	for (int i = index; i < N; i++)
 		polygons.push_back(POLY3D(0, i*2, i*2 + 2));
 	polygons.push_back(POLY3D(0, N*2, 2));
@@ -677,7 +677,7 @@ void Hole::Triangulate() {
 	edges.push_back(EDGE3D(precission*2 - 1, precission*4 - 1));
 	edges.push_back(EDGE3D(precission*2 - 1, precission*2 + 1));
 	edges.push_back(EDGE3D(precission*2 - 1, 1));
-	edges.push_back(EDGE3D(precission*2 - 1, precission*2 + 1));
+	edges.push_back(EDGE3D(precission*4 - 1, precission*2 + 1));
 		// setting side edges
 	for (int i = 0; i < precission - 1; i++) { // outter circle
 		edges.push_back(EDGE3D(i*2, i*2 + 1));
