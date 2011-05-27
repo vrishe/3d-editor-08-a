@@ -111,6 +111,10 @@ BOOL clsViewport::Render()
 	POINT				vert2DDrawBuffer[2];
 
 	MATRIX3D			viewMatrix,
+						objMoveMatrix(true),
+						objXRotateMatrix(true),
+						objYRotateMatrix(true),
+						objZRotateMatrix(true),
 						worldMatrix(true);
 	VECTOR3D			camPos;
 
@@ -156,8 +160,33 @@ BOOL clsViewport::Render()
 											sizeof(VECTOR3D) * objVertCount
 										);
 			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
+
+			objToRender->GetMoveMatrix(&objMoveMatrix);
+			objToRender->GetXRotationMatrix(&objXRotateMatrix);
+			objToRender->GetYRotationMatrix(&objYRotateMatrix);
+			objToRender->GetZRotationMatrix(&objZRotateMatrix);
 			for ( UINT j = 0; j < objVertCount; j++ )
 			{
+				Matrix3DTransformCoord(
+							&objMoveMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
+				Matrix3DTransformCoord(
+							&objXRotateMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
+				Matrix3DTransformCoord(
+							&objYRotateMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
+				Matrix3DTransformCoord(
+							&objZRotateMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
 				*(objVertBuffer + j) -= camPos;
 				Matrix3DTransformCoord(
 							&viewMatrix,

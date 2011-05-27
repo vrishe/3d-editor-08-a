@@ -114,16 +114,18 @@ public:
 
 	VECTOR3D getPosition();
 
-	void Follow(float units);
-	void Strafe(float units);
-	void Fly(float units);
+	void Follow(float units);	// change Y coord
+	void Strafe(float units);	// change X coord
+	void Fly(float units);		// change Z coord
 
-	void Pitch(float angle);
-	void Yaw(float angle);
-	void Roll(float angle);
+	void Pitch(float angle);	// right (Y)
+	void Yaw(float angle);		// up	 (Z)
+	void Roll(float angle);		// front (X)
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
-	void GetRotationMatrix(LPMATRIX3D mOut);
+	void GetXRotationMatrix(LPMATRIX3D mOut);
+	void GetYRotationMatrix(LPMATRIX3D mOut);
+	void GetZRotationMatrix(LPMATRIX3D mOut);
 	void GetScaleMatrix(LPMATRIX3D mOut);
 
 	void getName(LPTSTR objName, size_t bufSize);

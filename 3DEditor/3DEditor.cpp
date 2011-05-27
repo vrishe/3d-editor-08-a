@@ -55,16 +55,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 	//testCamera.Fly(100.0f);
-	testCamera1.Pitch(0.0*M_PI/180);
-	testCamera2.Pitch(90.0*M_PI/180);
-	testCamera3.Pitch(45.0*M_PI/180);
+	testCamera1.Pitch((float)(0.0*M_PI/180));
+	testCamera2.Pitch((float)(90.0*M_PI/180));
+	testCamera3.Pitch((float)(45.0*M_PI/180));
 	testScene.AddObject(&testPyramid);
 //	testScene.AddObject(&testCone);
-//	testScene.AddObject(&testExCone);
-//	testScene.AddObject(&testHole);
-	testPyramid.Strafe(100);
-	testPyramid.Follow(100);
+	testScene.AddObject(&testExCone);
+	testScene.AddObject(&testHole);
+	testPyramid.Strafe(145);
+	testPyramid.Follow(-30);
+	testPyramid.Fly(-70);
+	testPyramid.Yaw((float)(20.0*M_PI/180));
+	testExCone.Strafe(-50);
+	testExCone.Fly(40);
+	testExCone.Roll((float)(50.0*M_PI/180));
 	testScene.setAmbientColor(132, 128, 128);
+	testHole.Strafe(125);
+	testHole.Follow(70);
+	testHole.Fly(40);
+//	testHole.Pitch((float)(35.0*M_PI/180));
+
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);
 	testPool->addViewport(

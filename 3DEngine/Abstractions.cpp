@@ -144,18 +144,20 @@ void clsObject::Follow(float units) { pos += fWd * units; }
 void clsObject::Strafe(float units) { pos += rWd * units; }
 void clsObject::Fly(float units)	{ pos += uWd * units; }
 
-void clsObject::Pitch(float angle)
-{
-	MATRIX3D M;
+void clsObject::Pitch(float angle) {
+	pitch += angle;
 
+	MATRIX3D M;
+	
 	Matrix3DRotateAxis(&rWd, angle, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
-void clsObject::Yaw(float angle)
-{
+void clsObject::Yaw(float angle) {
+	yaw += angle;
+
 	MATRIX3D M;
 
 	Matrix3DRotateAxis(&uWd, angle, &M);
@@ -164,8 +166,9 @@ void clsObject::Yaw(float angle)
 	Vector3DMultV(&uWd, &fWd, &rWd);
 }
 
-void clsObject::Roll(float angle)
-{
+void clsObject::Roll(float angle) {
+	roll += angle;
+
 	MATRIX3D M;
 
 	Matrix3DRotateAxis(&fWd, angle, &M);
@@ -183,29 +186,115 @@ void clsObject::GetMoveMatrix(LPMATRIX3D mOut) {
 	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 
-	mOut->_11 = 1;
-	mOut->_12 = 0;
-	mOut->_13 = 0;
-	mOut->_14 = .0f;
+	//mOut->_11 = 1;
+	//mOut->_12 = 0;
+	//mOut->_13 = 0;
+	//mOut->_14 = .0f;
 
-	mOut->_21 = 0;
-	mOut->_22 = 1;
-	mOut->_23 = 0;
-	mOut->_24 = .0f;
+	//mOut->_21 = 0;
+	//mOut->_22 = 1;
+	//mOut->_23 = 0;
+	//mOut->_24 = .0f;
 
-	mOut->_31 = 0;
-	mOut->_32 = 0;
-	mOut->_33 = 1;
-	mOut->_34 = .0f;
+	//mOut->_31 = 0;
+	//mOut->_32 = 0;
+	//mOut->_33 = 1;
+	//mOut->_34 = .0f;
 
 	mOut->_41 = pos.x;
 	mOut->_42 = pos.y;
 	mOut->_43 = pos.z;
-	mOut->_44 = 1.0f;
+	//mOut->_44 = 1.0f;
 }
 
-void clsObject::GetRotationMatrix(LPMATRIX3D mOut) {
+void clsObject::GetXRotationMatrix(LPMATRIX3D mOut) {
+	Vector3DNormalize(&fWd, &fWd);
 
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+	Vector3DMultV(&uWd, &fWd, &rWd);
+	Vector3DNormalize(&rWd, &rWd);
+
+	//mOut->_11 = 1;
+	//mOut->_12 = 0;
+	//mOut->_13 = 0;
+	//mOut->_14 = .0f;
+
+	//mOut->_21 = 0;
+	mOut->_22 = cos(roll);
+	mOut->_23 = sin(roll);
+	//mOut->_24 = .0f;
+
+	//mOut->_31 = 0;
+	mOut->_32 = -sin(roll);
+	mOut->_33 = cos(roll);
+	//mOut->_34 = .0f;
+
+	//mOut->_41 = pos.x;
+	//mOut->_42 = pos.y;
+	//mOut->_43 = pos.z;
+	//mOut->_44 = 1.0f;
+}
+
+void clsObject::GetYRotationMatrix(LPMATRIX3D mOut) {
+	Vector3DNormalize(&fWd, &fWd);
+
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+	Vector3DMultV(&uWd, &fWd, &rWd);
+	Vector3DNormalize(&rWd, &rWd);
+
+	mOut->_11 = cos(pitch);
+	//mOut->_12 = 0;
+	mOut->_13 = -sin(pitch);
+	//mOut->_14 = .0f;
+
+	//mOut->_21 = 0;
+	//mOut->_22 = 1;
+	//mOut->_23 = 0;
+	//mOut->_24 = .0f;
+
+	mOut->_31 = sin(pitch);
+	//mOut->_32 = 0;
+	mOut->_33 = cos(pitch);
+	//mOut->_34 = .0f;
+
+	//mOut->_41 = pos.x;
+	//mOut->_42 = pos.y;
+	//mOut->_43 = pos.z;
+	//mOut->_44 = 1.0f;
+}
+
+void clsObject::GetZRotationMatrix(LPMATRIX3D mOut) {
+	Vector3DNormalize(&fWd, &fWd);
+
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+	Vector3DMultV(&uWd, &fWd, &rWd);
+	Vector3DNormalize(&rWd, &rWd);
+
+	mOut->_11 = cos(yaw);
+	mOut->_12 = sin(yaw);
+	//mOut->_13 = 0;
+	//mOut->_14 = .0f;
+
+	mOut->_21 = -sin(yaw);
+	mOut->_22 = cos(yaw);
+	//mOut->_23 = 0;
+	//mOut->_24 = .0f;
+
+	//mOut->_31 = 0;
+	//mOut->_32 = 0;
+	//mOut->_33 = 1;
+	//mOut->_34 = .0f;
+
+	//mOut->_41 = pos.x;
+	//mOut->_42 = pos.y;
+	//mOut->_43 = pos.z;
+	//mOut->_44 = 1.0f;
 }
 
 void clsObject::GetScaleMatrix(LPMATRIX3D mOut) {
@@ -669,8 +758,8 @@ size_t clsMesh::delListOfPolygons(vector <POLY3D> p) {
 clsCamera::clsCamera() : clsObject(CLS_CAMERA) 
 { 
 	projectionType	= PARALLEL;
-	screenMult		= 4. / 3.;
-	FOV				= M_PI_4;
+	screenMult		= 4.f / 3.f;
+	FOV				= (float)M_PI_4;
 }
 
 PROJECTION_TYPE clsCamera::getProjectionType() { return projectionType; }
