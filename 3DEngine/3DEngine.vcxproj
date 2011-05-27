@@ -75,12 +75,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Abstractions.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Math3D.h" />
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Abstractions.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Math3D.cpp" />
     <ClCompile Include="Primitives.cpp" />
     <ClCompile Include="Renderer.cpp" />
