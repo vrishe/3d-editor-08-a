@@ -100,22 +100,24 @@ void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt)
 }
 
 void Vector3DMultV(
-	const LPVECTOR3D src1, 
-	const LPVECTOR3D src2, 
-	tagVector3D* rslt
+	const LPVECTOR3D in1, 
+	const LPVECTOR3D in2, 
+	LPVECTOR3D out
 ) {
-	rslt->x = src1->y * src2->z - src1->z * src2->y;
-	rslt->y = src1->z * src2->x - src1->x * src2->z;
-	rslt->z = src1->x * src2->y - src1->y * src2->x;
+	*out = VECTOR3D(
+				in1->y * in2->z - in1->z * in2->y,
+				in1->z * in2->x - in1->x * in2->z,
+				in1->x * in2->y - in1->y * in2->x
+			);
 }
 
 float Vector3DMultS(					
-	const LPVECTOR3D src1, 
-	const LPVECTOR3D src2
+	const LPVECTOR3D in1, 
+	const LPVECTOR3D in2
 ) {
-	return src1->x * src2->x 
-			+ src1->y * src2->y 
-			+ src1->z * src2->z;
+	return in1->x * in2->x 
+			+ in1->y * in2->y 
+			+ in1->z * in2->z;
 }
 
 // ============================================================================
@@ -178,20 +180,22 @@ void Matrix3DTransformCoord(
 			const LPVECTOR3D in, 
 			LPVECTOR3D out
 ) {
-	out->x	= T->_11 * in->x 
+	*out = VECTOR3D(
+			T->_11 * in->x 
 			+ T->_21 * in->y 
-			+ T->_31 * in->z 
-			+ T->_41;
+			+ T->_31 * in->z
+			+ T->_41,
 
-	out->y	= T->_12 * in->x 
+			T->_12 * in->x 
 			+ T->_22 * in->y 
-			+ T->_32 * in->z 
-			+ T->_42;
+			+ T->_32 * in->z
+			+ T->_42,
 
-	out->z	= T->_13 * in->x 
+			T->_13 * in->x 
 			+ T->_23 * in->y 
-			+ T->_33 * in->z 
-			+ T->_43;
+			+ T->_33 * in->z
+			+ T->_43
+		);
 }
 
 void Matrix3DTransformNormal(
@@ -199,15 +203,17 @@ void Matrix3DTransformNormal(
 			const LPVECTOR3D in, 
 			LPVECTOR3D out
 ) {
-	out->x	= T->_11 * in->x 
+	*out = VECTOR3D(
+			T->_11 * in->x 
 			+ T->_21 * in->y 
-			+ T->_31 * in->z;
+			+ T->_31 * in->z,
 
-	out->y	= T->_12 * in->x 
+			T->_12 * in->x 
 			+ T->_22 * in->y 
-			+ T->_32 * in->z;
+			+ T->_32 * in->z,
 
-	out->z	= T->_13 * in->x 
+			T->_13 * in->x 
 			+ T->_23 * in->y 
-			+ T->_33 * in->z;
+			+ T->_33 * in->z
+		);
 }

@@ -102,6 +102,7 @@ BOOL clsViewport::Render()
 
 	HANDLE				procHeap		= GetProcessHeap();
 
+	LPCAMERA3D			camToRender;
 	LPMESH3D			objToRender;
 	LPVECTOR3D			objVertBuffer;
 	LPEDGE3D			objEdgeBuffer;
@@ -136,8 +137,10 @@ BOOL clsViewport::Render()
 	if ( bResult ) 
 	{
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
-		((LPCAMERA3D)Scene->getObject(cameraObjectID))->GetViewMatrix(&viewMatrix);
-		camPos = ((LPCAMERA3D)Scene->getObject(cameraObjectID))->getPosition();
+		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
+		camPos			= camToRender->getPosition();
+		camToRender->GetViewMatrix(&viewMatrix);
+
 		for ( UINT i = 0; i < sceneObjCount; i++ )
 		{
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
@@ -155,13 +158,13 @@ BOOL clsViewport::Render()
 			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
 			for ( UINT j = 0; j < objVertCount; j++ )
 			{
-				*((LPVECTOR3D)(objVertBuffer + j)) -= camPos;
+				*(objVertBuffer + j) -= camPos;
 				Matrix3DTransformCoord(
 							&viewMatrix,
 							(LPVECTOR3D)(objVertBuffer + j),
 							(LPVECTOR3D)(objVertBuffer + j)
 						);
-				*((LPVECTOR3D)(objVertBuffer + j)) += camPos;
+				*(objVertBuffer + j) += camPos;
 			}
 			
 			// Transformation calculations here:

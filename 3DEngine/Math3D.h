@@ -42,15 +42,15 @@ public:
 	bool			operator!= (const tagVector3D& u) const;
 } VECTOR3D, *LPVECTOR3D;
 
-void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt);
+void Vector3DNormalize(const LPVECTOR3D in, LPVECTOR3D out);
 void Vector3DMultV(
-				const LPVECTOR3D src1, 
-				const LPVECTOR3D src2, 
-				tagVector3D* rslt
+				const LPVECTOR3D in1, 
+				const LPVECTOR3D in2, 
+				tagVector3D* out
 			);
 float Vector3DMultS(
-				const LPVECTOR3D src1, 
-				const LPVECTOR3D src2
+				const LPVECTOR3D in1, 
+				const LPVECTOR3D in2
 			);
 
 // ============================================================================

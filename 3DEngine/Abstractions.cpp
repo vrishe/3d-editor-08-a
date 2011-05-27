@@ -151,7 +151,7 @@ void clsObject::Pitch(float angle)
 	Matrix3DRotateAxis(&rWd, angle, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
 void clsObject::Yaw(float angle)
@@ -161,7 +161,7 @@ void clsObject::Yaw(float angle)
 	Matrix3DRotateAxis(&uWd, angle, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&uWd, &fWd, &rWd);
 }
 
 void clsObject::Roll(float angle)
@@ -171,7 +171,7 @@ void clsObject::Roll(float angle)
 	Matrix3DRotateAxis(&fWd, angle, &M);
 
 	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
 //void clsObject::MoveTo(VECTOR3D pt) { pos = pt; }
@@ -660,7 +660,7 @@ void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 	Vector3DMultV(&fWd, &rWd, &uWd);
 	Vector3DNormalize(&uWd, &uWd);
 
-	Vector3DMultV(&fWd, &uWd, &rWd);
+	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 
 
