@@ -122,6 +122,10 @@ public:
 	void Yaw(float angle);
 	void Roll(float angle);
 
+	void GetMoveMatrix(LPMATRIX3D mOut);
+	void GetRotationMatrix(LPMATRIX3D mOut);
+	void GetScaleMatrix(LPMATRIX3D mOut);
+
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
 };

@@ -12,11 +12,11 @@ FORM				mainForm;
 UINT				ufWidth, ufHeight;
 LPRENDER_POOL		testPool;
 SCENE3D				testScene;
-CAMERA3D			testCamera;
+CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
 ExCone				testExCone(86.0f, 150.0f, 100.0f, 120.0f, 13);
-Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 12); 
+Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 5); 
 
 // Win API entry point:
 // ===================================
@@ -51,37 +51,43 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 	ufWidth -= 40;
 	ufHeight -= 40;
-	testScene.AddObject(&testCamera);
+	testScene.AddObject(&testCamera1);
+	testScene.AddObject(&testCamera2);
+	testScene.AddObject(&testCamera3);
 	//testCamera.Fly(100.0f);
-	testCamera.Pitch(0.0*M_PI/180);
+	testCamera1.Pitch(0.0*M_PI/180);
+	testCamera2.Pitch(90.0*M_PI/180);
+	testCamera3.Pitch(45.0*M_PI/180);
 	testScene.AddObject(&testPyramid);
-	//testScene.AddObject(&testCone);
-	//testScene.AddObject(&testExCone);
-	//testScene.AddObject(&testHole);
+//	testScene.AddObject(&testCone);
+//	testScene.AddObject(&testExCone);
+//	testScene.AddObject(&testHole);
+	testPyramid.Strafe(100);
+	testPyramid.Follow(100);
 	testScene.setAmbientColor(132, 128, 128);
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	//testPool->addViewport(
-	//			20, 20,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			testCamera.objID(),
-	//			RM_WIREFRAME
-	//		);
-	//testPool->addViewport(
-	//			20, 
-	//			25 + ufHeight / 2,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			testCamera.objID(),
-	//			RM_WIREFRAME
-	//		);
+	testPool->addViewport(
+				20, 20,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				testCamera1.objID(),
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				20, 
+				25 + ufHeight / 2,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				testCamera2.objID(),
+				RM_WIREFRAME
+			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
 				20,
 				ufWidth / 2 - 5,
 				ufHeight,
-				testCamera.objID(),
+				testCamera3.objID(),
 				RM_WIREFRAME
 			);
 	mainForm.Show();

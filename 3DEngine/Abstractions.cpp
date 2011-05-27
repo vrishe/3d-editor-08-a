@@ -174,6 +174,44 @@ void clsObject::Roll(float angle)
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
+void clsObject::GetMoveMatrix(LPMATRIX3D mOut) {
+	Vector3DNormalize(&fWd, &fWd);
+
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+	Vector3DMultV(&uWd, &fWd, &rWd);
+	Vector3DNormalize(&rWd, &rWd);
+
+	mOut->_11 = 1;
+	mOut->_12 = 0;
+	mOut->_13 = 0;
+	mOut->_14 = .0f;
+
+	mOut->_21 = 0;
+	mOut->_22 = 1;
+	mOut->_23 = 0;
+	mOut->_24 = .0f;
+
+	mOut->_31 = 0;
+	mOut->_32 = 0;
+	mOut->_33 = 1;
+	mOut->_34 = .0f;
+
+	mOut->_41 = pos.x;
+	mOut->_42 = pos.y;
+	mOut->_43 = pos.z;
+	mOut->_44 = 1.0f;
+}
+
+void clsObject::GetRotationMatrix(LPMATRIX3D mOut) {
+
+}
+
+void clsObject::GetScaleMatrix(LPMATRIX3D mOut) {
+
+}
+
 //void clsObject::MoveTo(VECTOR3D pt) { pos = pt; }
 //void clsObject::MoveTo(float pX, float pY, float pZ)
 //{
