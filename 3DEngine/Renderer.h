@@ -2,7 +2,7 @@
 
 #include <tchar.h>
 
-#include "Abstractions.h"
+#include "Camera.h"
 #include "..\Controls\Controls.h"
 
 

@@ -605,7 +605,7 @@ void Hole::Triangulate() {
 			vertices.push_back(VECTOR3D(0, -tR, h));
 			break;
 		default:
-			float k = tan((step*i) * 3.1415926535 / 180), x;
+			float k = tan((float)((step*i) * M_PI / 180)), x;
 			if (step*i < 90 || step*i > 270)
  				x = sqrt(bR*bR / (1 + k*k));
 			else
@@ -640,7 +640,7 @@ void Hole::Triangulate() {
 			vertices.push_back(VECTOR3D(0, -tRh, h));
 			break;
 		default:
-			float k = tan((step*i) * 3.1415926535 / 180), x;
+			float k = tan((float)((step*i) * M_PI / 180)), x;
 			if (step*i < 90 || step*i > 270)
  				x = sqrt(bRh*bRh / (1 + k*k));
 			else
