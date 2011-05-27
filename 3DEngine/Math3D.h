@@ -70,7 +70,7 @@ typedef struct tagMatrix {
 typedef struct tagMatrix3D : public tagMatrix {
 public:
 	tagMatrix3D(bool bSetIdentity = false);
-	tagMatrix3D(float filler);
+	tagMatrix3D(int filler);
 	tagMatrix3D(
             float a11, float a12, float a13, float a14,
             float a21, float a22, float a23, float a24,

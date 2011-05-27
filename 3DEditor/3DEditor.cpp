@@ -49,14 +49,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
-	ufWidth -= 40;
-	ufHeight -= 40;
+
 	testScene.AddObject(&testCamera1);
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 	//testCamera.Fly(100.0f);
 	testCamera1.Pitch((float)(0.0*M_PI/180));
-	testCamera2.Pitch((float)(90.0*M_PI/180));
+	testCamera2.Fly(200);
+	testCamera2.Pitch((float)(-90.0*M_PI/180));
 	testCamera3.Pitch((float)(45.0*M_PI/180));
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testCone);
@@ -74,8 +74,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testHole.Follow(10);
 	testHole.Fly(80);
 	testHole.Pitch((float)(35.0*M_PI/180));
-	testHole.ScaleByX(1.3);
+	testHole.ScaleByX(1.3f);
 
+	ufWidth -= 40;
+	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
 	testPool->addViewport(
 				20, 20,

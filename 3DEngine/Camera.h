@@ -13,19 +13,34 @@ class clsCamera : public clsObject {
 private:
 	PROJECTION_TYPE projectionType;
 
-	float			screenMult;
-	float			FOV;		// FOV это угол. в радианах
+	float			hFOV;		// FOV это угол. в радианах
+	float			vFOV;
+	float			nearClip;
+	float			farClip;
 
 public:
 	clsCamera();
+	clsCamera(
+			PROJECTION_TYPE projType,
+			float			horizFov,
+			float			vertFov
+		);
 
 	PROJECTION_TYPE	getProjectionType();
-	float			getScreenMult();
-	float			getFOV();
+	// void			getFOV(float* horiz, float* vert);
+	float			getHFov();
+	float			getVFov();
+	// void			getClips(float* near, float* far);
+	float			getNearCP();
+	float			getFarCP();
 
 	void			setProjectionType(PROJECTION_TYPE projType);
-	void			setScreenMult(float scrMult);
-	void			setFOV(float fieldOfView);
+	// void			setFOV(float horiz, float vert);
+	void			setHFov(float fieldOfViewHoriz);
+	void			setVFov(float fieldOfViewVert);
+	// void			setClips(float near, float far);
+	void			setNearCP(float nearCP);
+	void			setFarCP(float farCP);
 
 	void			GetViewMatrix(LPMATRIX3D mOut);
 };

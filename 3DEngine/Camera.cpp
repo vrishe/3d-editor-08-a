@@ -6,26 +6,57 @@
 clsCamera::clsCamera() : clsObject(CLS_CAMERA) 
 { 
 	projectionType	= PARALLEL;
-	screenMult		= 4.f / 3.f;
-	FOV				= (float)M_PI_4;
+	hFOV			= (float)M_PI_4;
+	vFOV			= (float)M_PI_4;
+	nearClip		= 1.0F;
+	farClip			= 1000.0F;
+}
+
+clsCamera::clsCamera(
+	PROJECTION_TYPE projType,
+	float			horizFov,
+	float			vertFov
+) {
+	projectionType	= PARALLEL;
+	hFOV			= (float)M_PI_4;
+	vFOV			= (float)M_PI_4;
+	nearClip		= 1.0F;
+	farClip			= 1000.0F;
+
+	setProjectionType(projType);
+	setHFov(horizFov);
+	setVFov(vertFov);
 }
 
 PROJECTION_TYPE clsCamera::getProjectionType() { return projectionType; }
-
-float clsCamera::getScreenMult() { return screenMult; }
-
-float clsCamera::getFOV() { return FOV; }
+float clsCamera::getHFov() { return hFOV; }
+float clsCamera::getVFov() { return vFOV; }
+float clsCamera::getNearCP() { return nearClip; }
+float clsCamera::getFarCP() { return farClip; }
 
 void clsCamera::setProjectionType(PROJECTION_TYPE projType) 
 { 
 	projectionType = projType; 
 }
 
-void clsCamera::setScreenMult(float scrMult) { screenMult = scrMult; }
-
-void clsCamera::setFOV(float fieldOfView) 
+void clsCamera::setHFov(float fieldOfViewHoriz) 
 { 
-	if ( fieldOfView > .0F ) FOV = fieldOfView; 
+	if ( fieldOfViewHoriz > .0F) hFOV = fieldOfViewHoriz; 
+}
+
+void clsCamera::setVFov(float fieldOfViewVert) 
+{ 
+	if ( fieldOfViewVert > .0F) vFOV = fieldOfViewVert; 
+}
+
+void clsCamera::setNearCP(float nearCP) 
+{ 
+	if ( nearCP > .0F && nearCP < farClip ) nearClip = nearCP; 
+}
+
+void clsCamera::setFarCP(float farCP) 
+{ 
+	if ( farCP > .0F && farCP > nearClip ) farClip = farCP; 
 }
 
 void clsCamera::GetViewMatrix(LPMATRIX3D mOut)

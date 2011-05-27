@@ -127,7 +127,7 @@ tagMatrix3D::tagMatrix3D(bool bSetIdentity)
 	bSetIdentity ? SetIdentity() : Fill(0); 
 }
 
-tagMatrix3D::tagMatrix3D(float filler) { Fill(filler); }
+tagMatrix3D::tagMatrix3D(int filler) { Fill(filler); }
 tagMatrix3D::tagMatrix3D(
 	        float a11, float a12, float a13, float a14,
             float a21, float a22, float a23, float a24,
@@ -151,7 +151,7 @@ void tagMatrix3D::SetIdentity()
 void Matrix3DRotateAxis(const LPVECTOR3D axis, float rads, LPMATRIX3D rslt)
 {
 	float	sinTheta	= sin(rads),
-			cosTheta	= 1 - sinTheta * sinTheta,
+			cosTheta	= cos(rads),
 			_1mCosTheta	= 1 - cosTheta;
 
 	rslt->_11 = axis->x * axis->x * _1mCosTheta + cosTheta;

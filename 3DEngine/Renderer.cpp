@@ -206,22 +206,27 @@ BOOL clsViewport::Render()
 			// Transformation calculations here:
 			for ( UINT j = 0; j < objEdgeCount; j++ ) 
 			{
+				if ( objVertBuffer[objEdgeBuffer[j].first].z > camToRender->getNearCP()
+					&& objVertBuffer[objEdgeBuffer[j].first].z < camToRender->getFarCP()
+					&& objVertBuffer[objEdgeBuffer[j].second].z > camToRender->getNearCP()
+					&& objVertBuffer[objEdgeBuffer[j].second].z < camToRender->getFarCP()
+				) { 
+					vert2DDrawBuffer[0].x 
+						= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
+						+ centerX;
+					vert2DDrawBuffer[0].y 
+						= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
+						+ centerY;
+				
+					vert2DDrawBuffer[1].x 
+						= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
+						+ centerX;
+					vert2DDrawBuffer[1].y 
+						= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
+						+ centerY;
 
-				vert2DDrawBuffer[0].x 
-					= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
-					+ centerX;
-				vert2DDrawBuffer[0].y 
-					= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
-					+ centerY;
-
-				vert2DDrawBuffer[1].x 
-					= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
-					+ centerX;
-				vert2DDrawBuffer[1].y 
-					= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
-					+ centerY;
-
-				Polyline( hMemDC, vert2DDrawBuffer, 2 );
+					Polyline( hMemDC, vert2DDrawBuffer, 2 );
+				}
 			}
 
 			HeapFree(procHeap, NULL, objVertBuffer);

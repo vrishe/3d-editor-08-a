@@ -2,32 +2,6 @@
 #include "Abstractions.h"
 
 // ============================================================================
-// Implementation of stuctures if necessary
-
-// Implementation of tagVertex struct:
-//tagVertex::tagVertex() 
-//{ 
-//	x = 0; 
-//	y = 0; 
-//	z = 0; 
-//	rhW	= 1.0f; 
-//}
-//
-//tagVertex::tagVertex(float fx, float fy, float fz, float rhw)
-//{ 
-//	x = fx; 
-//	y = fy; 
-//	z = fz; 
-//	rhW	= rhw; 
-//}
-//
-//bool tagVertex::operator== (const tagVertex &b) 
-//{
-//	return x == b.x 
-//		&& y == b.y 
-//		&& z == b.z;
-//}
-
 // Implementation of tagEdge struct:
 tagEdge::tagEdge() 
 	: first(-1), second(-1) { }
@@ -205,11 +179,11 @@ void clsObject::GetRollRotationMatrix(LPMATRIX3D mOut) {
 	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 
-	float c = mOut->_22 = cos(roll);
-	float s = mOut->_23 = sin(roll);
+	mOut->_22 = cos(roll);
+	mOut->_23 = sin(roll);
 
-	mOut->_32 = -s;
-	mOut->_33 = c;
+	mOut->_32 = -mOut->_23;
+	mOut->_33 = mOut->_22;
 }
 
 void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) {
@@ -221,11 +195,11 @@ void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) {
 	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 
-	float c = mOut->_11 = cos(pitch);
-	float s = mOut->_13 = -sin(pitch);
+	mOut->_11 = cos(pitch);
+	mOut->_31 = sin(pitch);
 
-	mOut->_31 = -s;
-	mOut->_33 = c;
+	mOut->_13 = -mOut->_31;
+	mOut->_33 = mOut->_11;
 }
 
 void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) {
@@ -237,11 +211,11 @@ void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) {
 	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 
-	float c = mOut->_11 = cos(yaw);
-	float s = mOut->_12 = sin(yaw);
+	mOut->_11 = cos(yaw);
+	mOut->_12 = sin(yaw);
 
-	mOut->_21 = -s;
-	mOut->_22 = c;
+	mOut->_21 = -mOut->_12;
+	mOut->_22 = mOut->_11;
 }
 
 void clsObject::GetScaleMatrix(LPMATRIX3D mOut) {
@@ -257,48 +231,6 @@ void clsObject::GetScaleMatrix(LPMATRIX3D mOut) {
 	mOut->_22 = yScale;
 	mOut->_33 = zScale;
 }
-
-//void clsObject::MoveTo(VECTOR3D pt) { pos = pt; }
-//void clsObject::MoveTo(float pX, float pY, float pZ)
-//{
-//	pos.x = pX;
-//	pos.y = pY;
-//	pos.z = pZ;
-//}
-//void clsObject::MoveToX(float pX) { pos.x = pX; }
-//void clsObject::MoveToY(float pY) { pos.y = pY; }
-//void clsObject::MoveToZ(float pZ) { pos.z = pZ; }
-//
-//void clsObject::MoveAt(VECTOR3D pt) { pos += pt; }
-//void clsObject::MoveAt(float pX, float pY, float pZ)
-//{
-//	pos.x += pX;
-//	pos.y += pY;
-//	pos.z += pZ;
-//}
-//void clsObject::MoveAtX(float pX) { pos.x += pX; }
-//void clsObject::MoveAtY(float pY) { pos.y += pY; }
-//void clsObject::MoveAtZ(float pZ) { pos.z += pZ; }
-//
-//void clsObject::RotateTo(float pitch, float roll, float yaw)
-//{
-//	Pitch	= pitch;
-//	Roll	= roll;
-//	Yaw		= yaw;
-//}
-//void clsObject::RotateToPitch(float pitch) { Pitch = pitch; }
-//void clsObject::RotateToRoll(float roll) { Roll = roll; }
-//void clsObject::RotateToYaw(float yaw) { Yaw = yaw; }
-//
-//void clsObject::RotateAt(float pitch, float roll, float yaw)
-//{
-//	Pitch	+= pitch;
-//	Roll	+= roll;
-//	Yaw		+= yaw;
-//}
-//void clsObject::RotateAtPitch(float pitch) { Pitch += pitch; }
-//void clsObject::RotateAtRoll(float roll) { Roll += roll; }
-//void clsObject::RotateAtYaw(float yaw) { Yaw += yaw; }
 
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
 { 
