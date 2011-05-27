@@ -261,6 +261,7 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 		bAlive = dwWaitResult != WAIT_OBJECT_0 + 1;
 		vp->Viewport->Render();
 		ResetEvent(vp->threadControls.doRender);
+		SetEvent(vp->threadControls.jobDone);
 	} while ( bAlive );
 
 	return SHUTDOWN_ON_DEMAND;
@@ -348,10 +349,13 @@ DWORD clsRenderPool::addViewport(
 			{
 				thData->threadControls.doRender = renderEvent;
 				thData->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
-				bResult = thData->threadControls.shutDown != NULL;
+				thData->threadControls.jobDone	= CreateEvent(0, FALSE, FALSE, NULL);
+				bResult = thData->threadControls.shutDown != NULL
+						&& thData->threadControls.jobDone != NULL;
 				if ( bResult ) 
 				{
 					Viewports.push_back(thData);
+					vpStates.push_back(thData->threadControls.jobDone);
 					ResumeThread(thData->Thread);
 					thData->Viewport->Show();
 				}
@@ -375,9 +379,11 @@ BOOL clsRenderPool::delViewport(UINT vpIndex)
 		WaitForSingleObject(Viewports[vpIndex]->Thread, THREAD_WAIT_TIMEOUT);
 		CloseHandle(Viewports[vpIndex]->Thread);
 		CloseHandle(Viewports[vpIndex]->threadControls.shutDown);
+		CloseHandle(Viewports[vpIndex]->threadControls.jobDone);
 		delete Viewports[vpIndex]->Viewport;
 		delete Viewports[vpIndex];
 		Viewports.erase(Viewports.begin() + vpIndex);
+		vpStates.erase(vpStates.begin() + vpIndex);
 	}
 	return bResult;
 }
@@ -398,4 +404,13 @@ LPVIEWPORT clsRenderPool::getViewport(DWORD vpID)
 	return Viewports[findViewport(vpID)]->Viewport;
 }
 
-BOOL clsRenderPool::RenderWorld() { return SetEvent(renderEvent); }
+DWORD clsRenderPool::RenderWorld() 
+{ 
+	SetEvent(renderEvent);
+	return WaitForMultipleObjects(
+				vpStates.size(),
+				vpStates.data(),
+				TRUE,
+				THREAD_WAIT_TIMEOUT
+			);
+}

@@ -36,6 +36,7 @@ enum RENDER_MODE {
 typedef struct tagTHREAD_CONTROLS {
 	EVENT doRender;
 	EVENT shutDown;
+	EVENT jobDone;
 } THREAD_CONTROLS, *LPTHREAD_CONTROLS;
 
 class clsViewport : public clsForm {
@@ -81,12 +82,14 @@ typedef struct tagTHREAD_DATA {
 } THREAD_DATA, *LPTHREAD_DATA;
 
 typedef vector<LPTHREAD_DATA> LPVIEWPORTS_LIST;
+typedef vector<EVENT> LPEVENTS_LIST;
 class clsRenderPool {
 private:
 	LPFORM				Owner;
 	LPSCENE3D			Scene;
 	LPVIEWPORTS_LIST	Viewports;
 
+	LPEVENTS_LIST		vpStates;
 	EVENT				renderEvent;
 
 	static DWORD WINAPI Render(LPVOID renderInfo);
@@ -94,7 +97,6 @@ private:
 public:
 	clsRenderPool(LPFORM Owner);
 	clsRenderPool(LPFORM Owner, LPSCENE3D lpScene);
-	//clsRenderPool(LPSCENE3D, LPVIEWPORT_INFO vpInfo, UINT nToAdd, LPUINT nOfAdded);
 	~clsRenderPool();
 
 	BOOL assignScene(LPSCENE3D lpScene);
@@ -113,6 +115,6 @@ public:
 	LPVIEWPORT getViewport(DWORD vpID);
 	UINT getViewportCount();
 
-	BOOL RenderWorld();
+	DWORD RenderWorld();
 };
 typedef clsRenderPool RENDER_POOL, *LPRENDER_POOL;
