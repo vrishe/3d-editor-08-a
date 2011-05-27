@@ -83,10 +83,14 @@ protected:
 					yaw,
 					roll;
 
-	VECTOR3D		pos;
-	VECTOR3D		fWd;
-	VECTOR3D		rWd;
-	VECTOR3D		uWd;
+	float			xScale,
+					yScale,
+					zScale;
+
+	VECTOR3D		pos,
+					fWd,
+					rWd,
+					uWd;
 
 	CONSTRAINTS		moveConst;
 
@@ -118,14 +122,18 @@ public:
 	void Strafe(float units);	// change X coord
 	void Fly(float units);		// change Z coord
 
+	void ScaleByX(float factor);
+	void ScaleByY(float factor);
+	void ScaleByZ(float factor);
+
 	void Pitch(float angle);	// right (Y)
 	void Yaw(float angle);		// up	 (Z)
 	void Roll(float angle);		// front (X)
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
-	void GetXRotationMatrix(LPMATRIX3D mOut);
-	void GetYRotationMatrix(LPMATRIX3D mOut);
-	void GetZRotationMatrix(LPMATRIX3D mOut);
+	void GetRollRotationMatrix(LPMATRIX3D mOut);
+	void GetPitchRotationMatrix(LPMATRIX3D mOut);
+	void GetYawRotationMatrix(LPMATRIX3D mOut);
 	void GetScaleMatrix(LPMATRIX3D mOut);
 
 	void getName(LPTSTR objName, size_t bufSize);

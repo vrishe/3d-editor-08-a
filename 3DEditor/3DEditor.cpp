@@ -16,7 +16,7 @@ CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
 ExCone				testExCone(86.0f, 150.0f, 100.0f, 120.0f, 13);
-Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 5); 
+Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
 // ===================================
@@ -62,19 +62,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 //	testScene.AddObject(&testCone);
 	testScene.AddObject(&testExCone);
 	testScene.AddObject(&testHole);
-	testPyramid.Strafe(145);
-	testPyramid.Follow(-30);
+	testPyramid.Strafe(95);
+	testPyramid.Follow(-38);
 	testPyramid.Fly(-70);
 	testPyramid.Yaw((float)(20.0*M_PI/180));
-	testExCone.Strafe(-50);
+	testExCone.Strafe(-75);
 	testExCone.Fly(40);
 	testExCone.Roll((float)(50.0*M_PI/180));
 	testScene.setAmbientColor(132, 128, 128);
-	testHole.Strafe(125);
-	testHole.Follow(70);
-	testHole.Fly(40);
-//	testHole.Pitch((float)(35.0*M_PI/180));
-
+	testHole.Strafe(175);
+	testHole.Follow(10);
+	testHole.Fly(80);
+	testHole.Pitch((float)(35.0*M_PI/180));
+	testHole.ScaleByX(1.3);
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);
 	testPool->addViewport(

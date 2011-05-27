@@ -112,6 +112,7 @@ BOOL clsViewport::Render()
 
 	MATRIX3D			viewMatrix,
 						objMoveMatrix(true),
+						objScaleMatrix(true),
 						objXRotateMatrix(true),
 						objYRotateMatrix(true),
 						objZRotateMatrix(true),
@@ -162,11 +163,17 @@ BOOL clsViewport::Render()
 			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
 
 			objToRender->GetMoveMatrix(&objMoveMatrix);
-			objToRender->GetXRotationMatrix(&objXRotateMatrix);
-			objToRender->GetYRotationMatrix(&objYRotateMatrix);
-			objToRender->GetZRotationMatrix(&objZRotateMatrix);
+			objToRender->GetScaleMatrix(&objScaleMatrix);
+			objToRender->GetRollRotationMatrix(&objXRotateMatrix);
+			objToRender->GetPitchRotationMatrix(&objYRotateMatrix);
+			objToRender->GetYawRotationMatrix(&objZRotateMatrix);
 			for ( UINT j = 0; j < objVertCount; j++ )
 			{
+				Matrix3DTransformCoord(
+							&objScaleMatrix,
+							(LPVECTOR3D)(objVertBuffer + j),
+							(LPVECTOR3D)(objVertBuffer + j)
+						);
 				Matrix3DTransformCoord(
 							&objMoveMatrix,
 							(LPVECTOR3D)(objVertBuffer + j),
