@@ -61,13 +61,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.setAmbientColor(132, 128, 128);
 
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	testPool->addViewport(
-				20, 20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				testCamera.objID(),
-				RM_WIREFRAME
-			);
+	//testPool->addViewport(
+	//			20, 20,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			testCamera.objID(),
+	//			RM_WIREFRAME
+	//		);
 	//testPool->addViewport(
 	//			20, 
 	//			25 + ufHeight / 2,
@@ -76,14 +76,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//			testCamera.objID(),
 	//			RM_WIREFRAME
 	//		);
-	//testPool->addViewport(
-	//			25 + ufWidth / 2, 
-	//			20,
-	//			ufWidth / 2 - 5,
-	//			ufHeight,
-	//			testCamera.objID(),
-	//			RM_WIREFRAME
-	//		);
+	testPool->addViewport(
+				25 + ufWidth / 2, 
+				20,
+				ufWidth / 2 - 5,
+				ufHeight,
+				testCamera.objID(),
+				RM_WIREFRAME
+			);
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));

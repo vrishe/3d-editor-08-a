@@ -631,7 +631,7 @@ size_t clsMesh::delListOfPolygons(vector <POLY3D> p) {
 clsCamera::clsCamera() : clsObject(CLS_CAMERA) 
 { 
 	projectionType	= PARALLEL;
-	screenMult		= 4 / 3;
+	screenMult		= 4. / 3.;
 	FOV				= M_PI_4;
 }
 
@@ -674,9 +674,9 @@ void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 	mOut->_23 = fWd.y;
 	mOut->_24 = .0f;
 
-	mOut->_31 = rWd.x;
-	mOut->_32 = uWd.x;
-	mOut->_33 = fWd.x;
+	mOut->_31 = rWd.z;
+	mOut->_32 = uWd.z;
+	mOut->_33 = fWd.z;
 	mOut->_34 = .0f;
 
 	mOut->_41 = -Vector3DMultS(&rWd, &pos);

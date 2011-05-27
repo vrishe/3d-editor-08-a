@@ -175,14 +175,14 @@ BOOL clsViewport::Render()
 					= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
 					+ centerX;
 				vert2DDrawBuffer[0].y 
-					= (LONG)objVertBuffer[objEdgeBuffer[j].first].y
+					= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
 					+ centerY;
 
 				vert2DDrawBuffer[1].x 
 					= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
 					+ centerX;
 				vert2DDrawBuffer[1].y 
-					= (LONG)objVertBuffer[objEdgeBuffer[j].second].y
+					= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
 					+ centerY;
 
 				Polyline( hMemDC, vert2DDrawBuffer, 2 );
