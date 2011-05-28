@@ -14,14 +14,8 @@ using namespace std;
 // ============================================================================
 // Supporting structures
 
-//typedef struct tagVertexPure : tagVector {
-//	float		rhW;
-//} VERTEX_PURE, *LPVERTEX_PURE;
-
 //typedef struct tagVertex : public tagVector3D {
-//	tagVertex();
-//	tagVertex(float x, float y, float z, float rhw = 1.0f);
-//	bool operator==(const tagVertex &b);
+//	
 //} VERTEX3D, *LPVERTEX3D;
 
 typedef struct tagEdge {
@@ -30,19 +24,24 @@ typedef struct tagEdge {
 
 	tagEdge();
 	tagEdge(size_t nFirst, size_t nSecond);
-	bool operator==(const tagEdge &b);
-	bool operator!=(const tagEdge &b);
+	bool operator==(const tagEdge &b) const;
+	bool operator!=(const tagEdge &b) const;
+	bool isContianingVertex(size_t vi);
 } EDGE3D, *LPEDGE3D;
 
 typedef struct tagPolygon {
 	size_t first;
 	size_t second;
 	size_t third;
+	
+	VECTOR normal; // не знаю, нужно ли.
 
 	tagPolygon();
 	tagPolygon(size_t a, size_t b, size_t c);
-	bool operator==(const tagPolygon &b);
-	bool operator!=(const tagPolygon &b);
+	bool operator==(const tagPolygon &b) const;
+	bool operator!=(const tagPolygon &b) const;
+	bool isContainingEdge (EDGE3D e);
+	bool isContainingVertex (size_t vi);
 } POLY3D, *LPPOLY3D;
 
 typedef struct tagColor
@@ -196,12 +195,13 @@ protected:
 
 	COLOR3D			color;
 
-	size_t findVertex(VECTOR3D);	// returns a vertex position
-	size_t findPolygon(POLY3D);		// returns a Polygon_ position
+	size_t findVertex(VECTOR3D v);	// returns a vertex position
+	size_t findEdge(EDGE3D e);
+	size_t findPolygon(POLY3D p);	// returns a Polygon_ position
 
-	/// delete ver/edge/polys that can't be a part of the object no more
-	size_t	dropUnusedVertices();		// delete vertexes if no polygons use them	
-	size_t	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
+	//// delete ver/edge/polys that can't be a part of the object no more
+	//size_t	dropUnusedVertices();		// delete vertexes if no polygons use them	
+	//size_t	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
 
 public:
 	clsMesh();
@@ -221,15 +221,15 @@ public:
 	);
 
 	// functionality
-	void			dropRedundant();
+	//void			dropRedundant();
 	// add some modifying functionality here
 
 	// getters
 	COLOR3D			getColor();
 	DWORD			getColorRef();
-	size_t			getVCount();
-	size_t			getECount();
-	size_t			getPCount();
+	size_t			getVerticesCount();
+	size_t			getEdgesCount();
+	size_t			getPolygonsCount();
 	LPVECTOR3D		getVerticesRaw();
 	LPEDGE3D		getEdgesRaw();
 	LPPOLY3D		getPolygonsRaw();
@@ -239,6 +239,7 @@ public:
 
 	void			getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
 	void			getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps);
+	void			getVerticesTransformed(LPVECTOR3D v);
 
 	// setters
 	void			setColor(
@@ -247,19 +248,23 @@ public:
 						unsigned char blue
 					);
 	void			setColor(COLOR3D c);
-	void			addVertex(VECTOR3D);
-	void			addListOfVertices(VERT_LIST);
-	bool			delVertex(VECTOR3D);
-	bool			delVertex(size_t);
-	size_t	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
-													// -n otherwise, where n - number of 
-													// undeleted elements
 
-	void			addPolygon(POLY3D);
-	void			addListOfPolygons(POLY_LIST);
-	bool			delPolygon(POLY3D);
-	bool			delPolygon(size_t);
-	size_t	delListOfPolygons(POLY_LIST);
+	//void			addVertex(VECTOR3D);
+	//void			addListOfVertices(VERT_LIST);
+	//bool			delVertex(VECTOR3D);
+	//bool			delVertex(size_t);
+	//size_t	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
+	//												// -n otherwise, where n - number of 
+	//												// undeleted elements
+
+	//bool			delEdge(EDGE3D);
+	//bool			delEdge(size_t);
+
+	//void			addPolygon(POLY3D);
+	//void			addListOfPolygons(POLY_LIST);
+	//bool			delPolygon(POLY3D);
+	//bool			delPolygon(size_t);
+	//size_t	delListOfPolygons(POLY_LIST);
 };
 typedef clsMesh MESH3D, *LPMESH3D;
 

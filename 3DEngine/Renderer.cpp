@@ -113,10 +113,10 @@ BOOL clsViewport::Render()
 	MATRIX3D			viewMatrix,
 						objMoveMatrix(true),
 						objScaleMatrix(true),
-						objXRotateMatrix(true),
-						objYRotateMatrix(true),
-						objZRotateMatrix(true),
-						worldMatrix(true);
+						objPitchRotateMatrix(true),
+						objRollRotateMatrix(true),
+						objYawRotateMatrix(true);
+
 	VECTOR3D			camPos;
 
 	// Approaching viewport canvas for drawing
@@ -150,9 +150,9 @@ BOOL clsViewport::Render()
 		{
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
 			objColor		= objToRender->getColor();
-			objVertCount	= objToRender->getVCount();
-			objPolyCount	= objToRender->getPCount();	
-			objEdgeCount	= objToRender->getECount();
+			objVertCount	= objToRender->getVerticesCount();
+			objPolyCount	= objToRender->getPolygonsCount();	
+			objEdgeCount	= objToRender->getEdgesCount();
 			objEdgeBuffer	= objToRender->getEdgesRaw();
 			objPolyBuffer	= objToRender->getPolygonsRaw();
 			objVertBuffer	= (LPVECTOR3D)HeapAlloc(
@@ -162,38 +162,9 @@ BOOL clsViewport::Render()
 										);
 			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
 
-			objToRender->GetMoveMatrix(&objMoveMatrix);
-			objToRender->GetScaleMatrix(&objScaleMatrix);
-			objToRender->GetRollRotationMatrix(&objXRotateMatrix);
-			objToRender->GetPitchRotationMatrix(&objYRotateMatrix);
-			objToRender->GetYawRotationMatrix(&objZRotateMatrix);
+			objToRender->getVerticesTransformed(objVertBuffer);
 			for ( UINT j = 0; j < objVertCount; j++ )
 			{
-				Matrix3DTransformCoord(
-							&objScaleMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
-						);
-				Matrix3DTransformCoord(
-							&objMoveMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
-						);
-				Matrix3DTransformCoord(
-							&objXRotateMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
-						);
-				Matrix3DTransformCoord(
-							&objYRotateMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
-						);
-				Matrix3DTransformCoord(
-							&objZRotateMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
-						);
 				*(objVertBuffer + j) -= camPos;
 				Matrix3DTransformCoord(
 							&viewMatrix,

@@ -9,13 +9,19 @@ tagEdge::tagEdge()
 tagEdge::tagEdge(size_t a, size_t b) 
 	: first(a), second(b) { }
 
-bool tagEdge::operator== (const tagEdge &b) 
+bool tagEdge::operator== (const tagEdge &b) const 
 {
-	return first == b.first 
-			&& second == b.second;
+	return (first == b.first && second == b.second)
+			|| (first == b.second && second == b.first);
 }
 
-bool tagEdge::operator!= (const tagEdge &b) {	return !operator==(b); }
+bool tagEdge::operator!= (const tagEdge &b) const {	return !operator==(b); }
+
+bool tagEdge::isContianingVertex(size_t vi) 
+{ 
+	return first	== vi 
+		|| second	== vi; 
+}
 
 // Implementation of tagPolygon struct:
 tagPolygon::tagPolygon() 
@@ -24,13 +30,27 @@ tagPolygon::tagPolygon()
 tagPolygon::tagPolygon(size_t a, size_t b, size_t c) 
 	: first(a), second(b), third(c) { }
 
-bool tagPolygon::operator== (const tagPolygon &b) {
-	return first == b.first 
-			&& second == b.second 
-			&& third == b.third;
+bool tagPolygon::operator== (const tagPolygon &b) const
+{
+	return first	== b.first 
+		&& second	== b.second 
+		&& third	== b.third;
 }
 
-bool tagPolygon::operator!= (const tagPolygon &b) {	return !operator==(b); }
+bool tagPolygon::operator!= (const tagPolygon &b) const { return !operator==(b); }
+
+bool tagPolygon::isContainingVertex(size_t vi) 
+{ 
+	return first	== vi 
+		|| second	== vi 
+		|| third	== vi; 
+}
+
+bool tagPolygon::isContainingEdge(EDGE3D e)
+{
+	return isContainingVertex(e.first) 
+		&& isContainingVertex(e.second);
+}
 
 // ===========================================================================
 // Implementation of clsObject class:
@@ -409,7 +429,17 @@ size_t clsMesh::findVertex(VECTOR3D v)
 	for (size_t i = 0; i < vCount; i++)
 		if (vertices[i] == v)
 			return i;
-	return -1;
+	return vCount;
+}
+
+size_t clsMesh::findEdge(EDGE3D e) 
+{
+	size_t eCount = edges.size();
+
+	for (size_t i = 0; i < eCount; i++)
+		if (edges[i] == e)
+			return i;
+	return eCount;
 }
 
 size_t clsMesh::findPolygon(POLY3D p) 
@@ -419,59 +449,60 @@ size_t clsMesh::findPolygon(POLY3D p)
 	for (size_t i = 0; i < pCount; i++)
 		if (polygons[i] == p)
 			return i;
-	return -1;
+	return pCount;
 }
 
-size_t clsMesh::dropUnusedVertices() 
-{
-	size_t result = 0,
-				 vCount = vertices.size(),
-				 pCount = polygons.size();
-
-	for (size_t i  = 0; i < vCount; i++) {
-		bool found = false;
-		for (size_t j = 0; j < pCount; j++)
-			if (polygons[j].first == i || polygons[j].second == i || polygons[j].third) {
-				found = true;
-				break;
-			}
-		if (!found) {
-			delVertex(i);
-			result++;
-		}
-	}
-	return result;
-}
-
-size_t clsMesh::dropRedundantPolygons() 
-{
-	size_t result = 0,
-				 vCount = vertices.size(),
-				 pCount = polygons.size();
-
-	for (size_t i = 0; i < pCount; i++) {
-		bool firstFound = false, secondFound = false, thirdFound = false;
-		for (size_t j = 0; j < vCount; j++) {
-			if (polygons[i].first == j) {
-				firstFound = true;
-				continue;
-			}
-			if (polygons[i].second == j) {
-				secondFound = true;
-				continue;
-			}
-			if (polygons[i].third == j) {
-				secondFound = true;
-				continue;
-			}
-		}
-		if (!firstFound || !secondFound || !thirdFound) {
-			delPolygon(i);
-			result++;
-		}
-	}
-	return result;
-}
+// DO NOT DELETE THIS:
+//size_t clsMesh::dropUnusedVertices() 
+//{
+//	size_t result = 0,
+//				 vCount = vertices.size(),
+//				 pCount = polygons.size();
+//
+//	for (size_t i  = 0; i < vCount; i++) {
+//		bool found = false;
+//		for (size_t j = 0; j < pCount; j++)
+//			if (polygons[j].first == i || polygons[j].second == i || polygons[j].third) {
+//				found = true;
+//				break;
+//			}
+//		if (!found) {
+//			delVertex(i);
+//			result++;
+//		}
+//	}
+//	return result;
+//}
+//
+//size_t clsMesh::dropRedundantPolygons() 
+//{
+//	size_t result = 0,
+//				 vCount = vertices.size(),
+//				 pCount = polygons.size();
+//
+//	for (size_t i = 0; i < pCount; i++) {
+//		bool firstFound = false, secondFound = false, thirdFound = false;
+//		for (size_t j = 0; j < vCount; j++) {
+//			if (polygons[i].first == j) {
+//				firstFound = true;
+//				continue;
+//			}
+//			if (polygons[i].second == j) {
+//				secondFound = true;
+//				continue;
+//			}
+//			if (polygons[i].third == j) {
+//				secondFound = true;
+//				continue;
+//			}
+//		}
+//		if (!firstFound || !secondFound || !thirdFound) {
+//			delPolygon(i);
+//			result++;
+//		}
+//	}
+//	return result;
+//}
 
 clsMesh::clsMesh() : clsObject(CLS_MESH) { setColor(COLOR3D()); }
 
@@ -486,8 +517,8 @@ clsMesh::clsMesh(
 clsMesh::clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps)
 	: clsObject(CLS_MESH)
 { 
-	addListOfVertices(vs);
-	addListOfPolygons(ps);
+	//addListOfVertices(vs);
+	//addListOfPolygons(ps);
 	setColor(c);
 }
 
@@ -499,16 +530,17 @@ clsMesh::clsMesh(
 		POLY_LIST ps
 ) : clsObject(CLS_MESH) 
 { 
-	addListOfVertices(vs);
-	addListOfPolygons(ps);
+	//addListOfVertices(vs);
+	//addListOfPolygons(ps);
 	setColor( red, green, blue ); 
 }
 
-void clsMesh::dropRedundant() 
-{	
-	dropRedundantPolygons();	
-	dropUnusedVertices();
-}
+// DO NOT DELETE THIS:
+//void clsMesh::dropRedundant() 
+//{	
+//	dropRedundantPolygons();	
+//	dropUnusedVertices();
+//}
 
 COLOR3D		clsMesh::getColor()			{ return color; }
 
@@ -516,9 +548,9 @@ DWORD		clsMesh::getColorRef()		{ return RGB(
 													color.Red, 
 													color.Green, 
 													color.Blue); }
-size_t		clsMesh::getVCount()		{ return vertices.size(); }
-size_t		clsMesh::getECount()		{ return edges.size(); }
-size_t		clsMesh::getPCount()		{ return polygons.size(); }
+size_t		clsMesh::getVerticesCount()	{ return vertices.size(); }
+size_t		clsMesh::getEdgesCount()	{ return edges.size(); }
+size_t		clsMesh::getPolygonsCount()	{ return polygons.size(); }
 LPVECTOR3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
 LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }
 LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }
@@ -540,6 +572,50 @@ void clsMesh::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps)
 	if ( ps != NULL ) *ps = polygons;
 }
 
+void clsMesh::getVerticesTransformed(LPVECTOR3D v)
+{
+	VECTOR3D	vertex;
+	MATRIX3D	mScalePos(true),
+				mPitchRot(true),
+				mYawRot(true),
+				mRollRot(true);
+	size_t vertCount = getVerticesCount();
+	if ( v != NULL )
+	{
+		GetMoveMatrix(&mScalePos);
+		GetScaleMatrix(&mScalePos);
+		GetPitchRotationMatrix(&mPitchRot);
+		GetYawRotationMatrix(&mYawRot);
+		GetRollRotationMatrix(&mRollRot);
+
+		for ( size_t i = 0; i < vertCount; i++ )
+		{
+			vertex = vertices[i];
+			Matrix3DTransformCoord(
+					&mScalePos,
+					&vertex,
+					&vertex
+				);
+			Matrix3DTransformNormal(
+					&mPitchRot,
+					&vertex,
+					&vertex
+				);
+			Matrix3DTransformNormal(
+					&mYawRot,
+					&vertex,
+					&vertex
+				);
+			Matrix3DTransformNormal(
+					&mRollRot,
+					&vertex,
+					&vertex
+				);
+			*(v+i) = vertex;
+		}
+	}
+}
+
 void clsMesh::setColor(
 		unsigned char red, 
 		unsigned char green, 
@@ -552,93 +628,113 @@ void clsMesh::setColor(
 
 void clsMesh::setColor(COLOR3D c)	{ color = c; }
 
-void clsMesh::addVertex(VECTOR3D v) { vertices.push_back(v); }
-
-void clsMesh::addListOfVertices(VERT_LIST v) 
-{ 
-	vertices.insert(vertices.end(), v.begin(), v.end()); 
-}
-
-bool clsMesh::delVertex(VECTOR3D v) 
-{
-	size_t pos = findVertex(v);
-
-	if (pos == -1)
-		return false;
-	vertices.erase(vertices.begin() + pos);
-	return true;
-}
-
-bool clsMesh::delVertex(size_t i) 
-{ 
-	size_t vCount = vertices.size();
-
-	if ( i > -1 && i < vCount) {
-		vertices.erase(vertices.begin() + i);
-		return true;
-	}
-	return false; 
-}
-
-size_t clsMesh::delListOfVertices(VERT_LIST v) {
-	size_t	result = 0,
-					vCount = vertices.size(),
-					j;
-
-	const size_t N = v.size();
-	for (size_t i = 0; i < N; i++) {
-		for (j = 0; j < vCount; j++)
-			if (vertices[j] == v[i]) {
-				vertices.erase(vertices.begin() + j);
-				vCount--;
-				break;
-			}
-		if (j >= vCount)
-			result--;
-	}
-	return result;
-}
-
-void clsMesh::addPolygon(POLY3D p) { polygons.push_back(p); }
-
-void clsMesh::addListOfPolygons(vector <POLY3D> p) { 
-	polygons.insert(polygons.end(), p.begin(), p.end());
-}
-
-bool clsMesh::delPolygon(POLY3D p) {
-	size_t pos = findPolygon(p);
-	if (pos == -1)
-		return false;
-	polygons.erase(polygons.begin() + pos);
-	return true;
-}
-
-bool clsMesh::delPolygon(size_t i) { 
-	size_t pCount = polygons.size();
-
-	if ( i > -1 && i < pCount) {
-		polygons.erase(polygons.begin() + i);
-		return true;
-	}
-	return false; 
-}
-
-size_t clsMesh::delListOfPolygons(vector <POLY3D> p) {
-	size_t	result = 0,
-					pCount = polygons.size(),
-					j;
-
-	const size_t N = p.size();
-	for (size_t i = 0; i < N; i++) {
-		for (j = 0; j < pCount; j++)
-			if (polygons[j] == p[i]) {
-				polygons.erase(polygons.begin() + j);
-				pCount--;
-				break;
-			}
-		if (j >= pCount)
-			result--;
-	}
-	return result;
-}
+// DO NOT DELETE THIS:
+//void clsMesh::addVertex(VECTOR3D v) { vertices.push_back(v); }
+//
+//void clsMesh::addListOfVertices(VERT_LIST v) 
+//{ 
+//	vertices.insert(vertices.end(), v.begin(), v.end()); 
+//}
+//
+//bool clsMesh::delVertex(VECTOR3D v) 
+//{
+//	size_t pos = findVertex(v);
+//	return delVertex(pos);
+//}
+//
+//bool clsMesh::delVertex(size_t vi) 
+//{ 
+//	size_t limit;
+//	POLY3D p;
+//	EDGE3D e;
+//
+//	if (vi >= vertices.size()) return false;
+//	vertices.erase(vertices.begin() + vi);
+//
+//	limit = polygons.size();
+//	for (size_t i = 0; i < limit; i++)
+//	{
+//		p = polygons[i];
+//		if ( p.isContainingVertex(vi) ) 
+//				delPolygon(i);
+//	}
+//	return true;
+//}
+//
+//size_t clsMesh::delListOfVertices(VERT_LIST v) {
+//	size_t	result = 0,
+//			vCount = v.size();
+//
+//	for (size_t i = 0; i < vCount; i++) 
+//		if ( delVertex(v[i]) ) result++;
+//
+//	return result;
+//}
+//
+//bool clsMesh::delEdge(EDGE3D e) 
+//{
+//	size_t pos = findEdge(e);
+//	return delEdge(pos);
+//}
+//
+//bool clsMesh::delEdge(size_t ei) 
+//{ 
+//	if (ei >= edges.size()) return false;
+//	edges.erase(edges.begin() + ei);
+//
+//	return true;
+//}
+//
+//void clsMesh::addPolygon(POLY3D p) { polygons.push_back(p); }
+//
+//void clsMesh::addListOfPolygons(POLY_LIST p) { 
+//	polygons.insert(polygons.end(), p.begin(), p.end());
+//}
+//
+//bool clsMesh::delPolygon(POLY3D p) {
+//	size_t pos = findPolygon(p);
+//	return delPolygon(pos);
+//}
+//
+//bool clsMesh::delPolygon(size_t pi) {
+//	POLY3D	pErased;
+//	EDGE3D	eSupposed;
+//	size_t	i,
+//			coOwners;
+//
+//	if ( pi >= polygons.size() ) return false;
+//
+//	pErased = polygons[pi];
+//	polygons.erase(polygons.begin() + pi);
+//	for ( 
+//		EDGE_LIST::iterator e	= edges.begin(),
+//		eLast					= edges.end();
+//		e != eLast;
+//		e++
+//	) {
+//		if ( pErased.isContainingEdge(*e) ) 
+//		{
+//			coOwners = 0;
+//			for (
+//				POLY_LIST::iterator p	= polygons.begin(),
+//				pLast					= polygons.end();
+//				p != pLast;
+//				p++
+//			) { 
+//				if ( p->isContainingEdge(*e) ) coOwners++;
+//				}
+//		}
+//	}
+//	return true;
+//}
+//
+//size_t clsMesh::delListOfPolygons(POLY_LIST p) {
+//	size_t	result = 0,
+//			pCount = p.size();
+//			
+//	for (size_t i = 0; i < pCount; i++) 
+//		if ( delPolygon(p[i]) ) result++;			
+//
+//	return result;
+//}
 
