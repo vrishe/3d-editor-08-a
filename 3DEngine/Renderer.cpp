@@ -82,12 +82,24 @@ BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID)
 
 VOID clsViewport::setRenderMode(RENDER_MODE renderMode) { rMode = renderMode; }
 
+typedef vector < pair <DIRECTPOLY3D, UINT> > SCENEPOLY; // first- index of a polygon in mesh, second - index of a mesh in scene
+typedef vector < VECTOR3D > SCENEVERT;
+
+bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
+	float s1  = (a.first.first.z + a.first.second.z + a.first.third.z) / 3;
+	float s2  = (b.first.first.z + b.first.second.z + b.first.third.z) / 3;
+	if ( s1 < s2 )
+		return true;
+	return false;
+}
+
 BOOL clsViewport::Render() 
 {
 	BOOL				bResult			= Scene != NULL;
 	HDC					hVpDC,
 						hMemDC;
 	HBRUSH				hBrCurrent,
+					   *hBrObjects,
 						hBrOld;
 	HBITMAP				hBMP,
 						hBMPOld;
@@ -96,6 +108,8 @@ BOOL clsViewport::Render()
 						centerY;
 
 	UINT				sceneObjCount,
+						sceneVertCount,
+						scenePolyCount,
 						objVertCount,
 						objEdgeCount,
 						objPolyCount;
@@ -105,17 +119,14 @@ BOOL clsViewport::Render()
 	LPCAMERA3D			camToRender;
 	LPMESH3D			objToRender;
 	LPVECTOR3D			objVertBuffer;
+//						sceneVertBuffer;
+	SCENEPOLY			scenePolyBuffer;
 	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
-	POINT				vert2DDrawBuffer[2];
+	POINT				vert2DDrawBuffer[3];
 
-	MATRIX3D			viewMatrix,
-						objMoveMatrix(true),
-						objScaleMatrix(true),
-						objPitchRotateMatrix(true),
-						objRollRotateMatrix(true),
-						objYawRotateMatrix(true);
+	MATRIX3D			viewMatrix;
 
 	VECTOR3D			camPos;
 
@@ -141,11 +152,25 @@ BOOL clsViewport::Render()
 
 	if ( bResult ) 
 	{
+		const UINT VEC3DSIZE = sizeof(VECTOR3D);
+		// prepearing global buffers for scene (lists of polygons and vertices)
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
+		scenePolyCount	= Scene->getPolygonsCount();
+		sceneVertCount	= Scene->getVerticesCount();
+		//sceneVertBuffer	= (LPVECTOR3D)HeapAlloc(
+		//									procHeap, 
+		//									HEAP_ZERO_MEMORY, 
+		//									VEC3DSIZE * ( sceneVertCount + 20 )
+		//								);
+		//sceneVertBuffer = new VECTOR3D[sceneVertCount];
+
+
+		// prepearing camera
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
 		camPos			= camToRender->getPosition();
 		camToRender->GetViewMatrix(&viewMatrix);
 
+		UINT vertCopied = 0;
 		for ( UINT i = 0; i < sceneObjCount; i++ )
 		{
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
@@ -158,11 +183,14 @@ BOOL clsViewport::Render()
 			objVertBuffer	= (LPVECTOR3D)HeapAlloc(
 											procHeap, 
 											HEAP_ZERO_MEMORY, 
-											sizeof(VECTOR3D) * objVertCount
+											VEC3DSIZE * objVertCount
 										);
-			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), sizeof(VECTOR3D) * objVertCount);
+			//objVertBuffer = new VECTOR3D[objVertCount];
+			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), VEC3DSIZE * objVertCount);
 
 			objToRender->getVerticesTransformed(objVertBuffer);
+
+			// camera transformations
 			for ( UINT j = 0; j < objVertCount; j++ )
 			{
 				*(objVertBuffer + j) -= camPos;
@@ -173,35 +201,112 @@ BOOL clsViewport::Render()
 						);
 				*(objVertBuffer + j) += camPos;
 			}
-			
-			// Transformation calculations here:
-			for ( UINT j = 0; j < objEdgeCount; j++ ) 
-			{
-				if ( objVertBuffer[objEdgeBuffer[j].first].z > camToRender->getNearCP()
-					&& objVertBuffer[objEdgeBuffer[j].first].z < camToRender->getFarCP()
-					&& objVertBuffer[objEdgeBuffer[j].second].z > camToRender->getNearCP()
-					&& objVertBuffer[objEdgeBuffer[j].second].z < camToRender->getFarCP()
-				) { 
-					vert2DDrawBuffer[0].x 
-						= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
-						+ centerX;
-					vert2DDrawBuffer[0].y 
-						= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
-						+ centerY;
-				
-					vert2DDrawBuffer[1].x 
-						= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
-						+ centerX;
-					vert2DDrawBuffer[1].y 
-						= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
-						+ centerY;
 
-					Polyline( hMemDC, vert2DDrawBuffer, 2 );
+			//if ( camToRender->getProjectionType() == CENTRAL )
+			//	for ( UINT j = 0; j < objVertCount; j++ ) {
+			//		objVertBuffer[objEdgeBuffer[j].first].x /= objVertBuffer[objEdgeBuffer[j].first].z;
+			//		objVertBuffer[objEdgeBuffer[j].first].y /= objVertBuffer[objEdgeBuffer[j].first].y;
+			//		objVertBuffer[objEdgeBuffer[j].first].z = 
+			//			(camToRender->getFarCP() / (camToRender->getFarCP() - camToRender->getNearCP()))
+			//			* (1 - camToRender->getNearCP() / objVertBuffer[objEdgeBuffer[j].first].z);
+			//	}
+			
+			// Proection calculations
+			if ( rMode != RM_WIREFRAME ) {
+				// filling a part of global buffers
+				for (UINT j = 0; j < objPolyCount; j++) {
+					DIRECTPOLY3D tmp;
+					tmp.first = objVertBuffer[ objToRender->getPolygon(j).first ];
+					tmp.second = objVertBuffer[ objToRender->getPolygon(j).second ];
+					tmp.third = objVertBuffer[ objToRender->getPolygon(j).third ];
+					scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
+				}
+				//CopyMemory(sceneVertBuffer + vertCopied*VEC3DSIZE, objVertBuffer, VEC3DSIZE * objVertCount);
+
+				//vertCopied += objVertCount;
+			}
+			else {
+				for ( UINT j = 0; j < objEdgeCount; j++ ) 
+				{
+					//if ( objVertBuffer[objEdgeBuffer[j].first].z > camToRender->getNearCP()
+					//	&& objVertBuffer[objEdgeBuffer[j].first].z < camToRender->getFarCP()
+					//	&& objVertBuffer[objEdgeBuffer[j].second].z > camToRender->getNearCP()
+					//	&& objVertBuffer[objEdgeBuffer[j].second].z < camToRender->getFarCP()
+					//) { 
+						vert2DDrawBuffer[0].x 
+							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
+							+ centerX;
+						vert2DDrawBuffer[0].y 
+							= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
+							+ centerY;
+				
+						vert2DDrawBuffer[1].x 
+							= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
+							+ centerX;
+						vert2DDrawBuffer[1].y 
+							= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
+							+ centerY;
+
+						Polyline( hMemDC, vert2DDrawBuffer, 2 );
+					//}
 				}
 			}
 
+			//delete [] objVertBuffer;
 			HeapFree(procHeap, NULL, objVertBuffer);
 		}
+
+		if ( rMode != RM_WIREFRAME ) {
+			sort(scenePolyBuffer.begin(), scenePolyBuffer.end(), ZBufSort);
+
+			HPEN hPenCur = CreatePen(PS_SOLID, 1, RGB(0,0,0));
+			HPEN hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
+			hBrObjects	= new HBRUSH[sceneObjCount];
+			for (UINT i = 0; i < sceneObjCount; i++ ) {
+				LPMESH3D tmp = (LPMESH3D)Scene->getObject(CLS_MESH, i);
+				hBrObjects[i] = CreateSolidBrush(tmp->getColorRef());
+			}
+			for (UINT i = 0; i < scenePolyCount; i++ ) { // work only in CENTRAL projection
+/*				if ( scenePolyBuffer[i].first.first.z > 0
+				&& scenePolyBuffer[i].first.first.z < 1
+
+				&& scenePolyBuffer[i].first.second.z > 0
+				&& scenePolyBuffer[i].first.second.z < 1
+
+				&& scenePolyBuffer[i].first.third.z > 0
+				&& scenePolyBuffer[i].first.third.z < 1
+				)*/ { 
+					hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
+					/*vert2DDrawBuffer[0].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.first ].x + centerX;
+					vert2DDrawBuffer[0].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.first ].y + centerY;
+
+					vert2DDrawBuffer[1].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.second ].x + centerX;
+					vert2DDrawBuffer[1].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.second ].y + centerY;
+
+					vert2DDrawBuffer[2].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.third ].x + centerX;
+					vert2DDrawBuffer[2].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.third ].y + centerY;*/
+
+					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x + centerX;
+					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y + centerY;
+
+					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x + centerX;
+					vert2DDrawBuffer[1].y = (LONG)scenePolyBuffer[i].first.second.y + centerY;
+
+					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x + centerX;
+					vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y + centerY;
+
+					Polygon( hMemDC, vert2DDrawBuffer, 3 );
+
+					SelectObject(hMemDC, hBrOld);
+					DeleteObject(hBrCurrent);
+				}
+			}
+
+			delete [] hBrObjects;
+		}
+
+//		delete [] sceneVertBuffer;
+//		HeapFree(procHeap, NULL, sceneVertBuffer);
 	}
 
 	BitBlt(

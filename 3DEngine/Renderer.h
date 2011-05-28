@@ -1,6 +1,8 @@
 #pragma once
 
 #include <tchar.h>
+#include <vector>
+#include <algorithm>
 
 #include "Camera.h"
 #include "..\Controls\Controls.h"

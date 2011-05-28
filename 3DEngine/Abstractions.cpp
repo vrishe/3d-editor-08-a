@@ -380,8 +380,7 @@ LPOBJECT3D clsScene::getObject(CLASS_ID clsID, size_t objIndex)
 {
 	CONTENT::iterator finder = objects.find(clsID);
 	LPOBJECT3D found = NULL;
-	if ( finder != objects.end() 
-		&& objIndex < finder->second.size() ) 
+	if ( finder != objects.end() && objIndex < finder->second.size() ) 
 		found = finder->second[objIndex];
 	return found;
 }
@@ -393,6 +392,24 @@ LPOBJECT3D clsScene::getObject(size_t objID)
 	LPOBJECT3D found = findObjectIndex(objID, &clsID, &objIndex) ?
 		objects[clsID][objIndex] : NULL;
 	return found;
+}
+
+size_t clsScene::getPolygonsCount() {
+	UINT count = 0, N = objects[CLS_MESH].size();
+	for (UINT i = 0; i < N; i++) {
+		LPMESH3D temp = (LPMESH3D)objects[CLS_MESH][i];
+		count += temp->getPolygonsCount();
+	}
+	return count;
+}
+
+size_t clsScene::getVerticesCount() {
+	UINT count = 0, N = objects[CLS_MESH].size();
+	for (UINT i = 0; i < N; i++){
+		LPMESH3D temp = (LPMESH3D)objects[CLS_MESH][i];
+		count += temp->getVerticesCount();
+	}
+	return count;
 }
 
 COLOR3D clsScene::getAmbientColor() { return ambientColor; }
@@ -550,13 +567,17 @@ DWORD		clsMesh::getColorRef()		{ return RGB(
 													color.Blue); }
 size_t		clsMesh::getVerticesCount()	{ return vertices.size(); }
 size_t		clsMesh::getEdgesCount()	{ return edges.size(); }
-size_t		clsMesh::getPolygonsCount()	{ return polygons.size(); }
+size_t		clsMesh::getPolygonsCount()	{ 
+	return polygons.size(); 
+}
 LPVECTOR3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
 LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }
 LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }
 VERT_LIST	clsMesh::getVertices()		{ return vertices; }
 EDGE_LIST	clsMesh::getEdges()			{ return edges; }
 POLY_LIST	clsMesh::getPolygons()		{ return polygons; }
+
+POLY3D		clsMesh::getPolygon(int i)	{ return polygons[i]; }
 
 void clsMesh::getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps) 
 {

@@ -18,6 +18,12 @@ using namespace std;
 //	
 //} VERTEX3D, *LPVERTEX3D;
 
+typedef struct tagDirectPolygon {
+	VECTOR3D first;
+	VECTOR3D second;
+	VECTOR3D third;
+} DIRECTPOLY3D, *LPDIRECTPOLY3D;
+
 typedef struct tagEdge {
 	size_t first;
 	size_t second;
@@ -169,6 +175,8 @@ public:
 
 	LPOBJECT3D	getObject(CLASS_ID clsID, size_t objIndex);
 	LPOBJECT3D	getObject(size_t objID);
+	size_t		getPolygonsCount();
+	size_t		getVerticesCount();
 	COLOR3D		getAmbientColor();
 	DWORD		getAmbientColorRef();
 
@@ -236,6 +244,8 @@ public:
 	VERT_LIST		getVertices();
 	EDGE_LIST		getEdges();
 	POLY_LIST		getPolygons();
+
+	POLY3D			getPolygon(int);
 
 	void			getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
 	void			getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps);

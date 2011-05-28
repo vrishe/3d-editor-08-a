@@ -50,26 +50,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
+	testScene.setAmbientColor(132, 128, 128);
 	testScene.AddObject(&testCamera1);
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
-	//testCamera.Fly(100.0f);
-	testCamera1.Pitch((float)(0.0*M_PI/180));
-	testCamera2.Fly(200);
-	testCamera2.Pitch((float)(-90.0*M_PI/180));
-	testCamera3.Pitch((float)(45.0*M_PI/180));
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testCone);
 	testScene.AddObject(&testExCone);
 	testScene.AddObject(&testHole);
+
+	//testCamera.Fly(100.0f);
+	testCamera1.Pitch((float)(0.0*M_PI/180));
+//	testCamera2.Fly(200);
+	testCamera2.Pitch((float)(-90.0*M_PI/180));
+	testCamera3.Pitch((float)(45.0*M_PI/180));
+//	testCamera3.setProjectionType(CENTRAL);
+
+	testPyramid.setColor(200, 30, 30);
 	testPyramid.Strafe(95);
 	testPyramid.Follow(-38);
 	testPyramid.Fly(-70);
 	testPyramid.Yaw((float)(50.0*M_PI/180));
+
+	testExCone.setColor(20, 150, 30);
 	testExCone.Strafe(-75);
 	testExCone.Fly(40);
 	testExCone.Roll((float)(50.0*M_PI/180));
-	testScene.setAmbientColor(132, 128, 128);
+	
+	testHole.setColor(100, 50, 100);
 	testHole.Strafe(175);
 	testHole.Follow(10);
 	testHole.Fly(80);
@@ -100,7 +108,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight,
 				testCamera3.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	mainForm.Show();
 
