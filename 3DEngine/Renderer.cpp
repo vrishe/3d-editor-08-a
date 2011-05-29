@@ -82,9 +82,6 @@ BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID)
 
 VOID clsViewport::setRenderMode(RENDER_MODE renderMode) { rMode = renderMode; }
 
-typedef vector < pair <DIRECTPOLY3D, UINT> > SCENEPOLY; // first- index of a polygon in mesh, second - index of a mesh in scene
-typedef vector < VECTOR3D > SCENEVERT;
-
 bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
 	float s1  = (a.first.first.z + a.first.second.z + a.first.third.z) / 3;
 	float s2  = (b.first.first.z + b.first.second.z + b.first.third.z) / 3;
@@ -126,7 +123,9 @@ BOOL clsViewport::Render()
 	COLOR3D				objColor;
 	POINT				vert2DDrawBuffer[3];
 
-	MATRIX3D			viewMatrix;
+	MATRIX3D			viewMatrix,
+						perspMatrix;
+	FLOAT				divisor;
 
 	VECTOR3D			camPos;
 
@@ -203,13 +202,19 @@ BOOL clsViewport::Render()
 			}
 
 			if ( camToRender->getProjectionType() == CENTRAL )
-				for ( UINT j = 0; j < objVertCount; j++ ) {
-					objVertBuffer[objEdgeBuffer[j].first].z = 
-						(camToRender->getFarCP() / (camToRender->getFarCP() - camToRender->getNearCP()))
-						* (1 - camToRender->getNearCP() / objVertBuffer[objEdgeBuffer[j].first].z);
-					objVertBuffer[objEdgeBuffer[j].first].x /= abs(objVertBuffer[objEdgeBuffer[j].first].z);
-					objVertBuffer[objEdgeBuffer[j].first].y /= abs(objVertBuffer[objEdgeBuffer[j].first].z);
+			{
+				camToRender->GetPerspectiveMatrix(&perspMatrix);
+				for ( UINT j = 0; j < objVertCount; j++ ) 
+				{
+					divisor = objVertBuffer[j].z / camToRender->getNearCP();
+					Matrix3DTransformCoord(
+									&perspMatrix,
+									(LPVECTOR3D)(objVertBuffer + j),
+									(LPVECTOR3D)(objVertBuffer + j)
+								);
+					//objVertBuffer[j] /= divisor;
 				}
+			}
 			
 			// Proection calculations
 			if ( rMode != RM_WIREFRAME ) {
@@ -237,15 +242,15 @@ BOOL clsViewport::Render()
 							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
 							+ centerX;
 						vert2DDrawBuffer[0].y 
-							= -(LONG)objVertBuffer[objEdgeBuffer[j].first].y
-							+ centerY;
+							= centerY
+							- (LONG)objVertBuffer[objEdgeBuffer[j].first].y;
 				
 						vert2DDrawBuffer[1].x 
 							= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
 							+ centerX;
 						vert2DDrawBuffer[1].y 
-							= -(LONG)objVertBuffer[objEdgeBuffer[j].second].y
-							+ centerY;
+							= centerY
+							- (LONG)objVertBuffer[objEdgeBuffer[j].second].y;
 
 						Polyline( hMemDC, vert2DDrawBuffer, 2 );
 					//}
@@ -262,10 +267,11 @@ BOOL clsViewport::Render()
 			HPEN hPenCur = CreatePen(PS_SOLID, 1, RGB(0,0,0));
 			HPEN hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
 			hBrObjects	= new HBRUSH[sceneObjCount];
-			for (UINT i = 0; i < sceneObjCount; i++ ) {
-				LPMESH3D tmp = (LPMESH3D)Scene->getObject(CLS_MESH, i);
-				hBrObjects[i] = CreateSolidBrush(tmp->getColorRef());
-			}
+			for (UINT i = 0; i < sceneObjCount; i++ )
+				hBrObjects[i] = CreateSolidBrush(
+						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
+					);
+
 			for (UINT i = 0; i < scenePolyCount; i++ ) { // work only in CENTRAL projection
 /*				if ( scenePolyBuffer[i].first.first.z > 0
 				&& scenePolyBuffer[i].first.first.z < 1
@@ -277,32 +283,22 @@ BOOL clsViewport::Render()
 				&& scenePolyBuffer[i].first.third.z < 1
 				)*/ { 
 					hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
-					/*vert2DDrawBuffer[0].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.first ].x + centerX;
-					vert2DDrawBuffer[0].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.first ].y + centerY;
-
-					vert2DDrawBuffer[1].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.second ].x + centerX;
-					vert2DDrawBuffer[1].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.second ].y + centerY;
-
-					vert2DDrawBuffer[2].x = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.third ].x + centerX;
-					vert2DDrawBuffer[2].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.third ].y + centerY;*/
-
 					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x + centerX;
-					vert2DDrawBuffer[0].y = -(LONG)scenePolyBuffer[i].first.first.y + centerY;
+					vert2DDrawBuffer[0].y = centerY - (LONG)scenePolyBuffer[i].first.first.y;
 
 					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x + centerX;
-					vert2DDrawBuffer[1].y = -(LONG)scenePolyBuffer[i].first.second.y + centerY;
+					vert2DDrawBuffer[1].y = centerY - (LONG)scenePolyBuffer[i].first.second.y;
 
 					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x + centerX;
-					vert2DDrawBuffer[2].y = -(LONG)scenePolyBuffer[i].first.third.y + centerY;
+					vert2DDrawBuffer[2].y = centerY - (LONG)scenePolyBuffer[i].first.third.y;
 
 					Polygon( hMemDC, vert2DDrawBuffer, 3 );
-
 					SelectObject(hMemDC, hBrOld);
-					DeleteObject(hBrCurrent);
 				}
 			}
 
-			delete [] hBrObjects;
+			for (UINT i = 0; i < sceneObjCount; i++ ) DeleteObject(hBrObjects[i]);		
+			delete[] hBrObjects;
 		}
 
 //		delete [] sceneVertBuffer;

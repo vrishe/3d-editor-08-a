@@ -41,6 +41,10 @@ typedef struct tagTHREAD_CONTROLS {
 	EVENT jobDone;
 } THREAD_CONTROLS, *LPTHREAD_CONTROLS;
 
+// first- index of a polygon in mesh, second - index of a mesh in scene
+typedef vector < pair <DIRECTPOLY3D, UINT> > SCENEPOLY;
+typedef vector < VECTOR3D > SCENEVERT;
+
 class clsViewport : public clsForm {
 private:
 	UINT			cameraObjectID;

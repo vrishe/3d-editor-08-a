@@ -62,13 +62,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//testCamera.Fly(100.0f);
 	testCamera1.Pitch((float)(0.0*M_PI/180));
 	//testCamera2.Fly(200);
-	testCamera2.Pitch((float)(-90.0*M_PI/180));
+	testCamera2.Pitch((float)(90.0*M_PI/180));
 	//testCamera3.Strafe(200);
 	testCamera3.Pitch((float)(45.0*M_PI/180));
-	//testCamera3.setProjectionType(CENTRAL);
+	testCamera3.setProjectionType(CENTRAL);
+	//testCamera3.setHFov(90.0f * (FLOAT)M_PI / 180.0f);
 
 	testPyramid.setColor(200, 30, 30);
-	testPyramid.Strafe(55);
+	testPyramid.Strafe(115);
 	testPyramid.Follow(-38);
 	testPyramid.Fly(40);
 	//testPyramid.Yaw((float)(50.0*M_PI/180));

@@ -56,7 +56,7 @@ void clsCamera::setNearCP(float nearCP)
 
 void clsCamera::setFarCP(float farCP) 
 { 
-	if ( farCP > .0F && farCP > nearClip ) farClip = farCP; 
+	if ( farCP > nearClip ) farClip = farCP; 
 }
 
 void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
@@ -89,4 +89,16 @@ void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 	mOut->_42 = -Vector3DMultS(&uWd, &pos);
 	mOut->_43 = -Vector3DMultS(&fWd, &pos);
 	mOut->_44 = 1.0f;
+}
+
+void clsCamera::GetPerspectiveMatrix(LPMATRIX3D mOut)
+{
+	mOut->SetIdentity();
+
+	mOut->_11 = 1.0f / tan(hFOV / 2.0f);
+	mOut->_22 = 1.0f / tan(vFOV / 2.0f);
+	mOut->_33 = farClip / (farClip - nearClip);
+	mOut->_34 = 1.0f / nearClip;
+	mOut->_43 = mOut->_33 * -nearClip;
+	mOut->_44 = .0f;
 }
