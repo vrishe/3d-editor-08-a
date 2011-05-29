@@ -15,7 +15,7 @@ SCENE3D				testScene;
 CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
-ExCone				testExCone(86.0f, 150.0f, 100.0f, 120.0f, 13);
+ExCone				testExCone(40.0f, 150.0f, 150.0f, 120.0f, 13);
 Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
@@ -57,25 +57,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testCone);
 	testScene.AddObject(&testExCone);
-	testScene.AddObject(&testHole);
+	//testScene.AddObject(&testHole);
 
 	//testCamera.Fly(100.0f);
 	testCamera1.Pitch((float)(0.0*M_PI/180));
-//	testCamera2.Fly(200);
+	//testCamera2.Fly(200);
 	testCamera2.Pitch((float)(-90.0*M_PI/180));
+	//testCamera3.Strafe(200);
 	testCamera3.Pitch((float)(45.0*M_PI/180));
-//	testCamera3.setProjectionType(CENTRAL);
+	//testCamera3.setProjectionType(CENTRAL);
 
 	testPyramid.setColor(200, 30, 30);
-	testPyramid.Strafe(95);
+	testPyramid.Strafe(55);
 	testPyramid.Follow(-38);
-	testPyramid.Fly(-70);
-	testPyramid.Yaw((float)(50.0*M_PI/180));
+	testPyramid.Fly(40);
+	//testPyramid.Yaw((float)(50.0*M_PI/180));
 
 	testExCone.setColor(20, 150, 30);
 	testExCone.Strafe(-75);
-	testExCone.Fly(40);
-	testExCone.Roll((float)(50.0*M_PI/180));
+	//testExCone.Fly(40);
+	//testExCone.Roll((float)(50.0*M_PI/180));
 	
 	testHole.setColor(100, 50, 100);
 	testHole.Strafe(175);
@@ -92,7 +93,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				testCamera1.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				20, 

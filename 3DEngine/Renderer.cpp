@@ -202,14 +202,14 @@ BOOL clsViewport::Render()
 				*(objVertBuffer + j) += camPos;
 			}
 
-			//if ( camToRender->getProjectionType() == CENTRAL )
-			//	for ( UINT j = 0; j < objVertCount; j++ ) {
-			//		objVertBuffer[objEdgeBuffer[j].first].x /= objVertBuffer[objEdgeBuffer[j].first].z;
-			//		objVertBuffer[objEdgeBuffer[j].first].y /= objVertBuffer[objEdgeBuffer[j].first].y;
-			//		objVertBuffer[objEdgeBuffer[j].first].z = 
-			//			(camToRender->getFarCP() / (camToRender->getFarCP() - camToRender->getNearCP()))
-			//			* (1 - camToRender->getNearCP() / objVertBuffer[objEdgeBuffer[j].first].z);
-			//	}
+			if ( camToRender->getProjectionType() == CENTRAL )
+				for ( UINT j = 0; j < objVertCount; j++ ) {
+					objVertBuffer[objEdgeBuffer[j].first].z = 
+						(camToRender->getFarCP() / (camToRender->getFarCP() - camToRender->getNearCP()))
+						* (1 - camToRender->getNearCP() / objVertBuffer[objEdgeBuffer[j].first].z);
+					objVertBuffer[objEdgeBuffer[j].first].x /= abs(objVertBuffer[objEdgeBuffer[j].first].z);
+					objVertBuffer[objEdgeBuffer[j].first].y /= abs(objVertBuffer[objEdgeBuffer[j].first].z);
+				}
 			
 			// Proection calculations
 			if ( rMode != RM_WIREFRAME ) {
@@ -287,13 +287,13 @@ BOOL clsViewport::Render()
 					vert2DDrawBuffer[2].y = (LONG)sceneVertBuffer[ scenePolyBuffer[i].first.third ].y + centerY;*/
 
 					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x + centerX;
-					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y + centerY;
+					vert2DDrawBuffer[0].y = -(LONG)scenePolyBuffer[i].first.first.y + centerY;
 
 					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x + centerX;
-					vert2DDrawBuffer[1].y = (LONG)scenePolyBuffer[i].first.second.y + centerY;
+					vert2DDrawBuffer[1].y = -(LONG)scenePolyBuffer[i].first.second.y + centerY;
 
 					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x + centerX;
-					vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y + centerY;
+					vert2DDrawBuffer[2].y = -(LONG)scenePolyBuffer[i].first.third.y + centerY;
 
 					Polygon( hMemDC, vert2DDrawBuffer, 3 );
 
