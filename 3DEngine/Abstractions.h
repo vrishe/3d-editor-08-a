@@ -35,15 +35,18 @@ typedef struct tagEdge {
 	bool isContianingVertex(size_t vi);
 } EDGE3D, *LPEDGE3D;
 
+typedef vector<VECTOR3D> VERT_LIST, *LPVERT_LIST;
+
 typedef struct tagPolygon {
 	size_t first;
 	size_t second;
 	size_t third;
 	
-	VECTOR normal; // не знаю, нужно ли.
+	VECTOR3D normal; // не знаю, нужно ли.
 
 	tagPolygon();
 	tagPolygon(size_t a, size_t b, size_t c);
+	void setNormal(LPVERT_LIST, size_t startVert);
 	bool operator==(const tagPolygon &b) const;
 	bool operator!=(const tagPolygon &b) const;
 	bool isContainingEdge (EDGE3D e);
@@ -190,7 +193,6 @@ typedef clsScene SCENE3D, *LPSCENE3D;
 // ============================================================================
 // Abstract mesh class that represents EVERY POSSIBLE
 // 3d mesh object. Provides basic mesh operations.
-typedef vector<VECTOR3D> VERT_LIST, *LPVERT_LIST;
 typedef vector<EDGE3D> EDGE_LIST, *LPEDGE_LIST;
 typedef vector<POLY3D> POLY_LIST, *LPPOLY_LIST;
 

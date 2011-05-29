@@ -30,6 +30,38 @@ tagPolygon::tagPolygon()
 tagPolygon::tagPolygon(size_t a, size_t b, size_t c) 
 	: first(a), second(b), third(c) { }
 
+void tagPolygon::setNormal(LPVERT_LIST vs, size_t startVert) {
+	VECTOR3D v1, v2;
+	switch (startVert) {
+	case 1:
+		v1 = VECTOR3D(vs->at(second).x - vs->at(first).x,
+					vs->at(second).y - vs->at(first).y,
+					vs->at(second).z - vs->at(first).z);
+		v2 = VECTOR3D(vs->at(third).x - vs->at(first).x,
+					vs->at(third).y - vs->at(first).y,
+					vs->at(third).z - vs->at(first).z);
+		Vector3DMultV(&v1, &v2, &normal);
+		break;
+	case 2:
+		v1 = VECTOR3D(vs->at(first).x - vs->at(second).x,
+					vs->at(first).y - vs->at(second).y,
+					vs->at(first).z - vs->at(second).z);
+		v2 = VECTOR3D(vs->at(third).x - vs->at(second).x,
+					vs->at(third).y - vs->at(second).y,
+					vs->at(third).z - vs->at(second).z);
+		Vector3DMultV(&v1, &v2, &normal);
+		break;
+	case 3:
+		v1 = VECTOR3D(vs->at(first).x - vs->at(third).x,
+					vs->at(first).y - vs->at(third).y,
+					vs->at(first).z - vs->at(third).z);
+		v2 = VECTOR3D(vs->at(second).x - vs->at(third).x,
+					vs->at(second).y - vs->at(third).y,
+					vs->at(second).z - vs->at(third).z);
+		Vector3DMultV(&v1, &v2, &normal);
+	}
+}
+
 bool tagPolygon::operator== (const tagPolygon &b) const
 {
 	return first	== b.first 
