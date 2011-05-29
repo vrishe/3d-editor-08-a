@@ -48,16 +48,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
 	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
+	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
 	testScene.setAmbientColor(132, 128, 128);
 	testScene.AddObject(&testCamera1);
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
-	testScene.AddObject(&testPyramid);
-	//testScene.AddObject(&testCone);
-	testScene.AddObject(&testExCone);
-	//testScene.AddObject(&testHole);
 
 	//testCamera.Fly(100.0f);
 	testCamera1.Pitch((float)(0.0*M_PI/180));
@@ -65,8 +62,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testCamera2.Pitch((float)(90.0*M_PI/180));
 	//testCamera3.Strafe(200);
 	testCamera3.Pitch((float)(45.0*M_PI/180));
-	testCamera3.setProjectionType(CENTRAL);
-	//testCamera3.setHFov(90.0f * (FLOAT)M_PI / 180.0f);
+	testCamera1.setProjectionType(CENTRAL);
+
+	testScene.AddObject(&testPyramid);
+	testScene.AddObject(&testCone);
+	testScene.AddObject(&testExCone);
+	testScene.AddObject(&testHole);
 
 	testPyramid.setColor(200, 30, 30);
 	testPyramid.Strafe(115);
@@ -139,19 +140,17 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-//LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
-//{
-//	BYTE anchor = testForm1->getAnchors();
-//	TCHAR number[20];
-// 	if ( wParam == 32 )
-//	{
-//		if ( ++anchor == 16 ) anchor = 0;
-//		_itow_s(anchor, number, 20, 10);
-//		mainForm->MBShow(number, _T("Anchor changed"), MB_OK);
-//		testForm1->setAnchors(anchor);
-//	}
-//	return 0L;
-//}
+LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+{
+	PROJECTION_TYPE pt = PARALLEL;
+ 	if ( wParam == VK_SPACE )
+	{
+ 		pt = pt == PARALLEL ? CENTRAL : PARALLEL;
+		testCamera3.setProjectionType(pt);
+		mainForm.Invalidate();
+	}
+	return 0L;
+}
 
 LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
