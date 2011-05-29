@@ -201,7 +201,6 @@ protected:
 	VERT_LIST		vertices;	// list of vertexes
 	EDGE_LIST		edges;		// list of edges
 	POLY_LIST		polygons;	// list of polygons
-	POLY_LIST		polyedges;	// list of links to edges
 
 	COLOR3D			color;
 

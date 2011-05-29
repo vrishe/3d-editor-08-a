@@ -233,11 +233,13 @@ void Cone::Triangulate() {
 	for (int i = 1; i < precission; i++) {
 		polygons.push_back(POLY3D(i*2, i*2 + 1, i*2 + 2));
 		polygons.push_back(POLY3D(i*2 + 1, i*2 + 2, i*2 + 3));
-		/*polygons[precission*2 + i - 1].setNormal(&vertices, 1);
-		polygons[precission*2 + i].setNormal(&vertices, 1);*/
+		polygons[precission*2 + i*2 - 2].setNormal(&vertices, 2);
+		polygons[precission*2 + i*2 - 1].setNormal(&vertices, 1);
 	}
 	polygons.push_back(POLY3D(precission*2, precission*2 + 1, 2));
 	polygons.push_back(POLY3D(precission*2 + 1, 2, 3));
+	polygons[precission*4 - 2].setNormal(&vertices, 2);
+	polygons[precission*4 - 1].setNormal(&vertices, 1);
 
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
@@ -503,20 +505,30 @@ void ExCone::Triangulate() {
 
 		// setting base polygons
 	N = (vertices.size() - 2) / 2; int index = ( N == precission / 2 + 1 ? 2 : 1 );
-	for (int i = index; i < N; i++)
+	for (int i = index; i < N; i++) {
 		polygons.push_back(POLY3D(0, i*2, i*2 + 2));
+		polygons[i - index].setNormal(&vertices, 2);
+	}
 	polygons.push_back(POLY3D(0, N*2, 2));
+	polygons[N - index].setNormal(&vertices, 2);
 		// setting top polygons
-	for (int i = index; i < N; i++)
+	for (int i = index; i < N; i++) {
 		polygons.push_back(POLY3D(1, i*2 + 1, i*2 + 3));
+		polygons[N + i - index].setNormal(&vertices, 1);
+	}
 	polygons.push_back(POLY3D(1, N*2 + 1, 3));
+	polygons[N*2 - index].setNormal(&vertices, 1);
 		// setting side polygons
 	for (int i = index; i < N; i++) {
 		polygons.push_back(POLY3D(i*2, i*2 + 1, i*2 + 2));
 		polygons.push_back(POLY3D(i*2 + 1, i*2 + 2, i*2 + 3));
+		polygons[N*2 + i*2 - 2*index].setNormal(&vertices, 2);
+		polygons[N*2 + i*2 - 1*index].setNormal(&vertices, 1);
 	}
 	polygons.push_back(POLY3D(N*2, N*2 + 1, 2));
 	polygons.push_back(POLY3D(N*2 + 1, 2, 3));
+	polygons[N*4 - 2*index].setNormal(&vertices, 2);
+	polygons[N*4 - 1*index].setNormal(&vertices, 1);
 
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
@@ -703,32 +715,48 @@ void Hole::Triangulate() {
 	edges.push_back(EDGE3D(precission*4 - 1, precission*2));
 
 		// setting base polygons
-	for (int i = 0; i < precission - 1; i++) {
+	for (int i = 0, j = 0; i < precission - 1; i++, j += 2) {
 		polygons.push_back(POLY3D(i*2, precission*2 + i*2, precission*2 + i*2 + 2));
 		polygons.push_back(POLY3D(precission*2 + i*2 + 2, i*2 + 2, i*2));
+		polygons[j].setNormal(&vertices, 1);
+		polygons[j + 1].setNormal(&vertices, 1);
 	}
 	polygons.push_back(POLY3D(precission*2 - 2, precission*4 - 2, precission*2));
 	polygons.push_back(POLY3D(precission*2, 0, precission*2 - 2));
+	polygons[precission*2 - 2].setNormal(&vertices, 1);
+	polygons[precission*2 - 1].setNormal(&vertices, 1);
 		// setting top polygons
-	for (int i = 0; i < precission - 1; i++) {
+	for (int i = 0, j = precission*2; i < precission - 1; i++, j += 2) {
 		polygons.push_back(POLY3D(i*2 + 1, precission*2 + i*2 + 1, precission*2 + i*2 + 3));
 		polygons.push_back(POLY3D(precission*2 + i*2 + 3, i*2 + 3, i*2 + 1));
+		polygons[j].setNormal(&vertices, 2);
+		polygons[j + 1].setNormal(&vertices, 2);
 	}
 	polygons.push_back(POLY3D(precission*2 - 1, precission*4 - 1, precission*2 + 1));
 	polygons.push_back(POLY3D(precission*2 + 1, 1, precission*2 - 1));
+	polygons[precission*4 - 2].setNormal(&vertices, 2);
+	polygons[precission*4 - 1].setNormal(&vertices, 2);
 		// setting side polygons
-	for (int i = 0; i < precission - 1; i++) { // outter circle
+	for (int i = 0, j = precission*4; i < precission - 1; i++, j+= 2) { // outter circle
 		polygons.push_back(POLY3D(i*2, i*2 + 1, i*2 + 2));
 		polygons.push_back(POLY3D(i*2 + 1, i*2 + 3, i*2 + 2));
+		polygons[j].setNormal(&vertices, 2);
+		polygons[j + 1].setNormal(&vertices, 2);
 	}
 	polygons.push_back(POLY3D(precission*2 - 2, precission*2 - 1, 0));
 	polygons.push_back(POLY3D(precission*2 - 1, 1, 0));
-	for (int i = 0; i < precission - 1; i++) { // inner circle
+	polygons[precission*6 - 2].setNormal(&vertices, 2);
+	polygons[precission*6 - 1].setNormal(&vertices, 2);
+	for (int i = 0, j = precission*6; i < precission - 1; i++, j += 2) { // inner circle
 		polygons.push_back(POLY3D(precission*2 + i*2, precission*2 + i*2 + 1, precission*2 + i*2 + 2));
 		polygons.push_back(POLY3D(precission*2 + i*2 + 1, precission*2 + i*2 + 3, precission*2 + i*2 + 2));
+		polygons[j].setNormal(&vertices, 1);
+		polygons[j + 1].setNormal(&vertices, 1);
 	}
 	polygons.push_back(POLY3D(precission*4 - 2, precission*4 - 1, precission*2));
 	polygons.push_back(POLY3D(precission*4 - 1, precission*2 + 1, precission*2));
+	polygons[precission*8 - 2].setNormal(&vertices, 1);
+	polygons[precission*8 - 1].setNormal(&vertices, 1);
 
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
