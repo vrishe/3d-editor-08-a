@@ -16,7 +16,7 @@ CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f),
 					testPyramid2(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
-ExCone				testExCone(40.0f, 150.0f, 110.0f, 120.0f, 13);
+ExCone				testExCone(40.0f, 150.0f, 150.0f, 120.0f, 13);
 Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
@@ -59,11 +59,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	//testCamera.Fly(100.0f);
 	testCamera1.Pitch((float)(0.0*M_PI/180));
+	testCamera1.setProjectionType(PT_CENTRAL);
 	//testCamera2.Fly(200);
 	testCamera2.Pitch((float)(90.0*M_PI/180));
 	//testCamera3.Strafe(200);
 	testCamera3.Pitch((float)(45.0*M_PI/180));
-	testCamera1.setProjectionType(CENTRAL);
+	//testCamera3.setHFov(60.0f * (FLOAT)M_PI/ 180.0f);
 
 	testScene.AddObject(&testPyramid);
 	testScene.AddObject(&testPyramid2);
@@ -99,7 +100,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				testCamera1.objID(),
-				RM_SHADED
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				20, 
@@ -146,11 +147,13 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
-	PROJECTION_TYPE pt = PARALLEL;
  	if ( wParam == VK_SPACE )
 	{
- 		pt = pt == PARALLEL ? CENTRAL : PARALLEL;
-		testCamera3.setProjectionType(pt);
+ 		if ( testCamera3.getProjectionType() == PT_PARALLEL ) 
+			testCamera3.setProjectionType(PT_CENTRAL);
+		else
+			testCamera3.setProjectionType(PT_PARALLEL);
+
 		mainForm.Invalidate();
 	}
 	return 0L;

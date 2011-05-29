@@ -5,8 +5,8 @@
 // ============================================================================
 // Camera class
 enum PROJECTION_TYPE {
-	PARALLEL	= 0,
-	CENTRAL		= 1
+	PT_PARALLEL	= 0,
+	PT_CENTRAL	= 1
 };
 
 class clsCamera : public clsObject {

@@ -93,15 +93,19 @@ bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
 BOOL clsViewport::Render() 
 {
 	BOOL				bResult			= Scene != NULL;
+	HANDLE				procHeap		= GetProcessHeap();
+
 	HDC					hVpDC,
 						hMemDC;
+
 	HBRUSH				hBrCurrent,
-					   *hBrObjects,
-						hBrOld;
+						hBrOld,
+					   *hBrObjects;
 	HBITMAP				hBMP,
 						hBMPOld;
+
 	RECT				clientRect;
-	INT					centerX,
+	FLOAT				centerX,
 						centerY;
 
 	UINT				sceneObjCount,
@@ -111,28 +115,28 @@ BOOL clsViewport::Render()
 						objEdgeCount,
 						objPolyCount;
 
-	HANDLE				procHeap		= GetProcessHeap();
-
 	LPCAMERA3D			camToRender;
 	LPMESH3D			objToRender;
 	LPVECTOR3D			objVertBuffer;
-//						sceneVertBuffer;
-	SCENEPOLY			scenePolyBuffer;
 	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
-	POINT				vert2DDrawBuffer[3];
+	SCENEPOLY			scenePolyBuffer;
 
-	MATRIX3D			viewMatrix,
-						perspMatrix;
-	FLOAT				divisor;
+	MATRIX3D			cameraMatrix,
+						perspectiveMatrix,
+						viewportMatrix;
+	FLOAT				divisor,
+						nearClip,
+						farClip;
 
 	VECTOR3D			camPos;
+	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
 	GetClientRect(hWnd, &clientRect);
-	centerX		= (INT)ceil((FLOAT)(clientRect.right / 2));
-	centerY		= (INT)ceil((FLOAT)(clientRect.bottom / 2));
+	centerX		= ceil((FLOAT)(clientRect.right / 2));
+	centerY		= ceil((FLOAT)(clientRect.bottom / 2));
 	hVpDC		= GetDC(hWnd);
 	hMemDC		= CreateCompatibleDC(hVpDC);
 	hBMP		= CreateCompatibleBitmap(
@@ -166,8 +170,10 @@ BOOL clsViewport::Render()
 
 		// prepearing camera
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
+		nearClip		= camToRender->getNearCP();
+		farClip			= camToRender->getFarCP();
 		camPos			= camToRender->getPosition();
-		camToRender->GetViewMatrix(&viewMatrix);
+		camToRender->GetViewMatrix(&cameraMatrix);
 
 		UINT vertCopied = 0;
 		for ( UINT i = 0; i < sceneObjCount; i++ )
@@ -184,8 +190,6 @@ BOOL clsViewport::Render()
 											HEAP_ZERO_MEMORY, 
 											VEC3DSIZE * objVertCount
 										);
-			//objVertBuffer = new VECTOR3D[objVertCount];
-			CopyMemory(objVertBuffer, objToRender->getVerticesRaw(), VEC3DSIZE * objVertCount);
 
 			objToRender->getVerticesTransformed(objVertBuffer);
 
@@ -194,36 +198,59 @@ BOOL clsViewport::Render()
 			{
 				*(objVertBuffer + j) -= camPos;
 				Matrix3DTransformCoord(
-							&viewMatrix,
-							(LPVECTOR3D)(objVertBuffer + j),
-							(LPVECTOR3D)(objVertBuffer + j)
+							&cameraMatrix,
+							objVertBuffer + j,
+							objVertBuffer + j
 						);
 				*(objVertBuffer + j) += camPos;
 			}
 
-			if ( camToRender->getProjectionType() == CENTRAL )
+			viewportMatrix.SetIdentity();
+			if ( camToRender->getProjectionType() == PT_CENTRAL )
 			{
-				camToRender->GetPerspectiveMatrix(&perspMatrix);
+				viewportMatrix._11 = centerX;
+				viewportMatrix._22 = -centerY;
+				viewportMatrix._33 = farClip - nearClip;
+				viewportMatrix._41 = centerX;
+				viewportMatrix._42 = centerY;
+				viewportMatrix._43 = nearClip;
+
+				camToRender->GetPerspectiveMatrix(&perspectiveMatrix);
 				for ( UINT j = 0; j < objVertCount; j++ ) 
 				{
 					divisor = objVertBuffer[j].z / camToRender->getNearCP();
 					Matrix3DTransformCoord(
-									&perspMatrix,
-									(LPVECTOR3D)(objVertBuffer + j),
-									(LPVECTOR3D)(objVertBuffer + j)
+									&perspectiveMatrix,
+									objVertBuffer + j,
+									objVertBuffer + j
 								);
-					//objVertBuffer[j] /= divisor;
+					objVertBuffer[j] /= divisor;
 				}
 			}
-			
+			else
+			{
+				viewportMatrix._22 = -1.0f;
+				viewportMatrix._41 = centerX;
+				viewportMatrix._42 = centerY;
+			}
+
+			for ( UINT j = 0; j < objVertCount; j++ )
+			{
+				Matrix3DTransformCoord(
+							&viewportMatrix,
+							objVertBuffer + j,
+							objVertBuffer + j
+						);
+			}
+		
 			// Proection calculations
 			if ( rMode != RM_WIREFRAME ) {
 				// filling a part of global buffers
 				for (UINT j = 0; j < objPolyCount; j++) {
 					DIRECTPOLY3D tmp;
-					tmp.first = objVertBuffer[ objToRender->getPolygon(j).first ];
-					tmp.second = objVertBuffer[ objToRender->getPolygon(j).second ];
-					tmp.third = objVertBuffer[ objToRender->getPolygon(j).third ];
+					tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
+					tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
+					tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
 					scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 				}
 				//CopyMemory(sceneVertBuffer + vertCopied*VEC3DSIZE, objVertBuffer, VEC3DSIZE * objVertCount);
@@ -239,18 +266,14 @@ BOOL clsViewport::Render()
 					//	&& objVertBuffer[objEdgeBuffer[j].second].z < camToRender->getFarCP()
 					//) { 
 						vert2DDrawBuffer[0].x 
-							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x
-							+ centerX;
+							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x;
 						vert2DDrawBuffer[0].y 
-							= centerY
-							- (LONG)objVertBuffer[objEdgeBuffer[j].first].y;
+							= (LONG)objVertBuffer[objEdgeBuffer[j].first].y;
 				
 						vert2DDrawBuffer[1].x 
-							= (LONG)objVertBuffer[objEdgeBuffer[j].second].x
-							+ centerX;
+							= (LONG)objVertBuffer[objEdgeBuffer[j].second].x;
 						vert2DDrawBuffer[1].y 
-							= centerY
-							- (LONG)objVertBuffer[objEdgeBuffer[j].second].y;
+							= (LONG)objVertBuffer[objEdgeBuffer[j].second].y;
 
 						Polyline( hMemDC, vert2DDrawBuffer, 2 );
 					//}
@@ -261,7 +284,8 @@ BOOL clsViewport::Render()
 			HeapFree(procHeap, NULL, objVertBuffer);
 		}
 
-		if ( rMode != RM_WIREFRAME ) {
+		if ( rMode != RM_WIREFRAME ) 
+		{
 			sort(scenePolyBuffer.begin(), scenePolyBuffer.end(), ZBufSort);
 
 			HPEN hPenCur = CreatePen(PS_SOLID, 1, RGB(0,0,0));
@@ -272,8 +296,9 @@ BOOL clsViewport::Render()
 						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
 					);
 
-			for (UINT i = 0; i < scenePolyCount; i++ ) { // work only in CENTRAL projection
-/*				if ( scenePolyBuffer[i].first.first.z > 0
+			for (UINT i = 0; i < scenePolyCount; i++ ) { 
+				// work only in CENTRAL projection
+				/*if ( scenePolyBuffer[i].first.first.z > 0
 				&& scenePolyBuffer[i].first.first.z < 1
 
 				&& scenePolyBuffer[i].first.second.z > 0
@@ -283,14 +308,14 @@ BOOL clsViewport::Render()
 				&& scenePolyBuffer[i].first.third.z < 1
 				)*/ { 
 					hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
-					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x + centerX;
-					vert2DDrawBuffer[0].y = centerY - (LONG)scenePolyBuffer[i].first.first.y;
+					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
+					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
 
-					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x + centerX;
-					vert2DDrawBuffer[1].y = centerY - (LONG)scenePolyBuffer[i].first.second.y;
+					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x;
+					vert2DDrawBuffer[1].y = (LONG)scenePolyBuffer[i].first.second.y;
 
-					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x + centerX;
-					vert2DDrawBuffer[2].y = centerY - (LONG)scenePolyBuffer[i].first.third.y;
+					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x;
+					vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y;
 
 					Polygon( hMemDC, vert2DDrawBuffer, 3 );
 					SelectObject(hMemDC, hBrOld);

@@ -5,7 +5,7 @@
 // Implementation of clsCamera class:
 clsCamera::clsCamera() : clsObject(CLS_CAMERA) 
 { 
-	projectionType	= PARALLEL;
+	projectionType	= PT_PARALLEL;
 	hFOV			= (float)M_PI_2;
 	vFOV			= (float)M_PI_2;
 	nearClip		= 1.0F;
@@ -17,7 +17,7 @@ clsCamera::clsCamera(
 	float			horizFov,
 	float			vertFov
 ) {
-	projectionType	= PARALLEL;
+	projectionType	= PT_PARALLEL;
 	hFOV			= (float)M_PI_4;
 	vFOV			= (float)M_PI_4;
 	nearClip		= 1.0F;
