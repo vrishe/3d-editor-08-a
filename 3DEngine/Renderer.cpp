@@ -135,8 +135,8 @@ BOOL clsViewport::Render()
 
 	// Approaching viewport canvas for drawing
 	GetClientRect(hWnd, &clientRect);
-	centerX		= ceil((FLOAT)(clientRect.right / 2));
-	centerY		= ceil((FLOAT)(clientRect.bottom / 2));
+	centerX		= ceil((FLOAT)(clientRect.right));
+	centerY		= ceil((FLOAT)(clientRect.bottom));
 	hVpDC		= GetDC(hWnd);
 	hMemDC		= CreateCompatibleDC(hVpDC);
 	hBMP		= CreateCompatibleBitmap(
@@ -164,8 +164,18 @@ BOOL clsViewport::Render()
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
 		nearClip		= camToRender->getNearCP();
 		farClip			= camToRender->getFarCP();
-		camPos			= camToRender->getPosition();
+		
 		camToRender->GetViewMatrix(&cameraMatrix);
+
+		viewportMatrix.SetIdentity();
+		viewportMatrix._22 = -1.0f;
+		viewportMatrix._41 = (FLOAT)clientRect.right / 2;
+		viewportMatrix._42 = (FLOAT)clientRect.bottom / 2;
+
+		if ( camToRender->getProjectionType() == PT_CENTRAL )
+			camToRender->GetPerspectiveMatrix(&projectionMatrix);
+		else 
+			camToRender->GetParallelMatrix(&projectionMatrix);
 
 		for ( UINT i = 0; i < sceneObjCount; i++ )
 		{
@@ -184,58 +194,34 @@ BOOL clsViewport::Render()
 
 			objToRender->getVerticesTransformed(objVertBuffer);
 
-			// camera relocation transformations
-			for ( UINT j = 0; j < objVertCount; j++ )
-			{
-				*(objVertBuffer + j) -= camPos;
-				Matrix3DTransformCoord(
-							&cameraMatrix,
-							objVertBuffer + j,
-							objVertBuffer + j
-						);
-				*(objVertBuffer + j) += camPos;
-			}
-
 			// camera projection transformations
-			if ( camToRender->getProjectionType() == PT_CENTRAL ) {
-				camToRender->GetPerspectiveMatrix(&projectionMatrix);
-				for ( UINT j = 0; j < objVertCount; j++ ) {
-					divisor = (objVertBuffer[j].z + nearClip);
-					Matrix3DTransformCoord(
-									&projectionMatrix,
-									objVertBuffer + j,
-									objVertBuffer + j
-								);
-					objVertBuffer[j] /= divisor;
-				}
-			}
-			else {
-				camToRender->GetParallelMatrix(&projectionMatrix);
-				for ( UINT j = 0; j < objVertCount; j++ ) {
-					divisor = (objVertBuffer[j].z + nearClip);
-					Matrix3DTransformCoord(
-									&projectionMatrix,
-									objVertBuffer + j,
-									objVertBuffer + j
-								);
-					objVertBuffer[j].z /= divisor;
-				}
-			}
-
-			// camera to viewport transformations
-			viewportMatrix.SetIdentity();
-			viewportMatrix._22 = -1.0f;
-			viewportMatrix._41 = centerX;
-			viewportMatrix._42 = centerY;
-			for ( UINT j = 0; j < objVertCount; j++ )
+			for ( UINT j = 0; j < objVertCount; j++ ) 
 			{
 				Matrix3DTransformCoord(
-							&viewportMatrix,
-							objVertBuffer + j,
-							objVertBuffer + j
-						);
+						&cameraMatrix,
+						objVertBuffer + j,
+						objVertBuffer + j
+					);
+
+				divisor = objVertBuffer[j].z + (farClip - nearClip) / 2;
+				Matrix3DTransformCoord(
+								&projectionMatrix,
+								objVertBuffer + j,
+								objVertBuffer + j
+							);
+				if ( camToRender->getProjectionType() == PT_CENTRAL )
+					objVertBuffer[j] /= divisor;
+				else
+					objVertBuffer[j].z /= divisor;
+
+				Matrix3DTransformCoord(
+						&viewportMatrix,
+						objVertBuffer + j,
+						objVertBuffer + j
+					);
 			}
-		
+
+
 			if ( rMode != RM_WIREFRAME ) {
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
@@ -253,13 +239,13 @@ BOOL clsViewport::Render()
 					  && objVertBuffer[objEdgeBuffer[j].second].z >= 0
 					  && objVertBuffer[objEdgeBuffer[j].second].z <= 1 
 					  && objVertBuffer[objEdgeBuffer[j].first].x >= 0
-					  && objVertBuffer[objEdgeBuffer[j].first].x <= centerX * 2
+					  && objVertBuffer[objEdgeBuffer[j].first].x <= clientRect.right
 					  && objVertBuffer[objEdgeBuffer[j].first].y >= 0
-					  && objVertBuffer[objEdgeBuffer[j].first].y <= centerY * 2
+					  && objVertBuffer[objEdgeBuffer[j].first].y <= clientRect.bottom
 					  && objVertBuffer[objEdgeBuffer[j].second].x >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].x <= centerX * 2
+					  && objVertBuffer[objEdgeBuffer[j].second].x <= clientRect.right
 					  && objVertBuffer[objEdgeBuffer[j].second].y >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].y <= centerY * 2)
+					  && objVertBuffer[objEdgeBuffer[j].second].y <= clientRect.bottom)
 					{ 
 						vert2DDrawBuffer[0].x 
 							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x;
@@ -300,18 +286,18 @@ BOOL clsViewport::Render()
 				  && scenePolyBuffer[i].first.third.z <= 1 
 
 				  && scenePolyBuffer[i].first.first.x >= 0
-			   	  && scenePolyBuffer[i].first.first.x <= centerX * 2
+				  && scenePolyBuffer[i].first.first.x <= clientRect.right
 				  && scenePolyBuffer[i].first.second.x >= 0
-			   	  && scenePolyBuffer[i].first.second.x <= centerX * 2
+			   	  && scenePolyBuffer[i].first.second.x <= clientRect.right
 				  && scenePolyBuffer[i].first.third.x >= 0
-			   	  && scenePolyBuffer[i].first.third.x <= centerX * 2
+			   	  && scenePolyBuffer[i].first.third.x <= clientRect.right
 				  
 				  && scenePolyBuffer[i].first.first.y >= 0
-			   	  && scenePolyBuffer[i].first.first.y <= centerY * 2
+			   	  && scenePolyBuffer[i].first.first.y <= clientRect.bottom
 				  && scenePolyBuffer[i].first.second.y >= 0
-			   	  && scenePolyBuffer[i].first.second.y <= centerY * 2
+			   	  && scenePolyBuffer[i].first.second.y <= clientRect.bottom
 				  && scenePolyBuffer[i].first.third.y >= 0
-			   	  && scenePolyBuffer[i].first.third.y <= centerY * 2 )
+			   	  && scenePolyBuffer[i].first.third.y <= clientRect.bottom)
 				{ 
 					VECTOR3D normal(scenePolyBuffer[i].first.Normal(1));
 					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);

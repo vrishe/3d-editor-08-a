@@ -208,7 +208,8 @@ void clsObject::ScaleByX(float factor) { xScale += factor; }
 void clsObject::ScaleByY(float factor) { yScale += factor; }
 void clsObject::ScaleByZ(float factor) { zScale += factor; }
 
-void clsObject::Pitch(float angle) {
+void clsObject::Pitch(float angle) 
+{
 	pitch += angle;
 
 	MATRIX3D M;
@@ -218,7 +219,8 @@ void clsObject::Pitch(float angle) {
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
-void clsObject::Yaw(float angle) {
+void clsObject::Yaw(float angle) 
+{
 	yaw += angle;
 
 	MATRIX3D M;
@@ -228,7 +230,8 @@ void clsObject::Yaw(float angle) {
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&uWd, &fWd, &rWd);
 }
-void clsObject::Roll(float angle) {
+void clsObject::Roll(float angle) 
+{
 	roll += angle;
 
 	MATRIX3D M;
@@ -239,45 +242,15 @@ void clsObject::Roll(float angle) {
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
-void clsObject::GetMoveMatrix(LPMATRIX3D mOut) {
-	Vector3DNormalize(&fWd, &fWd);
-
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
-
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-
+void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
+{
 	mOut->_41 = pos.x;
 	mOut->_42 = pos.y;
 	mOut->_43 = pos.z;
 }
 
-void clsObject::GetRollRotationMatrix(LPMATRIX3D mOut) {
-	Vector3DNormalize(&fWd, &fWd);
-
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
-
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-
-	mOut->_22 = cos(roll);
-	mOut->_23 = sin(roll);
-
-	mOut->_32 = -mOut->_23;
-	mOut->_33 = mOut->_22;
-}
-
-void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) {
-	Vector3DNormalize(&fWd, &fWd);
-
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
-
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-
+void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) 
+{
 	mOut->_11 = cos(pitch);
 	mOut->_31 = sin(pitch);
 
@@ -285,15 +258,8 @@ void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) {
 	mOut->_33 = mOut->_11;
 }
 
-void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) {
-	Vector3DNormalize(&fWd, &fWd);
-
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
-
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-
+void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) 
+{
 	mOut->_11 = cos(yaw);
 	mOut->_12 = sin(yaw);
 
@@ -301,15 +267,17 @@ void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) {
 	mOut->_22 = mOut->_11;
 }
 
-void clsObject::GetScaleMatrix(LPMATRIX3D mOut) {
-	Vector3DNormalize(&fWd, &fWd);
+void clsObject::GetRollRotationMatrix(LPMATRIX3D mOut) 
+{
+	mOut->_22 = cos(roll);
+	mOut->_23 = sin(roll);
 
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
+	mOut->_32 = -mOut->_23;
+	mOut->_33 = mOut->_22;
+}
 
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-
+void clsObject::GetScaleMatrix(LPMATRIX3D mOut) 
+{
 	mOut->_11 = xScale;
 	mOut->_22 = yScale;
 	mOut->_33 = zScale;
