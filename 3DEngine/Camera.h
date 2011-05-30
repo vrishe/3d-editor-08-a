@@ -43,6 +43,7 @@ public:
 	void			setFarCP(float farCP);
 
 	void			GetViewMatrix(LPMATRIX3D mOut);
+	void			GetParallelMatrix(LPMATRIX3D mOut);
 	void			GetPerspectiveMatrix(LPMATRIX3D mOut);
 };
 typedef clsCamera CAMERA3D, *LPCAMERA3D;

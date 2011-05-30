@@ -26,8 +26,9 @@ typedef HANDLE	THREAD, *LPTHREAD,
 
 // Necessary Viewport class definitions
 enum RENDER_MODE {
-	RM_WIREFRAME	= 0x01,
-	RM_SHADED		= 0x02
+	RM_WIREFRAME			= 0x01,
+	RM_SHADED				= 0x02,
+	RM_SHADEDWIREFRAME		= 0x02,
 };
 #define RM_WFSHADED RM_WIREFRAME | RM_SHADED
 
