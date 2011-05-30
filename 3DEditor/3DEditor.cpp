@@ -13,7 +13,7 @@ UINT				ufWidth, ufHeight;
 LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera1, testCamera2, testCamera3;
-Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f),
+Pyramid				testPyramid(140.0f, 140.0f, 140.0f, 140.0f, 140.0f),
 					testPyramid2(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
 ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
@@ -57,26 +57,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 
-	//testCamera.Fly(100.0f);
-	testCamera1.Pitch((float)(0.0*M_PI/180));
+	//testCamera1.Fly(-5.0f);
+	//testCamera1.Pitch((float)(0.0*M_PI/180));
 	//testCamera1.setProjectionType(PT_CENTRAL);
-	testCamera2.Fly(-200);
-	testCamera2.Follow(100);
-	testCamera2.Strafe(22);
+	//testCamera2.Fly(-100);
+	testCamera2.Follow(0);
+	//testCamera2.Strafe(22);
 	testCamera2.Pitch((float)(90.0*M_PI/180));
 	//testCamera3.Strafe(200);
 	testCamera3.Pitch((float)(45.0*M_PI/180));
 	//testCamera3.setHFov(60.0f * (FLOAT)M_PI/ 180.0f);
 
 	testScene.AddObject(&testPyramid);
-	testScene.AddObject(&testPyramid2);
+	//testScene.AddObject(&testPyramid2);
 	//testScene.AddObject(&testCone);
 	//testScene.AddObject(&testExCone);
 	//testScene.AddObject(&testHole);
 
 	testPyramid.setColor(200, 30, 30);
-	testPyramid.Strafe(115);
-	testPyramid.Follow(150);
+	//testPyramid.Strafe(115);
+	//testPyramid.Follow(150);
 	//testPyramid.Fly(40);
 	//testPyramid.Yaw((float)(50.0*M_PI/180));
 
