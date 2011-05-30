@@ -76,7 +76,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	testPyramid.setColor(200, 30, 30);
 	//testPyramid.Strafe(115);
-	//testPyramid.Follow(150);
+	testPyramid.Follow(450);
 	//testPyramid.Fly(40);
 	//testPyramid.Yaw((float)(50.0*M_PI/180));
 

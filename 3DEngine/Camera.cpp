@@ -8,7 +8,7 @@ clsCamera::clsCamera() : clsObject(CLS_CAMERA)
 	projectionType	= PT_PARALLEL;
 	hFOV			= (float)M_PI_2;
 	vFOV			= (float)M_PI_2;
-	nearClip		= 700.0F;
+	nearClip		= 350.0F;
 	farClip			= 1000.0F;
 }
 
@@ -18,9 +18,9 @@ clsCamera::clsCamera(
 	float			vertFov
 ) {
 	projectionType	= PT_PARALLEL;
-	hFOV			= (float)M_PI_4;
-	vFOV			= (float)M_PI_4;
-	nearClip		= 1.0F;
+	hFOV			= (float)M_PI_2;
+	vFOV			= (float)M_PI_2;
+	nearClip		= 350.0f;
 	farClip			= 1000.0F;
 
 	setProjectionType(projType);
@@ -96,19 +96,15 @@ void clsCamera::GetParallelMatrix(LPMATRIX3D mOut)
 	mOut->SetIdentity();
 
 	mOut->_33 = farClip / (farClip - nearClip);
-	mOut->_34 = mOut->_33 * (-nearClip);
-	mOut->_43 = 1.0f;
-	mOut->_44 = .0f;
+	mOut->_43 = mOut->_33 * (-nearClip);
 }
 
 void clsCamera::GetPerspectiveMatrix(LPMATRIX3D mOut)
 {
 	mOut->SetIdentity();
 
-	mOut->_11 = nearClip / tan(hFOV / 2.0f);
-	mOut->_22 = nearClip / tan(vFOV / 2.0f);
+	mOut->_11 = 2 * nearClip / tan(hFOV / 2.0f);
+	mOut->_22 = 2 * nearClip / tan(vFOV / 2.0f);
 	mOut->_33 = farClip / (farClip - nearClip);
-	mOut->_34 = mOut->_33 * (-nearClip);
-	mOut->_43 = 1.0f;
-	mOut->_44 = .0f;
+	mOut->_43 = mOut->_33 * (-nearClip);
 }
