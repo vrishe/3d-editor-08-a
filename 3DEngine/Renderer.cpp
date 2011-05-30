@@ -307,6 +307,9 @@ BOOL clsViewport::Render()
 				&& scenePolyBuffer[i].first.third.z > 0
 				&& scenePolyBuffer[i].first.third.z < 1
 				)*/ { 
+					scenePolyBuffer[i].first.setNormal(1);
+					float cosA = Vector3DMultS(&scenePolyBuffer[i].first.normal, &VECTOR3D(0,0,1)) / Vector3DLength(&scenePolyBuffer[i].first.normal);
+
 					hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
 					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
 					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;

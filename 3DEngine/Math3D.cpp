@@ -90,20 +90,19 @@ bool tagVector3D::operator== (const tagVector3D& u) const
 
 bool tagVector3D::operator!= (const tagVector3D& u) const {	return !operator==(u); }
 
-void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt)
-{
-	*rslt = (*src) / sqrt(
-						src->x*src->x 
-						+ src->y*src->y 
-						+ src->z*src->z
-					);
+float Vector3DLength(const LPVECTOR3D src) {
+	return sqrt(src->x*src->x + src->y*src->y + src->z*src->z);
+}
+
+void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt) {
+	*rslt = (*src) / Vector3DLength(src);
 }
 
 void Vector3DMultV(
 	const LPVECTOR3D in1, 
 	const LPVECTOR3D in2, 
-	LPVECTOR3D out
-) {
+	LPVECTOR3D out)
+{
 	*out = VECTOR3D(
 				in1->y * in2->z - in1->z * in2->y,
 				in1->z * in2->x - in1->x * in2->z,
@@ -113,8 +112,8 @@ void Vector3DMultV(
 
 float Vector3DMultS(					
 	const LPVECTOR3D in1, 
-	const LPVECTOR3D in2
-) {
+	const LPVECTOR3D in2)
+{
 	return in1->x * in2->x 
 			+ in1->y * in2->y 
 			+ in1->z * in2->z;

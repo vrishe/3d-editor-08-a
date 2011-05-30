@@ -16,7 +16,7 @@ CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid(50.0f, 140.0f, 110.0f, 90.0f, 75.0f),
 					testPyramid2(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
 Cone				testCone(30.0f, 75.0f, 50.0f, 24);
-ExCone				testExCone(40.0f, 150.0f, 150.0f, 120.0f, 13);
+ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
 Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
@@ -69,14 +69,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testPyramid2);
 	//testScene.AddObject(&testCone);
-	//testScene.AddObject(&testExCone);
-	//testScene.AddObject(&testHole);
+	testScene.AddObject(&testExCone);
+	testScene.AddObject(&testHole);
 
 	testPyramid.setColor(200, 30, 30);
-	//testPyramid.Strafe(115);
-	//testPyramid.Follow(150);
-	//testPyramid.Fly(140);
-	//testPyramid.Yaw((float)(50.0*M_PI/180));
+	testPyramid.Strafe(115);
+	testPyramid.Follow(-50);
+	//testPyramid.Fly(40);
+	testPyramid.Yaw((float)(50.0*M_PI/180));
 
 	testPyramid2.Strafe(-115);
 

@@ -18,12 +18,6 @@ using namespace std;
 //	
 //} VERTEX3D, *LPVERTEX3D;
 
-typedef struct tagDirectPolygon {
-	VECTOR3D first;
-	VECTOR3D second;
-	VECTOR3D third;
-} DIRECTPOLY3D, *LPDIRECTPOLY3D;
-
 typedef struct tagEdge {
 	size_t first;
 	size_t second;
@@ -37,12 +31,22 @@ typedef struct tagEdge {
 
 typedef vector<VECTOR3D> VERT_LIST, *LPVERT_LIST;
 
+typedef struct tagDirectPolygon {
+	VECTOR3D first;
+	VECTOR3D second;
+	VECTOR3D third;
+
+	VECTOR3D normal;
+
+	void setNormal(size_t startVert);
+} DIRECTPOLY3D, *LPDIRECTPOLY3D;
+
 typedef struct tagPolygon {
 	size_t first;
 	size_t second;
 	size_t third;
 	
-	VECTOR3D normal; // не знаю, нужно ли.
+	VECTOR3D normal;
 
 	tagPolygon();
 	tagPolygon(size_t a, size_t b, size_t c);

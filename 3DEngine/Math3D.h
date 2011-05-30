@@ -42,6 +42,7 @@ public:
 	bool			operator!= (const tagVector3D& u) const;
 } VECTOR3D, *LPVECTOR3D;
 
+float Vector3DLength(const LPVECTOR3D src);
 void Vector3DNormalize(const LPVECTOR3D in, LPVECTOR3D out);
 void Vector3DMultV(
 				const LPVECTOR3D in1, 

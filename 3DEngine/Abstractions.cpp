@@ -23,6 +23,37 @@ bool tagEdge::isContianingVertex(size_t vi)
 		|| second	== vi; 
 }
 
+// Implementation of tagDirectPolygon struct:
+void tagDirectPolygon::setNormal(size_t startVert) {
+	VECTOR3D v1, v2;
+	switch (startVert) {
+	case 1:
+		v1 = VECTOR3D(second.x - first.x,
+					second.y - first.y,
+					second.z - first.z);
+		v2 = VECTOR3D(third.x - first.x,
+					third.y - first.y,
+					third.z - first.z);
+		break;
+	case 2:
+		v1 = VECTOR3D(first.x - second.x,
+					first.y - second.y,
+					first.z - second.z);
+		v2 = VECTOR3D(third.x - second.x,
+					third.y - second.y,
+					third.z - second.z);
+		break;
+	case 3:
+		v1 = VECTOR3D(first.x - third.x,
+					first.y - third.y,
+					first.z - third.z);
+		v2 = VECTOR3D(second.x - third.x,
+					second.y - third.y,
+					second.z - third.z);
+	}
+	Vector3DMultV(&v1, &v2, &normal);
+}
+
 // Implementation of tagPolygon struct:
 tagPolygon::tagPolygon() 
 	: first(UINT_MAX), second(UINT_MAX), third(UINT_MAX) { }
@@ -40,7 +71,6 @@ void tagPolygon::setNormal(LPVERT_LIST vs, size_t startVert) {
 		v2 = VECTOR3D(vs->at(third).x - vs->at(first).x,
 					vs->at(third).y - vs->at(first).y,
 					vs->at(third).z - vs->at(first).z);
-		Vector3DMultV(&v1, &v2, &normal);
 		break;
 	case 2:
 		v1 = VECTOR3D(vs->at(first).x - vs->at(second).x,
@@ -49,7 +79,6 @@ void tagPolygon::setNormal(LPVERT_LIST vs, size_t startVert) {
 		v2 = VECTOR3D(vs->at(third).x - vs->at(second).x,
 					vs->at(third).y - vs->at(second).y,
 					vs->at(third).z - vs->at(second).z);
-		Vector3DMultV(&v1, &v2, &normal);
 		break;
 	case 3:
 		v1 = VECTOR3D(vs->at(first).x - vs->at(third).x,
@@ -58,8 +87,8 @@ void tagPolygon::setNormal(LPVERT_LIST vs, size_t startVert) {
 		v2 = VECTOR3D(vs->at(second).x - vs->at(third).x,
 					vs->at(second).y - vs->at(third).y,
 					vs->at(second).z - vs->at(third).z);
-		Vector3DMultV(&v1, &v2, &normal);
 	}
+	Vector3DMultV(&v1, &v2, &normal);
 }
 
 bool tagPolygon::operator== (const tagPolygon &b) const
