@@ -247,12 +247,19 @@ BOOL clsViewport::Render()
 				}
 			}
 			else {
-				for ( UINT j = 0; j < objEdgeCount; j++ ) 
-				{
+				for ( UINT j = 0; j < objEdgeCount; j++ ) { // Yeah baby, that's the stuff!
 					if ( objVertBuffer[objEdgeBuffer[j].first].z >= 0
 					  && objVertBuffer[objEdgeBuffer[j].first].z <= 1
 					  && objVertBuffer[objEdgeBuffer[j].second].z >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].z <= 1 )
+					  && objVertBuffer[objEdgeBuffer[j].second].z <= 1 
+					  && objVertBuffer[objEdgeBuffer[j].first].x >= 0
+					  && objVertBuffer[objEdgeBuffer[j].first].x <= centerX * 2
+					  && objVertBuffer[objEdgeBuffer[j].first].y >= 0
+					  && objVertBuffer[objEdgeBuffer[j].first].y <= centerY * 2
+					  && objVertBuffer[objEdgeBuffer[j].second].x >= 0
+					  && objVertBuffer[objEdgeBuffer[j].second].x <= centerX * 2
+					  && objVertBuffer[objEdgeBuffer[j].second].y >= 0
+					  && objVertBuffer[objEdgeBuffer[j].second].y <= centerY * 2)
 					{ 
 						vert2DDrawBuffer[0].x 
 							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x;
@@ -284,13 +291,19 @@ BOOL clsViewport::Render()
 						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
 					);
 
-			for (UINT i = 0; i < scenePolyCount; i++ ) { 
+			for (UINT i = 0; i < scenePolyCount; i++ ) { // AAaaaaand..... Here we go again! 
 				if ( scenePolyBuffer[i].first.first.z > 0
-				  && scenePolyBuffer[i].first.first.z < 1
-				  && scenePolyBuffer[i].first.second.z > 0
-				  && scenePolyBuffer[i].first.second.z < 1
-				  && scenePolyBuffer[i].first.third.z > 0
-				  && scenePolyBuffer[i].first.third.z < 1 ) 
+				  && objVertBuffer[objEdgeBuffer[j].first].z <= 1
+				  && objVertBuffer[objEdgeBuffer[j].second].z >= 0
+				  && objVertBuffer[objEdgeBuffer[j].second].z <= 1 
+				  && objVertBuffer[objEdgeBuffer[j].first].x >= 0
+			   	  && objVertBuffer[objEdgeBuffer[j].first].x <= centerX * 2
+				  && objVertBuffer[objEdgeBuffer[j].first].y >= 0
+				  && objVertBuffer[objEdgeBuffer[j].first].y <= centerY * 2
+				  && objVertBuffer[objEdgeBuffer[j].second].x >= 0
+				  && objVertBuffer[objEdgeBuffer[j].second].x <= centerX * 2
+				  && objVertBuffer[objEdgeBuffer[j].second].y >= 0
+				  && objVertBuffer[objEdgeBuffer[j].second].y <= centerY * 2)
 				{ 
 					VECTOR3D normal(scenePolyBuffer[i].first.Normal(1));
 					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
