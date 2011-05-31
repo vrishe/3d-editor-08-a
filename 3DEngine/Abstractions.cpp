@@ -265,8 +265,6 @@ void clsObject::LookAT(VECTOR3D pOv)
 	Matrix3DRotateAxis(&fWd, roll, &M);
 	Matrix3DTransformNormal(&M, &rWd, &rWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
-
-
 }
 
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 

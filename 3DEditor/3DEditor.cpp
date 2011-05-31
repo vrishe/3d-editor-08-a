@@ -57,21 +57,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 
-	testCamera1.Follow(-145.0f);
+	//testCamera1.Follow(-145.0f);
 	//testCamera1.Pitch((float)(0.0*M_PI/180));
 	//testCamera1.setProjectionType(PT_CENTRAL);
-	testCamera2.Fly(100);
+	//testCamera2.Fly(100);
 	//testCamera2.Follow(0);
 	//testCamera2.Strafe(22);
-	testCamera2.Pitch(90.0f*(FLOAT)M_PI/180.0f);
+	//testCamera2.Pitch(90.0f*(FLOAT)M_PI/180.0f);
+
 	//testCamera3.Strafe(200);
-	
 	testCamera3.Follow(-200);
-	//testCamera3.Fly(200);
-	testCamera3.Roll(-45.0f*(FLOAT)M_PI/180.0f);
+	testCamera3.Fly(200);
+	testCamera3.Roll(-10.0f*(FLOAT)M_PI/180.0f);
 	testCamera3.Pitch(-45.0f*(FLOAT)M_PI/180.0f);
 	testCamera3.Yaw(45.0f*(FLOAT)M_PI/180.0f);
-	testCamera3.LookAT(VECTOR3D(0.f,0.f,0.f));
+//	testCamera3.LookAT(VECTOR3D(0.f,0.f,0.f));
 	//testCamera3.Strafe(-106);
 	//testCamera3.setHFov(60.0f * (FLOAT)M_PI/ 180.0f);
 
@@ -84,7 +84,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testPyramid.setColor(200, 30, 30);
 	//testPyramid.Strafe(115);
 	//testPyramid.Follow(450);
-	//testPyramid.Fly(-70);
+	testPyramid.Fly(-70);
 	//testPyramid.Yaw((float)(50.0*M_PI/180));
 
 	//testPyramid2.Strafe(-115);

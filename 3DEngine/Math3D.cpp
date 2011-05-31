@@ -153,19 +153,19 @@ void Matrix3DRotateAxis(const LPVECTOR3D axis, float rads, LPMATRIX3D rslt)
 			cosTheta	= cos(rads),
 			_1mCosTheta	= 1 - cosTheta;
 
-	rslt->_11 = axis->x * axis->x * _1mCosTheta + cosTheta;
-	rslt->_12 = axis->x * axis->y * _1mCosTheta + axis->z * sinTheta;
-	rslt->_13 = axis->x * axis->z * _1mCosTheta + axis->y * sinTheta;
+	rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
+	rslt->_12 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
+	rslt->_13 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
 	rslt->_14 = .0f;
 
-	rslt->_21 = rslt->_12;
-	rslt->_22 = axis->y * axis->y * _1mCosTheta + cosTheta;
-	rslt->_23 = axis->y * axis->z * _1mCosTheta + axis->x * sinTheta;
+	rslt->_21 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
+	rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
+	rslt->_23 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
 	rslt->_24 = .0f;
 
-	rslt->_31 = rslt->_13;
-	rslt->_32 = rslt->_23;
-	rslt->_33 = axis->z * axis->z * _1mCosTheta + cosTheta;
+	rslt->_31 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
+	rslt->_32 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
+	rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
 	rslt->_34 = .0f;
 	
 	rslt->_41 = .0f;

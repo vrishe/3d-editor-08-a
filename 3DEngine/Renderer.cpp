@@ -157,8 +157,7 @@ BOOL clsViewport::Render()
 	{
 		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
-		scenePolyCount	= Scene->getPolygonsCount();
-		sceneVertCount	= Scene->getVerticesCount();
+//		sceneVertCount	= Scene->getVerticesCount();
 
 		// prepearing camera
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
@@ -229,7 +228,10 @@ BOOL clsViewport::Render()
 					tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 					tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 					tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-					scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
+					VECTOR3D normal(tmp.Normal(2));
+					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
+					if (cosA >= -1 && cosA <= 0)
+						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 				}
 			}
 			else {
@@ -277,6 +279,7 @@ BOOL clsViewport::Render()
 						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
 					);
 
+			scenePolyCount = scenePolyBuffer.size();
 			for (UINT i = 0; i < scenePolyCount; i++ ) { // AAaaaaand..... Here we go again! 
 				if ( scenePolyBuffer[i].first.first.z > 0
 				  && scenePolyBuffer[i].first.first.z <= 1
@@ -299,10 +302,6 @@ BOOL clsViewport::Render()
 				  && scenePolyBuffer[i].first.third.y >= 0
 			   	  && scenePolyBuffer[i].first.third.y <= clientRect.bottom)
 				{ 
-					VECTOR3D normal(scenePolyBuffer[i].first.Normal(2));
-					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
-					if (cosA >= -1 && cosA <= 0) 
-					{
 						hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
 						vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
 						vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
@@ -315,7 +314,6 @@ BOOL clsViewport::Render()
 
 						Polygon( hMemDC, vert2DDrawBuffer, 3 );
 						SelectObject(hMemDC, hBrOld);
-					}
 				}
 			}
 
