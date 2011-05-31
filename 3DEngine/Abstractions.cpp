@@ -296,9 +296,10 @@ void clsObject::LookAt(VECTOR3D lookAt)
 	{
 		if ( lookDirXYProjLen > EPSILON )
 		{
-			yawCosine	= Vector3DMultS(&lookDirXYProj, &yAxis) 
+			yawCosine	= Vector3DMultS(&lookDirXYProj, &xAxis) 
 						/ lookDirXYProjLen;
-			yaw			= acos(yawCosine) - (float)M_PI_2;
+			yaw			= -acos(yawCosine) 
+						* ((lookDirXYProj.y < 0) - (lookDirXYProj.y >= 0));
 
 			pitchCosine = Vector3DMultS(&lookDir, &lookDirXYProj) 
 						/ (lookDirLen * lookDirXYProjLen);
@@ -308,7 +309,7 @@ void clsObject::LookAt(VECTOR3D lookAt)
 		{
 			pitch = (float)M_PI_2;
 		}
-		pitch *= ((lookDir.z >= .0f) - (lookDir.z < .0f));
+		pitch *= ((lookDir.z < .0f) - (lookDir.z >= .0f));
 	}
 
 	roll	= -roll;

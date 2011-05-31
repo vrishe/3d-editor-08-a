@@ -62,17 +62,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera1);
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
-	//testScene.AddObject(&testPyramid2);
 	//testScene.AddObject(&testCone);
 	//testScene.AddObject(&testExCone);
 	//testScene.AddObject(&testHole);
 
 	// Objects here:
 	testPyramid1.setColor(200, 30, 30);
-	testPyramid1.Fly(-50.0f);
+	testPyramid1.Translate(.0f, .0f, -50.0f);
 
 	testPyramid2.setColor(30, 200, 30);
-	testPyramid2.PitchTo(90.0f * (FLOAT)M_PI/ 180.0f);
+	//testPyramid2.PitchTo(90.0f * (FLOAT)M_PI/ 180.0f);
 	testPyramid2.Translate(-150.0f, .0f, -170.0f);
 
 	testPyramid3.setColor(170, 170, 170);
@@ -84,10 +83,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testCamera1.Follow(-200);
 	testCamera1.setProjectionType(PT_CENTRAL);
 
-	testCamera2.YawTo(-90.0f * (FLOAT)M_PI/ 180.0f);
+	testCamera2.YawTo(90.0f * (FLOAT)M_PI/ 180.0f);
 	testCamera2.Fly(-65);
 	testCamera2.Strafe(-30);
-	testCamera2.Follow(-200);
+	testCamera2.Follow(200);
 
 	testCamera3.Fly(200);
 	testCamera3.Follow(-200);
@@ -132,7 +131,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		//testPyramid2.LookAt(&testPyramid1);
+		testPyramid2.LookAt(&testPyramid1);
 	}
 
 	delete testPool; 
