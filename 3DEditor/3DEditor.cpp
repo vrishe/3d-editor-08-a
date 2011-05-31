@@ -13,11 +13,12 @@ UINT				ufWidth, ufHeight;
 LPRENDER_POOL		testPool;
 SCENE3D				testScene;
 CAMERA3D			testCamera1, testCamera2, testCamera3;
-Pyramid				testPyramid(140.0f, 140.0f, 140.0f, 140.0f, 140.0f),
-					testPyramid2(50.0f, 140.0f, 110.0f, 90.0f, 75.0f);
-Cone				testCone(30.0f, 75.0f, 50.0f, 24);
-ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
-Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
+Pyramid				testPyramid1(100.0f, 100.0f, 100.0f, 100.0f, 100.0f),
+					testPyramid2(100.0f, 100.0f, 100.0f, 100.0f, 100.0f),
+					testPyramid3(100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
+//Cone				testCone(30.0f, 75.0f, 50.0f, 24);
+//ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
+//Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
 // ===================================
@@ -54,28 +55,46 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	testScene.setAmbientColor(132, 128, 128);
 
-	testScene.AddObject(&testPyramid);
+	// Scene assembly here:
+	testScene.AddObject(&testPyramid1);
+	testScene.AddObject(&testPyramid2);
+	testScene.AddObject(&testPyramid3);
+	testScene.AddObject(&testCamera1);
+	testScene.AddObject(&testCamera2);
+	testScene.AddObject(&testCamera3);
 	//testScene.AddObject(&testPyramid2);
 	//testScene.AddObject(&testCone);
 	//testScene.AddObject(&testExCone);
 	//testScene.AddObject(&testHole);
-	testScene.AddObject(&testCamera1);
-	testScene.AddObject(&testCamera2);
-	testScene.AddObject(&testCamera3);
 
-	testPyramid.setColor(200, 30, 30);
-	testPyramid.Fly(-70);
-	//testPyramid.Strafe(-70);
+	// Objects here:
+	testPyramid1.setColor(200, 30, 30);
+	testPyramid1.Fly(-50.0f);
 
+	testPyramid2.setColor(30, 200, 30);
+	testPyramid2.PitchTo(90.0f * (FLOAT)M_PI/ 180.0f);
+	testPyramid2.Translate(-150.0f, .0f, -170.0f);
+
+	testPyramid3.setColor(170, 170, 170);
+	testPyramid3.Fly(-50.0f);
+	testPyramid3.Follow(120.0f);
+	
+	// Cameras here:
+	testCamera1.Fly(-65);
 	testCamera1.Follow(-200);
-	testCamera3.Follow(-200);
-	//testCamera3.Fly(200);
-	//testCamera3.PitchTo(-45.0f * (FLOAT)M_PI/180.0f);
-	//testCamera3.LookAt(VECTOR3D(1.0f, 1.0f, .3f));
-	//testCamera2.LookAt(&testPyramid);
-	//testCamera3.LookAt(&testPyramid);
-	//testCamera2.Follow(200);
+	testCamera1.setProjectionType(PT_CENTRAL);
 
+	testCamera2.YawTo(-90.0f * (FLOAT)M_PI/ 180.0f);
+	testCamera2.Fly(-65);
+	testCamera2.Strafe(-30);
+	testCamera2.Follow(-200);
+
+	testCamera3.Fly(200);
+	testCamera3.Follow(-200);
+	testCamera3.LookAt(&testPyramid1);
+	testCamera3.setProjectionType(PT_CENTRAL);
+
+	// Viewports here:
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
@@ -84,7 +103,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				testCamera1.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				20, 
@@ -92,7 +111,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				testCamera2.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -113,6 +132,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		//testPyramid2.LookAt(&testPyramid1);
 	}
 
 	delete testPool; 
@@ -147,27 +167,23 @@ LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case VK_LEFT:
-				testPyramid.Strafe(-strafeDir);
-				//testCamera2.LookAt(&testPyramid);
-				//testCamera3.LookAt(&testPyramid);
+				testPyramid1.Strafe(-strafeDir);
+				testCamera3.LookAt(&testPyramid1);
 			break;
 
 		case VK_RIGHT:
-				testPyramid.Strafe(strafeDir);
-				//testCamera2.LookAt(&testPyramid);
-				//testCamera3.LookAt(&testPyramid);
+				testPyramid1.Strafe(strafeDir);
+				testCamera3.LookAt(&testPyramid1);
 			break;
 
 		case VK_DOWN:
-				testPyramid.Fly(-flyDir);
-				//testCamera2.LookAt(&testPyramid);
-				//testCamera3.LookAt(&testPyramid);
+				testPyramid1.Fly(-flyDir);
+				testCamera3.LookAt(&testPyramid1);
 			break;
 
 		case VK_UP:
-				testPyramid.Fly(flyDir);
-				//testCamera2.LookAt(&testPyramid);
-				//testCamera3.LookAt(&testPyramid);
+				testPyramid1.Fly(flyDir);
+				testCamera3.LookAt(&testPyramid1);
 			break;
 	}
 	mainForm.Invalidate();

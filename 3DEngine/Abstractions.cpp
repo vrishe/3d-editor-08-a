@@ -279,13 +279,10 @@ void clsObject::RollAt(float angle)
 void clsObject::LookAt(VECTOR3D lookAt)
 {
 	MATRIX3D M;
-	VECTOR3D	yAxis(.0f, 1.0f, .0f),
+	VECTOR3D	xAxis(1.0f, .0f, .0f),
+				yAxis(.0f, 1.0f, .0f),
 				zAxis(.0f, .0f, 1.0f),
-				lookDir(
-					lookAt.x - pos.x,
-					lookAt.y - pos.y,
-					lookAt.z - pos.z
-				),
+				lookDir = lookAt - pos,
 				lookDirXYProj(lookDir.x, lookDir.y, .0f);
 
 	float		lookDirLen			= Vector3DLength(&lookDir),
@@ -293,44 +290,38 @@ void clsObject::LookAt(VECTOR3D lookAt)
 				yawCosine,
 				pitchCosine;
 
-	Matrix3DRotateAxis(&fWd, -roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-				
+	yaw		= .0f;
+	pitch	= .0f;
 	if ( lookDirLen > EPSILON )
 	{
 		if ( lookDirXYProjLen > EPSILON )
 		{
 			yawCosine	= Vector3DMultS(&lookDirXYProj, &yAxis) 
 						/ lookDirXYProjLen;
-			yaw			= (float)M_PI_2 - acos(yawCosine);
+			yaw			= acos(yawCosine) - (float)M_PI_2;
 
-			pitchCosine = Vector3DMultS(&lookDir, &zAxis) 
-						/ lookDirLen;
-			pitch		= (float)M_PI_2 - acos(pitchCosine);
+			pitchCosine = Vector3DMultS(&lookDir, &lookDirXYProj) 
+						/ (lookDirLen * lookDirXYProjLen);
+			pitch		= acos(pitchCosine);
 		}
 		else
 		{
-			pitch = (float)M_PI_2 * ((lookDir.z >= .0f) - (lookDir.z < .0f));
+			pitch = (float)M_PI_2;
 		}
-	}
-	else
-	{	
-		pitch	= .0f;
-		yaw		= .0f;
+		pitch *= ((lookDir.z >= .0f) - (lookDir.z < .0f));
 	}
 
-	Matrix3DRotateAxis(&uWd, yaw, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DMultV(&uWd, &fWd, &rWd);
+	roll	= -roll;
+	Roll();
 
-	Matrix3DRotateAxis(&rWd, pitch, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+	fWd		= xAxis;
+	rWd		= yAxis;
+	uWd		= zAxis;
+	Yaw();
+	Pitch();
 
-	Matrix3DRotateAxis(&fWd, roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+	roll = -roll;
+	Roll();
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }
@@ -736,11 +727,6 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 		for ( size_t i = 0; i < vertCount; i++ )
 		{
 			vertex = vertices[i];
-			Matrix3DTransformCoord(
-					&mScalePos,
-					&vertex,
-					&vertex
-				);
 			Matrix3DTransformNormal(
 					&mPitchRot,
 					&vertex,
@@ -753,6 +739,11 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 				);
 			Matrix3DTransformNormal(
 					&mRollRot,
+					&vertex,
+					&vertex
+				);
+			Matrix3DTransformCoord(
+					&mScalePos,
 					&vertex,
 					&vertex
 				);

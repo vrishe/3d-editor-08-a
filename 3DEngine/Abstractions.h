@@ -139,6 +139,10 @@ public:
 	void Strafe(float units);	// Along local-y	
 	void Fly(float units);		// Along local-z
 
+	//void ScaleByX(float factor);
+	//void ScaleByY(float factor);
+	//void ScaleByZ(float factor);
+
 	void ScaleByX(float factor);
 	void ScaleByY(float factor);
 	void ScaleByZ(float factor);
