@@ -286,43 +286,51 @@ void clsObject::LookAt(VECTOR3D lookAt)
 					lookAt.y - pos.y,
 					lookAt.z - pos.z
 				),
-				lookDirXYProj(lookDir.x, lookDir.y, .0f),
-				lookDirXZProj(lookDir.x, .0f, lookDir.z);
+				lookDirXYProj(lookDir.x, lookDir.y, .0f);
 
 	float		lookDirLen			= Vector3DLength(&lookDir),
 				lookDirXYProjLen	= Vector3DLength(&lookDirXYProj),
-				lookDirXZProjLen	= Vector3DLength(&lookDirXZProj),
 				yawCosine,
 				pitchCosine;
+
+	Matrix3DRotateAxis(&fWd, -roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 				
 	if ( lookDirLen > EPSILON )
 	{
-		Matrix3DRotateAxis(&fWd, -roll, &M);
-		Matrix3DTransformNormal(&M, &rWd, &rWd);
-		Vector3DMultV(&fWd, &rWd, &uWd);
-
 		if ( lookDirXYProjLen > EPSILON )
 		{
-			yawCosine = Vector3DMultS(&lookDirXYProj, &yAxis) / lookDirXYProjLen;
-			yaw = acos(yawCosine) - (FLOAT)M_PI_2;
-			Matrix3DRotateAxis(&uWd, yaw, &M);
-			Matrix3DTransformNormal(&M, &fWd, &fWd);
-			Vector3DMultV(&uWd, &fWd, &rWd);
-		}
+			yawCosine	= Vector3DMultS(&lookDirXYProj, &yAxis) 
+						/ lookDirXYProjLen;
+			yaw			= (float)M_PI_2 - acos(yawCosine);
 
-		if ( lookDirXZProjLen > EPSILON )
+			pitchCosine = Vector3DMultS(&lookDir, &zAxis) 
+						/ lookDirLen;
+			pitch		= (float)M_PI_2 - acos(pitchCosine);
+		}
+		else
 		{
-			pitchCosine = Vector3DMultS(&lookDirXZProj, &zAxis) / lookDirXZProjLen;
-			pitch = (FLOAT)M_PI_2 - acos(pitchCosine);
-			Matrix3DRotateAxis(&rWd, pitch, &M);
-			Matrix3DTransformNormal(&M, &fWd, &fWd);
-			Vector3DMultV(&fWd, &rWd, &uWd);
+			pitch = (float)M_PI_2 * ((lookDir.z >= .0f) - (lookDir.z < .0f));
 		}
-
-		Matrix3DRotateAxis(&fWd, roll, &M);
-		Matrix3DTransformNormal(&M, &rWd, &rWd);
-		Vector3DMultV(&fWd, &rWd, &uWd);
 	}
+	else
+	{	
+		pitch	= .0f;
+		yaw		= .0f;
+	}
+
+	Matrix3DRotateAxis(&uWd, yaw, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Vector3DMultV(&uWd, &fWd, &rWd);
+
+	Matrix3DRotateAxis(&rWd, pitch, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+
+	Matrix3DRotateAxis(&fWd, roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }

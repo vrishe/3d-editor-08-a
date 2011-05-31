@@ -64,15 +64,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera3);
 
 	testPyramid.setColor(200, 30, 30);
-	testPyramid.Fly(400);
-	testPyramid.Strafe(-100);
+	testPyramid.Fly(-70);
+	//testPyramid.Strafe(-70);
 
 	testCamera1.Follow(-200);
 	testCamera3.Follow(-200);
-	testCamera3.Fly(200);
+	//testCamera3.Fly(200);
 	//testCamera3.PitchTo(-45.0f * (FLOAT)M_PI/180.0f);
 	//testCamera3.LookAt(VECTOR3D(1.0f, 1.0f, .3f));
-	testCamera3.LookAt(&testPyramid);
+	//testCamera2.LookAt(&testPyramid);
+	//testCamera3.LookAt(&testPyramid);
+	//testCamera2.Follow(200);
 
 	ufWidth -= 40;
 	ufHeight -= 40;
@@ -129,19 +131,47 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
- 	if ( wParam == VK_SPACE )
+	FLOAT	strafeDir	= 3.0f,
+			flyDir		= 3.0f;
+	switch ( wParam )
 	{
- 		if ( testCamera3.getProjectionType() == PT_PARALLEL ) {
-			testCamera1.setProjectionType(PT_CENTRAL);
-			testCamera3.setProjectionType(PT_CENTRAL);
-		}
-		else {
-			testCamera1.setProjectionType(PT_PARALLEL);
-			testCamera3.setProjectionType(PT_PARALLEL);
-		}
+		case VK_SPACE:
+ 			if ( testCamera3.getProjectionType() == PT_PARALLEL ) {
+				testCamera1.setProjectionType(PT_CENTRAL);
+				testCamera3.setProjectionType(PT_CENTRAL);
+			}
+			else {
+				testCamera1.setProjectionType(PT_PARALLEL);
+				testCamera3.setProjectionType(PT_PARALLEL);
+			}
+			break;
 
-		mainForm.Invalidate();
+		case VK_LEFT:
+				testPyramid.Strafe(-strafeDir);
+				//testCamera2.LookAt(&testPyramid);
+				//testCamera3.LookAt(&testPyramid);
+			break;
+
+		case VK_RIGHT:
+				testPyramid.Strafe(strafeDir);
+				//testCamera2.LookAt(&testPyramid);
+				//testCamera3.LookAt(&testPyramid);
+			break;
+
+		case VK_DOWN:
+				testPyramid.Fly(-flyDir);
+				//testCamera2.LookAt(&testPyramid);
+				//testCamera3.LookAt(&testPyramid);
+			break;
+
+		case VK_UP:
+				testPyramid.Fly(flyDir);
+				//testCamera2.LookAt(&testPyramid);
+				//testCamera3.LookAt(&testPyramid);
+			break;
 	}
+	mainForm.Invalidate();
+
 	return 0L;
 }
 
