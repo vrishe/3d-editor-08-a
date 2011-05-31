@@ -57,23 +57,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 
-	//testCamera1.Follow(-145.0f);
-	//testCamera1.Pitch((float)(0.0*M_PI/180));
-	//testCamera1.setProjectionType(PT_CENTRAL);
-	//testCamera2.Fly(100);
-	//testCamera2.Follow(0);
-	//testCamera2.Strafe(22);
-	//testCamera2.Pitch(90.0f*(FLOAT)M_PI/180.0f);
-
-	//testCamera3.Strafe(200);
+	testCamera1.Follow(-200);
 	testCamera3.Follow(-200);
-	testCamera3.Fly(200);
-	testCamera3.Roll(-10.0f*(FLOAT)M_PI/180.0f);
-	testCamera3.Pitch(-45.0f*(FLOAT)M_PI/180.0f);
-	testCamera3.Yaw(45.0f*(FLOAT)M_PI/180.0f);
-//	testCamera3.LookAT(VECTOR3D(0.f,0.f,0.f));
-	//testCamera3.Strafe(-106);
-	//testCamera3.setHFov(60.0f * (FLOAT)M_PI/ 180.0f);
+	//testCamera3.Fly(200);
+	//testCamera3.Pitch(-20.0f * (FLOAT)M_PI/180.0f);
+	testCamera3.LookAt(VECTOR3D(1.0f, 1.0f, .3f));
 
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testPyramid2);
@@ -82,44 +70,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//testScene.AddObject(&testHole);
 
 	testPyramid.setColor(200, 30, 30);
-	//testPyramid.Strafe(115);
-	//testPyramid.Follow(450);
 	testPyramid.Fly(-70);
-	//testPyramid.Yaw((float)(50.0*M_PI/180));
-
-	//testPyramid2.Strafe(-115);
-	//testPyramid2.Follow(200);
-
-	//testExCone.setColor(20, 150, 30);
-	//testExCone.Strafe(-75);
-	//testExCone.Fly(40);
-	//testExCone.Roll((float)(50.0*M_PI/180));
-	//
-	//testHole.setColor(100, 50, 100);
-	//testHole.Strafe(175);
-	//testHole.Follow(10);
-	//testHole.Fly(80);
-	//testHole.Pitch((float)(35.0*M_PI/180));
-	//testHole.ScaleByX(1.3f);
 
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	//testPool->addViewport(
-	//			20, 20,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			testCamera1.objID(),
-	//			RM_WIREFRAME
-	//		);
-	//testPool->addViewport(
-	//			20, 
-	//			25 + ufHeight / 2,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			testCamera2.objID(),
-	//			RM_WIREFRAME
-	//		);
+	testPool->addViewport(
+				20, 20,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				testCamera1.objID(),
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				20, 
+				25 + ufHeight / 2,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				testCamera2.objID(),
+				RM_WIREFRAME
+			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
 				20,

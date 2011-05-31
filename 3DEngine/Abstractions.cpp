@@ -242,29 +242,47 @@ void clsObject::Roll(float angle)
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
-void clsObject::LookAT(VECTOR3D pOv)
+void clsObject::LookAt(VECTOR3D lookAt)
 {
 	MATRIX3D M;
-	VECTOR3D	xy(pOv.x, pOv.y, .0f),
-				xz(pOv.x, .0f, pOv.z);
+	VECTOR3D	xAxis(1.0f, .0f, .0f),
+				lookAtXYProj(lookAt.x, lookAt.y, .0f),
+				lookAtXZProj(lookAt.x, .0f, lookAt.z);
 
-	Matrix3DRotateAxis(&fWd, -roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+	float		lookAtLen			= Vector3DLength(&lookAt),
+				lookAtXYProjLen		= Vector3DLength(&lookAtXYProj),
+				lookAtXZProjLen		= Vector3DLength(&lookAtXZProj),
+				yawCosine,
+				pitchCosine;
+				
+	if ( lookAtLen > EPSILON )
+	{
+		Matrix3DRotateAxis(&fWd, -roll, &M);
+		Matrix3DTransformNormal(&M, &rWd, &rWd);
+		Vector3DMultV(&fWd, &rWd, &uWd);
 
-	yaw = acos(Vector3DMultS(&xy, &pOv) / Vector3DLength(&xy) * Vector3DLength(&pOv));
-	Matrix3DRotateAxis(&uWd, yaw, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DMultV(&uWd, &fWd, &rWd);
+		if ( lookAtXYProjLen > EPSILON )
+		{
+			yawCosine = Vector3DMultS(&lookAtXYProj, &xAxis) / lookAtXYProjLen;
+			yaw = acos(yawCosine) * ((yawCosine >= .0f) - (yawCosine < 0));
+			Matrix3DRotateAxis(&uWd, yaw, &M);
+			Matrix3DTransformNormal(&M, &fWd, &fWd);
+			Vector3DMultV(&uWd, &fWd, &rWd);
+		}
 
-	pitch = acos(Vector3DMultS(&xz, &pOv) / Vector3DLength(&xz) * Vector3DLength(&pOv));
-	Matrix3DRotateAxis(&rWd, pitch, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+		if ( lookAtXZProjLen > EPSILON )
+		{
+			pitchCosine = Vector3DMultS(&lookAtXZProj, &xAxis) / lookAtXZProjLen;
+			pitch = acos(pitchCosine) * ((pitchCosine >= .0f) - (pitchCosine < 0));
+			Matrix3DRotateAxis(&rWd, pitch, &M);
+			Matrix3DTransformNormal(&M, &fWd, &fWd);
+			Vector3DMultV(&fWd, &rWd, &uWd);
+		}
 
-	Matrix3DRotateAxis(&fWd, roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+		Matrix3DRotateAxis(&fWd, roll, &M);
+		Matrix3DTransformNormal(&M, &rWd, &rWd);
+		Vector3DMultV(&fWd, &rWd, &uWd);
+	}
 }
 
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
