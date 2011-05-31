@@ -102,6 +102,10 @@ protected:
 
 	CONSTRAINTS		moveConst;
 
+	void Pitch();
+	void Yaw();
+	void Roll();
+
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
 	clsObject(
@@ -126,18 +130,32 @@ public:
 
 	VECTOR3D getPosition();
 
-	void Follow(float units);	// change Y coord
-	void Strafe(float units);	// change X coord
-	void Fly(float units);		// change Z coord
+	// Absolute translation
+	void Translate(const LPVECTOR3D tV);
+	void Translate(float tX, float tY, float tZ);	 
+
+	//Relative translation
+	void Follow(float units);	// Along local-x
+	void Strafe(float units);	// Along local-y	
+	void Fly(float units);		// Along local-z
 
 	void ScaleByX(float factor);
 	void ScaleByY(float factor);
 	void ScaleByZ(float factor);
 
-	void Pitch(float angle);	// right (Y)
-	void Yaw(float angle);		// up	 (Z)
-	void Roll(float angle);		// front (X)
+	// Absolute rotation
+	void PitchTo(float angle);	// Along local-y
+	void YawTo(float angle);	// Along local-z
+	void RollTo(float angle);	// Along local-x
+
+	// Relative rortaion
+	void PitchAt(float angle);
+	void YawAt(float angle);
+	void RollAt(float angle);
+
+	// Take a look at point or object
 	void LookAt(VECTOR3D lookAt);
+	void LookAt(const clsObject *objToLookAt);
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
 	void GetRollRotationMatrix(LPMATRIX3D mOut);

@@ -53,24 +53,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
 	testScene.setAmbientColor(132, 128, 128);
-	testScene.AddObject(&testCamera1);
-	testScene.AddObject(&testCamera2);
-	testScene.AddObject(&testCamera3);
-
-	testCamera1.Follow(-200);
-	testCamera3.Follow(-200);
-	//testCamera3.Fly(200);
-	//testCamera3.Pitch(-20.0f * (FLOAT)M_PI/180.0f);
-	testCamera3.LookAt(VECTOR3D(1.0f, 1.0f, .3f));
 
 	testScene.AddObject(&testPyramid);
 	//testScene.AddObject(&testPyramid2);
 	//testScene.AddObject(&testCone);
 	//testScene.AddObject(&testExCone);
 	//testScene.AddObject(&testHole);
+	testScene.AddObject(&testCamera1);
+	testScene.AddObject(&testCamera2);
+	testScene.AddObject(&testCamera3);
 
 	testPyramid.setColor(200, 30, 30);
-	testPyramid.Fly(-70);
+	testPyramid.Fly(400);
+	testPyramid.Strafe(-100);
+
+	testCamera1.Follow(-200);
+	testCamera3.Follow(-200);
+	testCamera3.Fly(200);
+	//testCamera3.PitchTo(-45.0f * (FLOAT)M_PI/180.0f);
+	//testCamera3.LookAt(VECTOR3D(1.0f, 1.0f, .3f));
+	testCamera3.LookAt(&testPyramid);
 
 	ufWidth -= 40;
 	ufHeight -= 40;

@@ -200,18 +200,22 @@ size_t clsObject::objID()	{ return ID; }
 
 VECTOR3D clsObject::getPosition() { return pos; }
 
-void clsObject::Follow(float units) { pos += fWd * units; }
-void clsObject::Strafe(float units) { pos += rWd * units; }
+void clsObject::Translate(const LPVECTOR3D tV) { pos = *tV; }
+void clsObject::Translate(float tX, float tY, float tZ) 
+{ 
+	pos = VECTOR3D(tX, tY, tZ); 
+}
+
+void clsObject::Follow(float units)	{ pos += fWd * units; }
+void clsObject::Strafe(float units)	{ pos += rWd * units; }
 void clsObject::Fly(float units)	{ pos += uWd * units; }
 
 void clsObject::ScaleByX(float factor) { xScale += factor; }
 void clsObject::ScaleByY(float factor) { yScale += factor; }
 void clsObject::ScaleByZ(float factor) { zScale += factor; }
 
-void clsObject::Pitch(float angle) 
+void clsObject::Pitch()
 {
-	pitch += angle;
-
 	MATRIX3D M;
 	
 	Matrix3DRotateAxis(&rWd, pitch, &M);
@@ -219,10 +223,9 @@ void clsObject::Pitch(float angle)
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
-void clsObject::Yaw(float angle) 
-{
-	yaw += angle;
 
+void clsObject::Yaw()
+{
 	MATRIX3D M;
 
 	Matrix3DRotateAxis(&uWd, yaw, &M);
@@ -230,10 +233,9 @@ void clsObject::Yaw(float angle)
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&uWd, &fWd, &rWd);
 }
-void clsObject::Roll(float angle) 
-{
-	roll += angle;
 
+void clsObject::Roll()
+{
 	MATRIX3D M;
 
 	Matrix3DRotateAxis(&fWd, roll, &M);
@@ -242,38 +244,76 @@ void clsObject::Roll(float angle)
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
+void clsObject::PitchTo(float angle) 
+{
+	pitch = angle;
+	Pitch();
+}
+void clsObject::YawTo(float angle) 
+{
+	yaw = angle;
+	Yaw();
+}
+void clsObject::RollTo(float angle) 
+{
+	roll = angle;
+	Roll();
+}
+
+void clsObject::PitchAt(float angle) 
+{
+	pitch += angle;
+	Pitch();
+}
+void clsObject::YawAt(float angle) 
+{
+	yaw += angle;
+	Yaw();
+}
+void clsObject::RollAt(float angle) 
+{
+	roll += angle;
+	Roll();
+}
+
 void clsObject::LookAt(VECTOR3D lookAt)
 {
 	MATRIX3D M;
-	VECTOR3D	xAxis(1.0f, .0f, .0f),
-				lookAtXYProj(lookAt.x, lookAt.y, .0f),
-				lookAtXZProj(lookAt.x, .0f, lookAt.z);
+	VECTOR3D	yAxis(.0f, 1.0f, .0f),
+				zAxis(.0f, .0f, 1.0f),
+				lookDir(
+					lookAt.x - pos.x,
+					lookAt.y - pos.y,
+					lookAt.z - pos.z
+				),
+				lookDirXYProj(lookDir.x, lookDir.y, .0f),
+				lookDirXZProj(lookDir.x, .0f, lookDir.z);
 
-	float		lookAtLen			= Vector3DLength(&lookAt),
-				lookAtXYProjLen		= Vector3DLength(&lookAtXYProj),
-				lookAtXZProjLen		= Vector3DLength(&lookAtXZProj),
+	float		lookDirLen			= Vector3DLength(&lookDir),
+				lookDirXYProjLen	= Vector3DLength(&lookDirXYProj),
+				lookDirXZProjLen	= Vector3DLength(&lookDirXZProj),
 				yawCosine,
 				pitchCosine;
 				
-	if ( lookAtLen > EPSILON )
+	if ( lookDirLen > EPSILON )
 	{
 		Matrix3DRotateAxis(&fWd, -roll, &M);
 		Matrix3DTransformNormal(&M, &rWd, &rWd);
 		Vector3DMultV(&fWd, &rWd, &uWd);
 
-		if ( lookAtXYProjLen > EPSILON )
+		if ( lookDirXYProjLen > EPSILON )
 		{
-			yawCosine = Vector3DMultS(&lookAtXYProj, &xAxis) / lookAtXYProjLen;
-			yaw = acos(yawCosine) * ((yawCosine >= .0f) - (yawCosine < 0));
+			yawCosine = Vector3DMultS(&lookDirXYProj, &yAxis) / lookDirXYProjLen;
+			yaw = acos(yawCosine) - (FLOAT)M_PI_2;
 			Matrix3DRotateAxis(&uWd, yaw, &M);
 			Matrix3DTransformNormal(&M, &fWd, &fWd);
 			Vector3DMultV(&uWd, &fWd, &rWd);
 		}
 
-		if ( lookAtXZProjLen > EPSILON )
+		if ( lookDirXZProjLen > EPSILON )
 		{
-			pitchCosine = Vector3DMultS(&lookAtXZProj, &xAxis) / lookAtXZProjLen;
-			pitch = acos(pitchCosine) * ((pitchCosine >= .0f) - (pitchCosine < 0));
+			pitchCosine = Vector3DMultS(&lookDirXZProj, &zAxis) / lookDirXZProjLen;
+			pitch = (FLOAT)M_PI_2 - acos(pitchCosine);
 			Matrix3DRotateAxis(&rWd, pitch, &M);
 			Matrix3DTransformNormal(&M, &fWd, &fWd);
 			Vector3DMultV(&fWd, &rWd, &uWd);
@@ -284,6 +324,8 @@ void clsObject::LookAt(VECTOR3D lookAt)
 		Vector3DMultV(&fWd, &rWd, &uWd);
 	}
 }
+
+void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }
 
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
 {
