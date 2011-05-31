@@ -8,7 +8,7 @@ clsCamera::clsCamera() : clsObject(CLS_CAMERA)
 	projectionType	= PT_PARALLEL;
 	hFOV			= (float)M_PI_2;
 	vFOV			= (float)M_PI_2;
-	nearClip		= 350.0F;
+	nearClip		= .0F;
 	farClip			= 1000.0F;
 }
 
@@ -20,7 +20,7 @@ clsCamera::clsCamera(
 	projectionType	= PT_PARALLEL;
 	hFOV			= (float)M_PI_2;
 	vFOV			= (float)M_PI_2;
-	nearClip		= 350.0f;
+	nearClip		= .0f;
 	farClip			= 1000.0F;
 
 	setProjectionType(projType);

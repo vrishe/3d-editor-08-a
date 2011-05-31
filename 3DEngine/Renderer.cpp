@@ -299,7 +299,7 @@ BOOL clsViewport::Render()
 				  && scenePolyBuffer[i].first.third.y >= 0
 			   	  && scenePolyBuffer[i].first.third.y <= clientRect.bottom)
 				{ 
-					VECTOR3D normal(scenePolyBuffer[i].first.Normal(1));
+					VECTOR3D normal(scenePolyBuffer[i].first.Normal(2));
 					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
 					if (cosA >= -1 && cosA <= 0) 
 					{

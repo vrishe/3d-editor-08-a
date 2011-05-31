@@ -57,11 +57,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera2);
 	testScene.AddObject(&testCamera3);
 
-	testCamera1.setNearCP(1.0);
-	testCamera2.setNearCP(1.0);
-	testCamera3.setNearCP(1.0);
-
-	//testCamera1.Fly(-5.0f);
+	testCamera1.Follow(-145.0f);
 	//testCamera1.Pitch((float)(0.0*M_PI/180));
 	//testCamera1.setProjectionType(PT_CENTRAL);
 	testCamera2.Fly(100);
@@ -70,9 +66,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testCamera2.Pitch(90.0f*(FLOAT)M_PI/180.0f);
 	//testCamera3.Strafe(200);
 	
-	testCamera3.Follow(-100);
-	testCamera3.Fly(100);
+	testCamera3.Follow(-200);
+	//testCamera3.Fly(200);
+	testCamera3.Roll(-45.0f*(FLOAT)M_PI/180.0f);
 	testCamera3.Pitch(-45.0f*(FLOAT)M_PI/180.0f);
+	testCamera3.Yaw(45.0f*(FLOAT)M_PI/180.0f);
+	testCamera3.LookAT(VECTOR3D(0.f,0.f,0.f));
+	//testCamera3.Strafe(-106);
 	//testCamera3.setHFov(60.0f * (FLOAT)M_PI/ 180.0f);
 
 	testScene.AddObject(&testPyramid);
@@ -84,7 +84,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testPyramid.setColor(200, 30, 30);
 	//testPyramid.Strafe(115);
 	//testPyramid.Follow(450);
-	//testPyramid.Fly(40);
+	//testPyramid.Fly(-70);
 	//testPyramid.Yaw((float)(50.0*M_PI/180));
 
 	//testPyramid2.Strafe(-115);
@@ -105,21 +105,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	testPool->addViewport(
-				20, 20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				testCamera1.objID(),
-				RM_WIREFRAME
-			);
-	testPool->addViewport(
-				20, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				testCamera2.objID(),
-				RM_WIREFRAME
-			);
+	//testPool->addViewport(
+	//			20, 20,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			testCamera1.objID(),
+	//			RM_WIREFRAME
+	//		);
+	//testPool->addViewport(
+	//			20, 
+	//			25 + ufHeight / 2,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			testCamera2.objID(),
+	//			RM_WIREFRAME
+	//		);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
 				20,

@@ -137,6 +137,7 @@ public:
 	void Pitch(float angle);	// right (Y)
 	void Yaw(float angle);		// up	 (Z)
 	void Roll(float angle);		// front (X)
+	void LookAT(VECTOR3D pOv);
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
 	void GetRollRotationMatrix(LPMATRIX3D mOut);

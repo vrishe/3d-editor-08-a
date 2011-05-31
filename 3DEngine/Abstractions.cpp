@@ -214,7 +214,7 @@ void clsObject::Pitch(float angle)
 
 	MATRIX3D M;
 	
-	Matrix3DRotateAxis(&rWd, angle, &M);
+	Matrix3DRotateAxis(&rWd, pitch, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
@@ -225,7 +225,7 @@ void clsObject::Yaw(float angle)
 
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&uWd, angle, &M);
+	Matrix3DRotateAxis(&uWd, yaw, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&uWd, &fWd, &rWd);
@@ -236,10 +236,37 @@ void clsObject::Roll(float angle)
 
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&fWd, angle, &M);
+	Matrix3DRotateAxis(&fWd, roll, &M);
 
 	Matrix3DTransformNormal(&M, &rWd, &rWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
+}
+
+void clsObject::LookAT(VECTOR3D pOv)
+{
+	MATRIX3D M;
+	VECTOR3D	xy(pOv.x, pOv.y, .0f),
+				xz(pOv.x, .0f, pOv.z);
+
+	Matrix3DRotateAxis(&fWd, -roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+
+	yaw = acos(Vector3DMultS(&xy, &pOv) / Vector3DLength(&xy) * Vector3DLength(&pOv));
+	Matrix3DRotateAxis(&uWd, yaw, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Vector3DMultV(&uWd, &fWd, &rWd);
+
+	pitch = acos(Vector3DMultS(&xz, &pOv) / Vector3DLength(&xz) * Vector3DLength(&pOv));
+	Matrix3DRotateAxis(&rWd, pitch, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+
+	Matrix3DRotateAxis(&fWd, roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+
+
 }
 
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
