@@ -16,9 +16,9 @@ CAMERA3D			testCamera1, testCamera2, testCamera3;
 Pyramid				testPyramid1(100.0f, 100.0f, 100.0f, 100.0f, 100.0f),
 					testPyramid2(100.0f, 100.0f, 100.0f, 100.0f, 100.0f),
 					testPyramid3(100.0f, 100.0f, 100.0f, 100.0f, 100.0f);
-//Cone				testCone(30.0f, 75.0f, 50.0f, 24);
-//ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
-//Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
+Cone				testCone(30.0f, 75.0f, 50.0f, 24);
+ExCone				testExCone(40.0f, 150.0f, 120.0f, 120.0f, 13);
+Hole				testHole(30.0f, 50.0f, 30.0f, 30.0f, 10.0f, 20); 
 
 // Win API entry point:
 // ===================================
@@ -64,14 +64,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&testCamera3);
 	//testScene.AddObject(&testCone);
 	//testScene.AddObject(&testExCone);
-	//testScene.AddObject(&testHole);
+	testScene.AddObject(&testHole);
 
 	// Objects here:
 	testPyramid1.setColor(200, 30, 30);
 	testPyramid1.Translate(.0f, .0f, -50.0f);
 
 	testPyramid2.setColor(30, 200, 30);
-	//testPyramid2.PitchTo(90.0f * (FLOAT)M_PI/ 180.0f);
+	testPyramid2.PitchTo(90.0f * (FLOAT)M_PI/ 180.0f);
 	testPyramid2.Translate(-150.0f, .0f, -170.0f);
 
 	testPyramid3.setColor(170, 170, 170);

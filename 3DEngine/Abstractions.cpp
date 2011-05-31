@@ -298,8 +298,8 @@ void clsObject::LookAt(VECTOR3D lookAt)
 		{
 			yawCosine	= Vector3DMultS(&lookDirXYProj, &xAxis) 
 						/ lookDirXYProjLen;
-			yaw			= -acos(yawCosine) 
-						* ((lookDirXYProj.y < 0) - (lookDirXYProj.y >= 0));
+			yaw			= acos(yawCosine) 
+						* ((lookDirXYProj.y >= 0) - (lookDirXYProj.y < 0));
 
 			pitchCosine = Vector3DMultS(&lookDir, &lookDirXYProj) 
 						/ (lookDirLen * lookDirXYProjLen);
