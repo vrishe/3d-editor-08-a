@@ -136,7 +136,7 @@ public:
 
 	//Relative translation
 	void Follow(float units);	// Along local-x
-	void Strafe(float units);	// Along local-y	
+	void Strafe(float units);	// Along local-y
 	void Fly(float units);		// Along local-z
 
 	//void ScaleByX(float factor);

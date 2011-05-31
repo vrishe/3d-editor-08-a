@@ -85,7 +85,7 @@ VOID clsViewport::setRenderMode(RENDER_MODE renderMode) { rMode = renderMode; }
 bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
 	float s1  = (a.first.first.z + a.first.second.z + a.first.third.z) / 3;
 	float s2  = (b.first.first.z + b.first.second.z + b.first.third.z) / 3;
-	if ( s1 < s2 )
+	if ( s1 > s2 )
 		return true;
 	return false;
 }
