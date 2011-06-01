@@ -157,6 +157,10 @@ public:
 	void YawAt(float angle);
 	void RollAt(float angle);
 
+	void RotateX(float angle);
+	void RotateY(float angle);
+	void RotateZ(float angle);
+
 	// Take a look at point or object
 	void LookAt(VECTOR3D lookAt);
 	void LookAt(const clsObject *objToLookAt);

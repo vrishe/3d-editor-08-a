@@ -276,6 +276,16 @@ void clsObject::RollAt(float angle)
 	Roll();
 }
 
+void clsObject::RotateX(float angle) {
+	MATRIX3D M;
+
+	Matrix3DRotateAxis(&VECTOR3D(1.f, 0.f, 0.f), angle, &M);
+
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Matrix3DTransformNormal(&M, &uWd, &uWd); 
+}
+
 void clsObject::LookAt(VECTOR3D lookAt)
 {
 	MATRIX3D M;

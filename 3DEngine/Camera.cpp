@@ -66,13 +66,13 @@ void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 				vU(.0f, .0f, 1.0f);
 	MATRIX3D	M;
 	
-	Matrix3DRotateAxis(&vR, -pitch, &M);
-	Matrix3DTransformNormal(&M, &vF, &vF);
-	Vector3DMultV(&vF, &vR, &vU);
-
 	Matrix3DRotateAxis(&vU, -yaw, &M);
 	Matrix3DTransformNormal(&M, &vF, &vF);
 	Vector3DMultV(&vU, &vF, &vR);
+
+	Matrix3DRotateAxis(&vR, -pitch, &M);
+	Matrix3DTransformNormal(&M, &vF, &vF);
+	Vector3DMultV(&vF, &vR, &vU);
 
 	Matrix3DRotateAxis(&vF, -roll, &M);
 	Matrix3DTransformNormal(&M, &vR, &vR);
