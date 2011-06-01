@@ -376,6 +376,20 @@ DWORD clsControl::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Repla
 	return S_DONE;
 }
 
+EVENT_FUNC clsControl::ObtainEventHandler(UINT Event)
+{
+	EVENT_FUNC_MAP::iterator finder = EventHandlers.find(Event);
+	if ( finder != EventHandlers.end() ) return finder->second;
+	return NULL;
+}
+
+EVENT_FUNC clsControl::operator[](UINT Event)
+{
+	return ObtainEventHandler(Event);
+}
+
+//EVENT_FUNC clsControl::operator+=(
+
 VOID clsControl::ResetEventHandlers() { EventHandlers.clear(); }
 
 BOOL clsControl::Show(BOOL bRecursive)		

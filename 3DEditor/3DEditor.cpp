@@ -27,6 +27,17 @@ Microphone			testMic( 200, 80, 80 );
 // Win API entry point:
 // ===================================
 
+LRESULT button_hover(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	UINT width, height;
+	((LPCONTROL)Sender)->getSize(&width, &height);
+	((LPCONTROL)Sender)->MoveTo(
+		25 + ufWidth / 2 + rand() % ((ufWidth / 2 - 5) - width), 
+		25 + ufHeight / 2 + rand() % ((ufHeight / 2 - 5) - height) 
+	);
+	return 0L;
+}
+
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
@@ -129,7 +140,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				30,
 				&mainForm
 			);
-	testButton.setAnchors(ANCR_LEFT | ANCR_RIGHT);
+	testButton.setText(_T("Click!"));
+	testButton.AssignEventHandler(WM_MOUSEMOVE, button_hover, TRUE); 
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
@@ -150,14 +162,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
  //Form event handler functions
  //============================================================================
-LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	((LPFORM)Sender)->Validate();
 	testPool->RenderWorld();
 	return 0L;
 }
 
-LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	FLOAT	strafeDir	= 3.0f,
 			flyDir		= 3.0f;
@@ -203,25 +215,32 @@ LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_menuClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	switch (LOWORD(wParam))
 	{
-	case IDM_ABOUT:
-		((LPFORM)Sender)->DBShow(
-				MAKEINTRESOURCE(IDD_ABOUTBOX), 
-				About_DialogBox_Handler
-			);
-		break;
-	case IDM_EXIT:
-		((LPFORM)Sender)->Destroy();
-		break;
+		case IDM_ABOUT:
+			((LPFORM)Sender)->DBShow(
+					MAKEINTRESOURCE(IDD_ABOUTBOX), 
+					About_DialogBox_Handler
+				);
+			break;
+		case IDM_EXIT:
+			((LPFORM)Sender)->Destroy();
+			break;
+		case 0: 
+			((LPFORM)Sender)->MBShow(
+					_T("Okay! You've done that!"),
+					_T("Lol!"),
+					MB_OK
+				);
+			break;
 	}
 	return 0L;
 }
 
 
-LRESULT mainForm_OnDestroy(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	PostQuitMessage(0);
 	return 0;

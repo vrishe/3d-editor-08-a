@@ -57,10 +57,11 @@ enum ANCHOR {
 #define	ANCR_BOTTOMTOP		ANCR_BOTTOM | ANCR_TOP
 #define ANCR_ALL			ANCR_LEFTRIGHT | ANCR_BOTTOMTOP
 
-typedef LRESULT(*EVENT_FUNC)(LPVOID, WPARAM, LPARAM);	// Typical event handler looks like this.
+typedef LPVOID	LPOBJECT;
+typedef LRESULT(*EVENT_FUNC)(LPOBJECT, WPARAM, LPARAM);	// Typical event handler looks like this.
 typedef map<UINT, EVENT_FUNC> EVENT_FUNC_MAP;			// Short map definition.
 typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition
-	
+
 // This is a superclass which gives a ground to all
 // derived classes, which implement alternative 
 // functionality.
@@ -138,8 +139,9 @@ public:
 			EVENT_FUNC Handler, 
 			BOOL Replace 
 		);
+	EVENT_FUNC ObtainEventHandler(UINT Event);
+	EVENT_FUNC operator[](UINT Event);
 	VOID	ResetEventHandlers();
-	
 
 // Control state management.
 	BOOL	Show(BOOL bRecursive = TRUE);
