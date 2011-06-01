@@ -336,7 +336,7 @@ void clsObject::LookAt(VECTOR3D lookAt)
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }
-
+void clsObject::LookAt(float lX, float lY, float lZ) { LookAt(VECTOR3D(lX, lY, lZ)); }
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
 {
 	mOut->_41 = pos.x;

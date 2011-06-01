@@ -164,6 +164,7 @@ public:
 	// Take a look at point or object
 	void LookAt(VECTOR3D lookAt);
 	void LookAt(const clsObject *objToLookAt);
+	void LookAt(float lX, float lY, float lZ);
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
 	void GetRollRotationMatrix(LPMATRIX3D mOut);
