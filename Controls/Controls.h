@@ -77,6 +77,7 @@ private:
 					WPARAM wParam, 
 					LPARAM lParam 
 				);
+	WNDPROC			defCtrlProc;
 	EVENT_FUNC_MAP	EventHandlers;	// STL Map which maps function with an event
 	
 // Do you really think you should know about

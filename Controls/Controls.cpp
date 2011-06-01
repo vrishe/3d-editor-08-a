@@ -170,7 +170,7 @@ LRESULT CALLBACK clsControl::CtrlProc (
 
 	finder = ctrlHandled->EventHandlers.find(Event);
 	if ( finder == ctrlHandled->EventHandlers.end() )
-		return DefWindowProc(hWnd, Event, wParam, lParam);
+		return ctrlHandled->defCtrlProc(hWnd, Event, wParam, lParam);
 
 	return finder->second(ctrlHandled, wParam, lParam);	
 }
@@ -275,7 +275,11 @@ DWORD clsControl::Create(
 					- rcRealDimentions.top;
 // Sublassing process part:
 	SetLastError(0);
-	SetWindowLongPtr(hWnd, GWL_WNDPROC, PtrToLong(CtrlProc));
+	defCtrlProc = (WNDPROC)SetWindowLongPtr(
+									hWnd, 
+									GWL_WNDPROC, 
+									PtrToLong(CtrlProc)
+								);
 	SetWindowLongPtr(hWnd, GWL_USERDATA, PtrToLong(this));
 	if ( GetLastError() != 0 ) 	
 	{

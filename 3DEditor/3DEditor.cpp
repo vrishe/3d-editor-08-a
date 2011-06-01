@@ -20,9 +20,8 @@ CAMERA3D			CameraTop,
 					CameraRight, 
 					CameraPersp;
 
-Pyramid				testCubeX(25, 25, 25, 25, 25, 0, 200, 40, 40);
-Pyramid				testCubeY(25, 25, 25, 25, 25, 0, 40, 200, 40);
-Pyramid				testCubeZ(25, 25, 25, 25, 25, 0, 40, 40, 200);
+CONTROL				testButton;
+
 Microphone			testMic( 200, 80, 80 );
 
 // Win API entry point:
@@ -66,15 +65,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testMic);
-	//testScene.AddObject(&testCubeX);
-	//testScene.AddObject(&testCubeY);
-	//testScene.AddObject(&testCubeZ);
 
 	// Objects here:
-	testCubeX.Follow(100);
-	testCubeY.Strafe(100);
-	testCubeZ.Fly(100);
-
 	testMic.Fly(-120);
 	
 	// Cameras here:
@@ -118,14 +110,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				CameraRight.objID(),
 				RM_WIREFRAME
 			);
-	testPool->addViewport(
-				25 + ufWidth / 2, 
+	//testPool->addViewport(
+	//			25 + ufWidth / 2, 
+	//			25 + ufHeight / 2,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			CameraPersp.objID(),
+	//			RM_SHADEDWF
+	//		);
+
+	testButton.Create(
+				_T("button"),
+				WS_CHILD | BS_PUSHBUTTON,
+				NULL,
+				25 + ufWidth / 2,
 				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraPersp.objID(),
-				RM_SHADEDWF
+				70,
+				30,
+				&mainForm
 			);
+	testButton.setAnchors(ANCR_LEFT | ANCR_RIGHT);
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
