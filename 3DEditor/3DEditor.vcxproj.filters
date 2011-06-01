@@ -21,6 +21,9 @@
     <None Include="3DEditor.ico">
       <Filter>Файлы ресурсов</Filter>
     </None>
+    <None Include="3DEditor.exe.manifest">
+      <Filter>Файлы ресурсов</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Internal.h">
