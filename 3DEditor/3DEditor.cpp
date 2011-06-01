@@ -17,10 +17,13 @@ SCENE3D				testScene;
 
 CAMERA3D			CameraTop, 
 					CameraFront, 
-					CameraLeft, 
+					CameraRight, 
 					CameraPersp;
 
-Microphone			testMic;
+Pyramid				testCubeX(25, 25, 25, 25, 25, 0, 200, 40, 40);
+Pyramid				testCubeY(25, 25, 25, 25, 25, 0, 40, 200, 40);
+Pyramid				testCubeZ(25, 25, 25, 25, 25, 0, 40, 40, 200);
+Microphone			testMic( 200, 80, 80 );
 
 // Win API entry point:
 // ===================================
@@ -52,7 +55,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
 	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
-	//mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
+	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
 	testScene.setAmbientColor(132, 128, 128);
@@ -60,22 +63,30 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
 	testScene.AddObject(&CameraFront);
-	testScene.AddObject(&CameraLeft);
+	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testMic);
+	//testScene.AddObject(&testCubeX);
+	//testScene.AddObject(&testCubeY);
+	//testScene.AddObject(&testCubeZ);
 
 	// Objects here:
+	testCubeX.Follow(100);
+	testCubeY.Strafe(100);
+	testCubeZ.Fly(100);
+
 	testMic.Fly(-120);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
 	CameraTop.LookAt(.0f, .0f, .0f);
+	CameraTop.RollTo(90.0f * (FLOAT)M_PI / 180.0f);
 
 	CameraFront.Translate(200.0f, .0f, .0f);
 	CameraFront.LookAt(.0f, .0f, .0f);
 
-	CameraLeft.Translate(.0f, -200.0f, .0f);
-	CameraLeft.LookAt(.0f, .0f, .0f);
+	CameraRight.Translate(.0f, 200.0f, .0f);
+	CameraRight.LookAt(.0f, .0f, .0f);
 
 	CameraPersp.Translate(200.0f, 200.0f, 200.f);
 	CameraPersp.LookAt(.0f, .0f, .0f);
@@ -89,7 +100,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraTop.objID(),
-				RM_SHADED
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -97,15 +108,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraFront.objID(),
-				RM_SHADED
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				20, 
 				25 + ufHeight / 2,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				CameraLeft.objID(),
-				RM_SHADED
+				CameraRight.objID(),
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -113,7 +124,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraPersp.objID(),
-				RM_SHADED
+				RM_SHADEDWF
 			);
 	mainForm.Show();
 
@@ -142,47 +153,51 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-//LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
-//{
-//	FLOAT	strafeDir	= 3.0f,
-//			flyDir		= 3.0f;
-//	switch ( wParam )
-//	{
-//		case VK_SPACE:
-// 			if ( CameraLeft.getProjectionType() == PT_PARALLEL ) {
-//				CameraTop.setProjectionType(PT_CENTRAL);
-//				CameraLeft.setProjectionType(PT_CENTRAL);
-//			}
-//			else {
-//				CameraTop.setProjectionType(PT_PARALLEL);
-//				CameraLeft.setProjectionType(PT_PARALLEL);
-//			}
-//			break;
-//
-//		case VK_LEFT:
-//				testPyramid1.Strafe(-strafeDir);
-//				CameraLeft.LookAt(&testPyramid1);
-//			break;
-//
-//		case VK_RIGHT:
-//				testPyramid1.Strafe(strafeDir);
-//				CameraLeft.LookAt(&testPyramid1);
-//			break;
-//
-//		case VK_DOWN:
-//				testPyramid1.Fly(-flyDir);
-//				CameraLeft.LookAt(&testPyramid1);
-//			break;
-//
-//		case VK_UP:
-//				testPyramid1.Fly(flyDir);
-//				CameraLeft.LookAt(&testPyramid1);
-//			break;
-//	}
-//	mainForm.Invalidate();
-//
-//	return 0L;
-//}
+LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
+{
+	FLOAT	strafeDir	= 3.0f,
+			flyDir		= 3.0f;
+	switch ( wParam )
+	{
+		case VK_SPACE:
+ 			if ( CameraRight.getProjectionType() == PT_PARALLEL ) {
+				CameraTop.setProjectionType(PT_CENTRAL);
+				CameraRight.setProjectionType(PT_CENTRAL);
+				CameraFront.setProjectionType(PT_CENTRAL);
+				CameraPersp.setProjectionType(PT_CENTRAL);
+			}
+			else {
+				CameraTop.setProjectionType(PT_PARALLEL);
+				CameraRight.setProjectionType(PT_PARALLEL);
+				CameraFront.setProjectionType(PT_PARALLEL);
+				CameraPersp.setProjectionType(PT_PARALLEL);
+			}
+			break;
+
+		/*case VK_LEFT:
+				testPyramid1.Strafe(-strafeDir);
+				CameraRight.LookAt(&testPyramid1);
+			break;
+
+		case VK_RIGHT:
+				testPyramid1.Strafe(strafeDir);
+				CameraRight.LookAt(&testPyramid1);
+			break;
+
+		case VK_DOWN:
+				testPyramid1.Fly(-flyDir);
+				CameraRight.LookAt(&testPyramid1);
+			break;
+
+		case VK_UP:
+				testPyramid1.Fly(flyDir);
+				CameraRight.LookAt(&testPyramid1);
+			break;*/
+	}
+	mainForm.Invalidate();
+
+	return 0L;
+}
 
 LRESULT mainForm_menuClick(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {

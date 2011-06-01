@@ -3,28 +3,34 @@
 Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue) : clsMesh(red, green, blue) {
 	// make a microphone here!
 	base			= new ExCone(15, 85, 85, 70, 24);
-	buttonL			= new Pyramid(9, 40, 8, 40, 23);
-	buttonR			= new Pyramid(9, 40, 8, 40, 23);
+	buttonL			= new Pyramid(9, 23, 40, 12, 40, 5.5);
+	buttonR			= new Pyramid(9, 23, 40, 12, 40, 5.5);
 
 	upright			= new Cone(50, 8, 8, 24);
 	shroudLow		= new Cone(30, 12, 12, 24);
 	shroudHi		= new Cone(90, 12, 12, 24);
 	bridge			= new Cone(12, 8, 5, 24);
 
-	handleBridgeUp	= new Pyramid(13, 9, 5, 9, 5);
-	handleBridgeDown= new Pyramid(10, 9, 5, 9, 5);
-	handle			= new Pyramid(108, 9.5, 6.5, 6.5, 6.5, -1.5);
-	handleTop		= new Pyramid(8.f, 9.5, 6.5, 9.5, 6.5, 4.3);
+	handleBridgeUp	= new Pyramid(13, 5, 8, 5, 8);
+	handleBridgeDown= new Pyramid(10, 5, 8, 5, 8);
+	handle			= new Pyramid(108, 9.5, 6.5, 6.5, 6.5, 1.5);
+	handleTop		= new Pyramid(8.f, 9.5, 6.5, 9.5, 6.5, -4.3);
 
 	head			= new Hole(30, 40, 30, 40, 30, 24);
 	headFront		= new Hole(3,  43, 30, 43, 27, 24);
 	headBack		= new Hole(3,  43, 30, 43, 27, 24);
 	core			= new Cone(39, 30, 30, 24);
 
-	buttonL->Fly(7.5); 
-	buttonL->Strafe(70); buttonL->Follow(-22.);
-	buttonR->Fly(7.5); 	
-	buttonR->Strafe(70); buttonR->Follow(22.);
+	base->YawTo(-90.0f * (FLOAT)M_PI / 180.0f);
+
+	buttonL->Fly(16.5); 	
+	buttonL->Follow(70);
+	buttonL->Strafe(-22);
+	buttonL->PitchTo((FLOAT)M_PI);
+	buttonR->Fly(16.5); 	
+	buttonR->Follow(70);
+	buttonR->Strafe(22);
+	buttonR->PitchTo((FLOAT)M_PI);
 
 	upright->Fly(15);
 	shroudLow->Fly(20);
@@ -32,31 +38,30 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	bridge->Fly(145);
 
 	handleBridgeUp->Fly(112);
-	handleBridgeUp->Follow(-17);
+	handleBridgeUp->Strafe(17);
 	handleBridgeDown->Fly(36.5);
-	handleBridgeDown->Follow(-17);
+	handleBridgeDown->Strafe(17);
 	handle->Fly(133);
-	handle->Follow(-26);
+	handle->Strafe(26);
+	handle->Follow(0.5);
 	handle->PitchTo((FLOAT)M_PI);
+	handle->YawTo((FLOAT)M_PI_2);
 	handleTop->Fly(133);
-	handleTop->Follow(-26);
+	handleTop->Strafe(26);
+	handleTop->YawTo((FLOAT)M_PI_2);
 
 	head->Fly(197);
-	head->Strafe(-15);
-	head->PitchTo(90.0f * (FLOAT)M_PI / 180.0f);
-	head->YawTo(90.0f * (FLOAT)M_PI / 180.0f);
+	head->Follow(-15);
+	head->PitchTo((FLOAT)M_PI_2);
 	headFront->Fly(197);
-	headFront->Strafe(15);
-	headFront->PitchTo(90.0f * (FLOAT)M_PI / 180.0f);
-	headFront->YawTo(90.0f * (FLOAT)M_PI / 180.0f);
+	headFront->Follow(15);
+	headFront->PitchTo((FLOAT)M_PI_2);
 	headBack->Fly(197);
-	headBack->Strafe(-15);
-	headBack->PitchTo(90.0f * (FLOAT)M_PI / 180.0f);
-	headBack->YawTo(90.0f * (FLOAT)M_PI / 180.0f);
+	headBack->Follow(-15);
+	headBack->PitchTo((FLOAT)M_PI_2);
 	core->Fly(197);
-	core->Strafe(-18);
-	core->PitchTo(90.0f * (FLOAT)M_PI / 180.0f);
-	core->YawTo(90.0f * (FLOAT)M_PI / 180.0f);
+	core->Follow(-18);
+	core->PitchTo((FLOAT)M_PI_2);
 
 	addMesh(base);
 	addMesh(buttonL);

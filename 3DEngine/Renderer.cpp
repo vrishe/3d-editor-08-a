@@ -5,8 +5,7 @@
 // clsViewport implementation
 LRESULT BkGndSaver(LPVOID Sender, WPARAM wParam, LPARAM lParam) { return 1L; }
 
-clsViewport::clsViewport()
-{
+clsViewport::clsViewport(){
 	cameraObjectID	= 0;
 	rMode			= RM_WIREFRAME;
 	Scene			= NULL;
@@ -17,8 +16,8 @@ clsViewport::clsViewport()
 clsViewport::clsViewport(
 	LPSCENE3D lpSceneHost, 
 	UINT uCameraObjectID, 
-	RENDER_MODE renderMode
-) {
+	RENDER_MODE renderMode) 
+{
 	cameraObjectID	= 0;
 	Scene	= NULL;
 	rMode	= RM_WIREFRAME;
@@ -37,8 +36,8 @@ DWORD clsViewport::SetUp(
 				INT	vpPosX,
 				INT vpPosY,
 				UINT vpWidth,
-				UINT vpHeight
-) {
+				UINT vpHeight) 
+{
 	if ( Scene == NULL ) return E_DOES_NOT_EXIST;
 	return 	clsForm::Create(	
 				VIEWPORT_CLASS_NAME,
@@ -58,8 +57,7 @@ LPSCENE3D clsViewport::getScene()			{ return Scene; }
 UINT clsViewport::getCameraObjectID()		{ return cameraObjectID; }
 RENDER_MODE clsViewport::getRenderMode()	{ return rMode; }
 
-BOOL clsViewport::setScene(LPSCENE3D lpSceneHost)
-{
+BOOL clsViewport::setScene(LPSCENE3D lpSceneHost) {
 	BOOL bResult 
 		= lpSceneHost	!= NULL 
 		&& lpSceneHost->getObjectClassCount(CLS_CAMERA) != 0;
@@ -71,8 +69,7 @@ BOOL clsViewport::setScene(LPSCENE3D lpSceneHost)
 	return bResult;
 }
 
-BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID)
-{	
+BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID) {	
 	BOOL bResult 
 		= Scene		!= NULL 
 		&& Scene->getObject(uCameraObjectID)->clsID() == CLS_CAMERA;
@@ -90,8 +87,7 @@ bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
 	return false;
 }
 
-BOOL clsViewport::Render() 
-{
+BOOL clsViewport::Render() {
 	BOOL				bResult			= Scene != NULL;
 	HANDLE				procHeap		= GetProcessHeap();
 
@@ -153,8 +149,7 @@ BOOL clsViewport::Render()
 	SelectObject(hMemDC, hBrOld);
 	DeleteObject(hBrCurrent);
 
-	if ( bResult ) 
-	{
+	if ( bResult ) {
 		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
 		scenePolyCount	= Scene->getPolygonsCount();
@@ -177,8 +172,7 @@ BOOL clsViewport::Render()
 		else 
 			camToRender->GetParallelMatrix(&projectionMatrix);
 
-		for ( UINT i = 0; i < sceneObjCount; i++ )
-		{
+		for ( UINT i = 0; i < sceneObjCount; i++ ) {
 			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
 			objColor		= objToRender->getColor();
 			objVertCount	= objToRender->getVerticesCount();
@@ -195,8 +189,7 @@ BOOL clsViewport::Render()
 			objToRender->getVerticesTransformed(objVertBuffer);
 
 			// camera projection transformations
-			for ( UINT j = 0; j < objVertCount; j++ ) 
-			{
+			for ( UINT j = 0; j < objVertCount; j++ ) {
 				Matrix3DTransformCoord(
 						&cameraMatrix,
 						objVertBuffer + j,
@@ -265,12 +258,9 @@ BOOL clsViewport::Render()
 			HeapFree(procHeap, NULL, objVertBuffer);
 		}
 
-		if ( rMode != RM_WIREFRAME ) 
-		{
+		if ( rMode != RM_WIREFRAME ) {
 			sort(scenePolyBuffer.begin(), scenePolyBuffer.end(), ZBufSort);
 
-			HPEN hPenCur = CreatePen(PS_SOLID, 1, RGB(0,0,0));
-			HPEN hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
 			hBrObjects	= new HBRUSH[sceneObjCount];
 			for (UINT i = 0; i < sceneObjCount; i++ )
 				hBrObjects[i] = CreateSolidBrush(
@@ -303,7 +293,19 @@ BOOL clsViewport::Render()
 					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
 					if (cosA >= -1 && cosA <= 0) 
 					{
+						HPEN hPenCur, hPenOld;
+						COLOR3D color = ((LPMESH3D)Scene->getObject(CLS_MESH, scenePolyBuffer[i].second))->getColor();
+						if ( rMode == RM_SHADED )
+							hPenCur = CreatePen(PS_SOLID, 1, RGB(color.Red, color.Green, color.Blue));
+						else
+							hPenCur = CreatePen(PS_SOLID, 1, RGB(
+															(color.Red > 90		?	color.Red - 90	 : 0), 
+															(color.Green > 90	?	color.Green	- 90 : 0),
+															(color.Blue > 90	?	color.Blue - 90  : 0)
+															));
+						hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
 						hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
+
 						vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
 						vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
 
@@ -315,6 +317,8 @@ BOOL clsViewport::Render()
 
 						Polygon( hMemDC, vert2DDrawBuffer, 3 );
 						SelectObject(hMemDC, hBrOld);
+						SelectObject(hMemDC, hPenOld);
+						DeleteObject(hPenCur);
 					}
 				}
 			}
