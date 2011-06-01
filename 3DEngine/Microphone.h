@@ -3,26 +3,32 @@
 #include "Primitives.h"
 
 class Microphone : public clsMesh {
-	ExCone	base;			// 0
-	Cone	upright,		// 3
-			shroudHi,		// 5
-			shroudLow,		// 4
-			bridge,			// 6
-			core;
-	Hole	head,			// 7
-			headFront,
-			headBack;
-	Pyramid button1,		// 1
-			button2,		// 2
-			handle,
-			handleBridge1,
-			handleBridge2;
+	ExCone	*base;				// 0
+	Cone	*upright,			// 3
+			*shroudHi,			// 5
+			*shroudLow,			// 4
+			*bridge,			// 6
+			*core;				// 13
+	Hole	*head,				// 10
+			*headFront,			// 11
+			*headBack;			// 12
+	Pyramid *buttonL,			// 1
+			*buttonR,			// 2
+			*handle,			// 9
+			*handleBridgeUp,	// 7
+			*handleBridgeDown,	// 8
+			*handleTop;			// 14
 
 	void addMesh(LPMESH3D); // adding vertices, edges and polygons to global microphone lists
 
 public:
-	Microphone();
+	Microphone(
+		unsigned char red	= 0xff,
+		unsigned char green	= 0xff,
+		unsigned char blue	= 0xff
+		);
 	Microphone(float bR, float totalH);
+	~Microphone();
 
 	// setters
 	void setBaseRadius		(float);

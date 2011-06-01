@@ -7,11 +7,12 @@
 
 class Pyramid : public clsMesh {
 protected:
-	float h;	// height
-	float bL;	// base length
-	float bW;	// base width
-	float tL;	// top length
-	float tW;	// top width
+	float h;		// height
+	float bL;		// base length
+	float bW;		// base width
+	float tL;		// top length
+	float tW;		// top width
+	float shift;    // get your head out by OX
 
 public:
 	Pyramid(COLOR3D c);
@@ -21,7 +22,8 @@ public:
 		float bWidth, 
 		float tLength, 
 		float tWidth,
-		COLOR3D	c
+		COLOR3D	c,
+		float sh = 0
 	);
 	Pyramid(
 		unsigned char red	= 0xff,
@@ -34,6 +36,7 @@ public:
 		float bWidth, 
 		float tLength, 
 		float tWidth,
+		float sh = 0,
 		unsigned char red	= 0xff,
 		unsigned char green	= 0xff,
 		unsigned char blue	= 0xff

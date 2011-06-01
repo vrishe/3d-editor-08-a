@@ -18,10 +18,10 @@ void Pyramid::Triangulate() {
 	vertices.push_back(VECTOR3D(bL/2,bW/2, 0));		// 2
 	vertices.push_back(VECTOR3D(bL/2,-bW/2, 0));	// 3
 		// setting top vertices
-	vertices.push_back(VECTOR3D(-tL/2,-tW/2, h));	// 4
-	vertices.push_back(VECTOR3D(-tL/2,tW/2, h));	// 5
-	vertices.push_back(VECTOR3D(tL/2,tW/2, h));		// 6
-	vertices.push_back(VECTOR3D(tL/2,-tW/2, h));	// 7
+	vertices.push_back(VECTOR3D(-tL/2 + shift,-tW/2, h));	// 4
+	vertices.push_back(VECTOR3D(-tL/2 + shift,tW/2, h));	// 5
+	vertices.push_back(VECTOR3D(tL/2 + shift,tW/2, h));		// 6
+	vertices.push_back(VECTOR3D(tL/2 + shift,-tW/2, h));	// 7
 
 		// setting edges
 	// setting base edges
@@ -70,7 +70,7 @@ void Pyramid::Triangulate() {
 /* ---------------------- constructors --------------------- */
 
 Pyramid::Pyramid(COLOR3D c) 
-	: clsMesh(c), h(0), bL(0), bW(0), tL(0), tW(0) { }
+	: clsMesh(c), h(0), bL(0), bW(0), tL(0), tW(0), shift(0) { }
 
 Pyramid::Pyramid(
 		float height, 
@@ -78,7 +78,8 @@ Pyramid::Pyramid(
 		float bWidth, 
 		float tLength, 
 		float tWidth,
-		COLOR3D	c
+		COLOR3D	c,
+		float sh
 ) : clsMesh(c)
 { 
 	h  = height;
@@ -86,6 +87,7 @@ Pyramid::Pyramid(
 	bW = bWidth;
 	tL = tLength;
 	tW = tWidth;
+	shift = sh;
 	Triangulate();
 }
 
@@ -100,6 +102,7 @@ Pyramid::Pyramid(
 	bW	= 0;
 	tL	= 0;
 	tW	= 0;
+	shift = 0;
 }
 
 Pyramid::Pyramid(
@@ -108,6 +111,7 @@ Pyramid::Pyramid(
 		float bWidth, 
 		float tLength, 
 		float tWidth,
+		float sh,
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
@@ -118,6 +122,7 @@ Pyramid::Pyramid(
 	bW = bWidth;
 	tL = tLength;
 	tW = tWidth;
+	shift = sh;
 	Triangulate();
 }
 

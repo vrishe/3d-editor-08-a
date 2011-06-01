@@ -15,12 +15,12 @@ LPRENDER_POOL		testPool;
 
 SCENE3D				testScene;
 
-CAMERA3D			testCamera1, 
-					testCamera2, 
-					testCamera3, 
-					testCamera4;
+CAMERA3D			CameraTop, 
+					CameraFront, 
+					CameraLeft, 
+					CameraPersp;
 
-Hole				testHole(50.0f, 75.0f, 50.0f, 45.0f, 20.0f, 60); 
+Microphone			testMic;
 
 // Win API entry point:
 // ===================================
@@ -58,26 +58,27 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.setAmbientColor(132, 128, 128);
 
 	// Scene assembly here:
-	testScene.AddObject(&testCamera1);
-	testScene.AddObject(&testCamera2);
-	testScene.AddObject(&testCamera3);
-	testScene.AddObject(&testCamera4);
-	testScene.AddObject(&testHole);
+	testScene.AddObject(&CameraTop);
+	testScene.AddObject(&CameraFront);
+	testScene.AddObject(&CameraLeft);
+	testScene.AddObject(&CameraPersp);
+	testScene.AddObject(&testMic);
 
 	// Objects here:
+	testMic.Fly(-120);
 	
 	// Cameras here:
-	testCamera1.Translate(.0f, .0f, 200.f);
-	testCamera1.LookAt(.0f, .0f, .0f);
+	CameraTop.Translate(.0f, .0f, 200.f);
+	CameraTop.LookAt(.0f, .0f, .0f);
 
-	testCamera2.Translate(200.0f, .0f, .0f);
-	testCamera2.LookAt(.0f, .0f, .0f);
+	CameraFront.Translate(200.0f, .0f, .0f);
+	CameraFront.LookAt(.0f, .0f, .0f);
 
-	testCamera3.Translate(.0f, 200.0f, .0f);
-	testCamera3.LookAt(.0f, .0f, .0f);
+	CameraLeft.Translate(.0f, -200.0f, .0f);
+	CameraLeft.LookAt(.0f, .0f, .0f);
 
-	testCamera4.Translate(200.0f, 200.0f, 200.f);
-	testCamera4.LookAt(.0f, .0f, .0f);
+	CameraPersp.Translate(200.0f, 200.0f, 200.f);
+	CameraPersp.LookAt(.0f, .0f, .0f);
 
 	// Viewports here:
 	ufWidth -= 40;
@@ -87,7 +88,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				20, 20,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				testCamera1.objID(),
+				CameraTop.objID(),
 				RM_SHADED
 			);
 	testPool->addViewport(
@@ -95,7 +96,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				20,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				testCamera2.objID(),
+				CameraFront.objID(),
 				RM_SHADED
 			);
 	testPool->addViewport(
@@ -103,7 +104,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				25 + ufHeight / 2,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				testCamera3.objID(),
+				CameraLeft.objID(),
 				RM_SHADED
 			);
 	testPool->addViewport(
@@ -111,7 +112,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				25 + ufHeight / 2,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
-				testCamera4.objID(),
+				CameraPersp.objID(),
 				RM_SHADED
 			);
 	mainForm.Show();
@@ -148,34 +149,34 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 //	switch ( wParam )
 //	{
 //		case VK_SPACE:
-// 			if ( testCamera3.getProjectionType() == PT_PARALLEL ) {
-//				testCamera1.setProjectionType(PT_CENTRAL);
-//				testCamera3.setProjectionType(PT_CENTRAL);
+// 			if ( CameraLeft.getProjectionType() == PT_PARALLEL ) {
+//				CameraTop.setProjectionType(PT_CENTRAL);
+//				CameraLeft.setProjectionType(PT_CENTRAL);
 //			}
 //			else {
-//				testCamera1.setProjectionType(PT_PARALLEL);
-//				testCamera3.setProjectionType(PT_PARALLEL);
+//				CameraTop.setProjectionType(PT_PARALLEL);
+//				CameraLeft.setProjectionType(PT_PARALLEL);
 //			}
 //			break;
 //
 //		case VK_LEFT:
 //				testPyramid1.Strafe(-strafeDir);
-//				testCamera3.LookAt(&testPyramid1);
+//				CameraLeft.LookAt(&testPyramid1);
 //			break;
 //
 //		case VK_RIGHT:
 //				testPyramid1.Strafe(strafeDir);
-//				testCamera3.LookAt(&testPyramid1);
+//				CameraLeft.LookAt(&testPyramid1);
 //			break;
 //
 //		case VK_DOWN:
 //				testPyramid1.Fly(-flyDir);
-//				testCamera3.LookAt(&testPyramid1);
+//				CameraLeft.LookAt(&testPyramid1);
 //			break;
 //
 //		case VK_UP:
 //				testPyramid1.Fly(flyDir);
-//				testCamera3.LookAt(&testPyramid1);
+//				CameraLeft.LookAt(&testPyramid1);
 //			break;
 //	}
 //	mainForm.Invalidate();
