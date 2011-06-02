@@ -482,6 +482,7 @@ clsScene::clsScene()
 	clsObjLst.first = CLS_MESH;
 	objects.insert(clsObjLst);
 	clsObjLst.first = CLS_LIGHT;
+	objects.insert(clsObjLst);
 
 	ambientColor.Red	= 0;
 	ambientColor.Green	= 0;

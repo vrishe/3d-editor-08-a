@@ -153,7 +153,6 @@ BOOL clsViewport::Render() {
 
 	if ( bResult ) 
 	{
-		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
 		if ( rMode != RM_WIREFRAME ) {
 			scenePolyCount  = Scene->getPolygonsCount();
@@ -186,7 +185,7 @@ BOOL clsViewport::Render() {
 			objVertBuffer			= (LPVECTOR3D)HeapAlloc(
 											procHeap, 
 											HEAP_ZERO_MEMORY, 
-											VEC3DSIZE * objVertCount
+											sizeof(VECTOR3D) * objVertCount
 										);
 
 			objToRender->getVerticesTransformed(objVertBuffer);

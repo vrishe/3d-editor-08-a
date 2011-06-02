@@ -25,7 +25,7 @@ CAMERA3D			CameraTop,
 DIFLIGHT3D			testLight;
 
 PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
-MICROPHONE3D		testMic( 130, 130, 200 );
+MICROPHONE3D		testMic( 80, 80, 200 );
 
 // Win API entry point:
 // ===================================
@@ -84,6 +84,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// Objects here:
 	testMic.Fly(-120);
+
+	// Lighters:
+	testLight.Translate(-1, 0, 1);
+	testLight.setPower(0.1);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
