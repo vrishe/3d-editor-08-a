@@ -146,6 +146,13 @@ bool tagPolygon::isContainingEdge(EDGE3D e)
 		&& isContainingVertex(e.second);
 }
 
+// Implementation of tagColor struct:
+tagColor::tagColor(unsigned char r, unsigned char g, unsigned char b) {
+	Red = r;
+	Green = g;
+	Blue = b;
+}
+
 // ===========================================================================
 // Implementation of clsObject class:
 size_t clsObject::Counter = 1;

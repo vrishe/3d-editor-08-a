@@ -11,8 +11,6 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
-CONTROL				testButton;
-
 LPRENDER_POOL		testPool;
 
 SCENE3D				testScene;
@@ -22,24 +20,13 @@ CAMERA3D			CameraTop,
 					CameraRight, 
 					CameraPersp;
 
-DIFLIGHT3D			testLight;
+DIFLIGHT3D			testLight1, testLight2;
 
 PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
-MICROPHONE3D		testMic( 100, 100, 200 );
+MICROPHONE3D		testMic( 55, 55, 124 );
 
 // Win API entry point:
 // ===================================
-
-LRESULT button_hover(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
-{
-	UINT width, height;
-	((LPCONTROL)Sender)->getSize(&width, &height);
-	((LPCONTROL)Sender)->MoveTo(
-		25 + ufWidth / 2 + rand() % ((ufWidth / 2 - 5) - width), 
-		25 + ufHeight / 2 + rand() % ((ufHeight / 2 - 5) - height) 
-	);
-	return 0L;
-}
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -78,7 +65,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraFront);
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
-	testScene.AddObject(&testLight);
+	testScene.AddObject(&testLight1);
+	testScene.AddObject(&testLight2);
 	testScene.AddObject(&testMic);
 	//testScene.AddObject(&cubeX);
 
@@ -86,13 +74,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testMic.Fly(-120);
 
 	// Lighters here:
-	testLight.LookAt(-1, 0, -0.5f);
-	testLight.setColor(255, 0, 0);
+	testLight1.LookAt(-1, 0, 0);
+	testLight1.setColor(60, 30, 30);
+	testLight1.setPower(0.1f);
+	testLight2.LookAt(0, 0, -1);
+	testLight2.setColor(5, 5, 5);
+	testLight2.setPower(0.1f);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
 	CameraTop.LookAt(.0f, .0f, .0f);
-	CameraTop.RollTo(90.0f * (FLOAT)M_PI / 180.0f);
+	CameraTop.RollTo(-90.0f * (FLOAT)M_PI / 180.0f);
 
 	CameraFront.Translate(200.0f, .0f, .0f);
 	CameraFront.LookAt(.0f, .0f, .0f);
@@ -138,19 +130,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				CameraPersp.objID(),
 				RM_SHADEDWF
 			);
-
-	//testButton.Create(
-	//			_T("button"),
-	//			WS_CHILD | BS_PUSHBUTTON,
-	//			NULL,
-	//			25 + ufWidth / 2,
-	//			25 + ufHeight / 2,
-	//			70,
-	//			30,
-	//			&mainForm
-	//		);
-	//testButton.setText(_T("Click!"));
-	//testButton.AssignEventHandler(WM_MOUSEMOVE, button_hover, TRUE); 
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));

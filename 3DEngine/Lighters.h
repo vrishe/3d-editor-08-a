@@ -2,11 +2,12 @@
 
 #include "Abstractions.h"
 
+#define DARK_SIDE 0.2
 // ============================================================================
 // clsDifLight class
 
 class clsDifLight : public clsObject {
-	float	power;		// must be 0 <= power <= 1
+	float	power;		// must be 0 <= power
 	COLOR3D color;
 
 public:

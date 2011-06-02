@@ -198,26 +198,28 @@ BOOL clsViewport::Render() {
 				objPolyCount	= objToRender->getPolygonsCount();
 
 				for (UINT j = scenePolyBuffer.size(); j < objPolyCount; j++) {
-					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 1));
 					Vector3DNormalize(&normal, &normal);
-					scenePolyColorBuffer[j] = objToRender->getColor();
+					scenePolyColorBuffer[j] = COLOR3D(0,0,0);
 
 					for (UINT k = 0; k < sceneLightCount; k++) 	{
 						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);
+						if ( lightToRender->getPower() == 0 )
+							continue;
 						FLOAT ratio = Vector3DMultS(&normal, &lightToRender->getForwardLookDirection());
-						if (ratio > -EPSILON)
-							ratio += lightToRender->getPower();
+						if (ratio < -EPSILON)
+							ratio = lightToRender->getPower() - ratio;
 						else
-							ratio = lightToRender->getPower();
+							ratio = (FLOAT)DARK_SIDE;
 
-						COLOR3D newColor	= scenePolyColorBuffer[j],
+						COLOR3D newColor	= objToRender->getColor(),
 								lightColor	= lightToRender->getColor();
-						UINT red	= (UINT)(min(newColor.Red + lightColor.Red, 255)   * ratio);
+						UINT red	= (UINT)(min(newColor.Red + lightColor.Red, 255)     * ratio);
 						UINT green	= (UINT)(min(newColor.Green + lightColor.Green, 255) * ratio);
-						UINT blue	= (UINT)(min(newColor.Blue + lightColor.Blue, 255)  * ratio);
-						newColor.Red	= ( red > 255	? 255 : red );
-						newColor.Green	= ( green > 255 ? 255 : green );
-						newColor.Blue	= ( blue > 255  ? 255 : blue );
+						UINT blue	= (UINT)(min(newColor.Blue + lightColor.Blue, 255)   * ratio);
+						newColor.Red	= max(scenePolyColorBuffer[j].Red,	 ( red > 255	? 255 : red ));
+						newColor.Green	= max(scenePolyColorBuffer[j].Green, ( green > 255	? 255 : green ));
+						newColor.Blue	= max(scenePolyColorBuffer[j].Blue,  ( blue > 255	? 255 : blue ));
 						scenePolyColorBuffer[j] = newColor;
 					}
 				}
@@ -369,8 +371,7 @@ BOOL clsViewport::Render() {
 					DeleteObject(hPenCurrent);
 				}
 			}
-			delete scenePolyColorBuffer;
-
+			delete[] scenePolyColorBuffer;
 		}
 	}
 
