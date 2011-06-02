@@ -212,12 +212,12 @@ BOOL clsViewport::Render() {
 
 						COLOR3D newColor	= scenePolyColorBuffer[j],
 								lightColor	= lightToRender->getColor();
-						UINT red	= (UINT)(max(newColor.Red,	  lightColor.Red)  * ratio);
-						UINT green	= (UINT)(max(newColor.Green, lightColor.Green) * ratio);
-						UINT blue	= (UINT)(max(newColor.Blue,  lightColor.Blue)  * ratio);
-						newColor.Red	= ( newColor.Red > 255	 ? 255 : red );
-						newColor.Green	= ( newColor.Green > 255 ? 255 : green );
-						newColor.Blue	= ( newColor.Blue > 255  ? 255 : blue );
+						UINT red	= (UINT)(min(newColor.Red + lightColor.Red, 255)   * ratio);
+						UINT green	= (UINT)(min(newColor.Green + lightColor.Green, 255) * ratio);
+						UINT blue	= (UINT)(min(newColor.Blue + lightColor.Blue, 255)  * ratio);
+						newColor.Red	= ( red > 255	? 255 : red );
+						newColor.Green	= ( green > 255 ? 255 : green );
+						newColor.Blue	= ( blue > 255  ? 255 : blue );
 						scenePolyColorBuffer[j] = newColor;
 					}
 				}
@@ -369,8 +369,8 @@ BOOL clsViewport::Render() {
 					DeleteObject(hPenCurrent);
 				}
 			}
+			delete scenePolyColorBuffer;
 		}
-		if ( rMode != RM_WIREFRAME ) delete scenePolyColorBuffer;
 	}
 
 	BitBlt(
