@@ -27,9 +27,10 @@ public:
 	Microphone(
 		unsigned char red	= 0xff,
 		unsigned char green	= 0xff,
-		unsigned char blue	= 0xff
+		unsigned char blue	= 0xff,
+		float bR = 85, 
+		float tH = 243
 		);
-	Microphone(float bR, float totalH);
 	~Microphone();
 
 	// setters

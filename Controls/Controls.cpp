@@ -858,6 +858,7 @@ DWORD clsControl::Create(
 			(tabSearch = GetWindow(tabSearch, GW_HWNDPREV)) != NULL 
 		) tabOrder++;
 	}
+	return 0;
 }
 
 DWORD clsControl::Create(

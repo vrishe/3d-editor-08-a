@@ -2,23 +2,23 @@
 
 // ============================================================================
 // Implementation of Microphone class:
-Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue) : clsMesh(red, green, blue) {
+Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue, float bR, float tH) : clsMesh(red, green, blue) {
 	// make a microphone here!
-	base			= new ExCone(15, 85, 85, 70, 24);
-	buttonL			= new Pyramid(9, 23, 40, 12, 40, 5.5);
-	buttonR			= new Pyramid(9, 23, 40, 12, 40, 5.5);
+	base			= new ExCone (tH * 0.062f, bR, bR, bR * 0.824f, 24);
+	buttonL			= new Pyramid(tH * 0.037f, bR * 0.27f, bR * 0.47f, bR * 0.1412f, bR * 0.47f, 5.5);
+	buttonR			= new Pyramid(tH * 0.037f, bR * 0.27f, bR * 0.47f, bR * 0.1412f, bR * 0.47f, 5.5);
 
-	upright			= new Cone(50, 8, 8, 24);
-	shroudLow		= new Cone(30, 12, 12, 24);
-	shroudHi		= new Cone(90, 12, 12, 24);
-	bridge			= new Cone(12, 8, 5, 24);
+	upright			= new Cone(tH * 0.2057f,	 bR * 0.0941f, bR * 0.0941f, 24);
+	shroudLow		= new Cone(tH * 0.12345679f, bR * 0.1412f, bR * 0.1412f, 24);
+	shroudHi		= new Cone(tH * 0.37f,		 bR * 0.1412f, bR * 0.1412f, 24);
+	bridge			= new Cone(tH * 0.0494f,	 bR * 0.0941f, bR * 0.0588f, 24);
 
-	handleBridgeUp	= new Pyramid(13, 5, 8, 5, 8);
-	handleBridgeDown= new Pyramid(10, 5, 8, 5, 8);
-	handle			= new Pyramid(108, 9.5, 6.5, 6.5, 6.5, 1.5);
+	handleBridgeUp	= new Pyramid(tH * 0.535f, bR * 0.1682f, bR * 0.0941f, bR * 0.1682f, 8);
+	handleBridgeDown= new Pyramid(tH * 0.1,   bR * 0.1682f, bR * 0.0941f, bR * 0.1682f, 8);
+	handle			= new Pyramid(tH / 2.25, 9.5, 6.5, 6.5, 6.5, 1.5);
 	handleTop		= new Pyramid(8, 9.5, 6.5, 9.5, 6.5, -4.3f);
 
-	head			= new Hole(30, 40, 30, 40, 30, 24);
+	head			= new Hole(30, bR * 0.47f, 30, bR * 0.47f, 30, 24);
 	headFront		= new Hole(3,  43, 30, 43, 27, 24);
 	headBack		= new Hole(3,  43, 30, 43, 27, 24);
 	core			= new Cone(39, 30, 30, 24);
@@ -84,10 +84,6 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();
-}
-
-Microphone::Microphone(float bR, float totalH) : clsMesh() {
-	// make a microphone here!
 }
 
 Microphone::~Microphone() {

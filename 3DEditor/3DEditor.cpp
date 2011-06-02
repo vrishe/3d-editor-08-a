@@ -58,7 +58,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
-	testScene.setAmbientColor(56, 56, 56);
+	testScene.setAmbientColor(128, 125, 125);
 
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
