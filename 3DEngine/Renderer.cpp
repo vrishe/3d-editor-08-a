@@ -370,6 +370,7 @@ BOOL clsViewport::Render() {
 				}
 			}
 			delete scenePolyColorBuffer;
+
 		}
 	}
 
