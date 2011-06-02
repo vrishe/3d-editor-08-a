@@ -94,22 +94,26 @@ BOOL clsViewport::Render() {
 	HDC					hVpDC,
 						hMemDC;
 
+	HPEN				hPenCurrent, 
+						hPenOld;
 	HBRUSH				hBrCurrent,
-						hBrOld,
-					   *hBrObjects;
+						hBrOld;
 	HBITMAP				hBMP,
 						hBMPOld;
 
 	RECT				clientRect;
-	FLOAT				centerX,
-						centerY;
-
 	UINT				sceneObjCount,
-						sceneVertCount,
 						scenePolyCount,
 						objVertCount,
 						objEdgeCount,
 						objPolyCount;
+
+	FLOAT				centerX,
+						centerY,
+						divisor,
+						nearClip,
+						farClip;
+	VECTOR3D			camPos;
 
 	LPCAMERA3D			camToRender;
 	LPMESH3D			objToRender;
@@ -117,16 +121,12 @@ BOOL clsViewport::Render() {
 	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
 	COLOR3D				objColor;
-	SCENEPOLY			scenePolyBuffer;
 
 	MATRIX3D			cameraMatrix,
 						projectionMatrix,
 						viewportMatrix;
-	FLOAT				divisor,
-						nearClip,
-						farClip;
-
-	VECTOR3D			camPos;
+	
+	SCENEPOLY			scenePolyBuffer;
 	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
@@ -149,10 +149,10 @@ BOOL clsViewport::Render() {
 	SelectObject(hMemDC, hBrOld);
 	DeleteObject(hBrCurrent);
 
-	if ( bResult ) {
+	if ( bResult ) 
+	{
 		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
-		sceneVertCount	= Scene->getVerticesCount();
 
 		// prepearing camera
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
@@ -171,15 +171,12 @@ BOOL clsViewport::Render() {
 		else 
 			camToRender->GetParallelMatrix(&projectionMatrix);
 
-		for ( UINT i = 0; i < sceneObjCount; i++ ) {
-			objToRender		= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
-			objColor		= objToRender->getColor();
-			objVertCount	= objToRender->getVerticesCount();
-			objPolyCount	= objToRender->getPolygonsCount();	
-			objEdgeCount	= objToRender->getEdgesCount();
-			objEdgeBuffer	= objToRender->getEdgesRaw();
-			objPolyBuffer	= objToRender->getPolygonsRaw();
-			objVertBuffer	= (LPVECTOR3D)HeapAlloc(
+		for ( UINT i = 0; i < sceneObjCount; i++ ) 
+		{
+			objToRender				= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
+			objColor				= objToRender->getColor();
+			objVertCount			= objToRender->getVerticesCount();
+			objVertBuffer			= (LPVECTOR3D)HeapAlloc(
 											procHeap, 
 											HEAP_ZERO_MEMORY, 
 											VEC3DSIZE * objVertCount
@@ -187,25 +184,14 @@ BOOL clsViewport::Render() {
 
 			objToRender->getVerticesTransformed(objVertBuffer);
 
-			float lightning[1000];
 			// camera projection transformations
-			for ( UINT j = 0; j < objVertCount; j++ ) {
+			for ( UINT j = 0; j < objVertCount; j++ ) 
+			{
 				Matrix3DTransformCoord(
 						&cameraMatrix,
 						objVertBuffer + j,
 						objVertBuffer + j
 					);
-
-				// calculate lightning here
-				for (UINT j = 0; j < objPolyCount; j++) {
-					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
-					float nLength = Vector3DLength(&normal);
-					Vector3DNormalize(&normal, &normal);
-					float mult = Vector3DMultS(&normal, &VECTOR3D(0,1,0));
-					float cosLight = mult / nLength;
-					float k = (1 + cosLight);
-					lightning[j] = k;
-				}
 
 				divisor = objVertBuffer[j].z + (farClip - nearClip) / 2;
 				Matrix3DTransformCoord(
@@ -226,36 +212,47 @@ BOOL clsViewport::Render() {
 			}
 
 
-			if ( rMode != RM_WIREFRAME ) {
+			if ( rMode != RM_WIREFRAME ) 
+			{
+				objPolyBuffer	= objToRender->getPolygonsRaw();
+				objPolyCount	= objToRender->getPolygonsCount();	
+
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
 					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
-					float cosCam = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
+					float cosCam = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) 
+													/ Vector3DLength(&normal);
 					if (cosCam >= -1 && cosCam < 0) {
 						DIRECTPOLY3D tmp;
 						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-						tmp.diffuse = lightning[j];
 						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 					}
 				}
 			}
-			else {
-				for ( UINT j = 0; j < objEdgeCount; j++ ) { // Yeah baby, that's the stuff!
+			else 
+			{
+				objEdgeCount	= objToRender->getEdgesCount();
+				objEdgeBuffer	= objToRender->getEdgesRaw();
+
+				hPenCurrent		= CreatePen(PS_SOLID, 1, objToRender->getColorRef());
+				hPenOld			= (HPEN)SelectObject(hMemDC, hPenCurrent);
+				for ( UINT j = 0; j < objEdgeCount; j++ ) 
+				{ // Yeah baby, that's the stuff!
 					if ( objVertBuffer[objEdgeBuffer[j].first].z >= 0
-					  && objVertBuffer[objEdgeBuffer[j].first].z <= 1
-					  && objVertBuffer[objEdgeBuffer[j].second].z >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].z <= 1 
-					  && objVertBuffer[objEdgeBuffer[j].first].x >= 0
-					  && objVertBuffer[objEdgeBuffer[j].first].x <= clientRect.right
-					  && objVertBuffer[objEdgeBuffer[j].first].y >= 0
-					  && objVertBuffer[objEdgeBuffer[j].first].y <= clientRect.bottom
-					  && objVertBuffer[objEdgeBuffer[j].second].x >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].x <= clientRect.right
-					  && objVertBuffer[objEdgeBuffer[j].second].y >= 0
-					  && objVertBuffer[objEdgeBuffer[j].second].y <= clientRect.bottom)
-					{ 
+						&& objVertBuffer[objEdgeBuffer[j].first].z <= 1
+						&& objVertBuffer[objEdgeBuffer[j].second].z >= 0
+						&& objVertBuffer[objEdgeBuffer[j].second].z <= 1 
+						&& objVertBuffer[objEdgeBuffer[j].first].x >= 0
+						&& objVertBuffer[objEdgeBuffer[j].first].x <= clientRect.right
+						&& objVertBuffer[objEdgeBuffer[j].first].y >= 0
+						&& objVertBuffer[objEdgeBuffer[j].first].y <= clientRect.bottom
+						&& objVertBuffer[objEdgeBuffer[j].second].x >= 0
+						&& objVertBuffer[objEdgeBuffer[j].second].x <= clientRect.right
+						&& objVertBuffer[objEdgeBuffer[j].second].y >= 0
+						&& objVertBuffer[objEdgeBuffer[j].second].y <= clientRect.bottom
+					) { 
 						vert2DDrawBuffer[0].x 
 							= (LONG)objVertBuffer[objEdgeBuffer[j].first].x;
 						vert2DDrawBuffer[0].y 
@@ -269,65 +266,56 @@ BOOL clsViewport::Render() {
 						Polyline( hMemDC, vert2DDrawBuffer, 2 );
 					}
 				}
+				SelectObject(hMemDC, hPenOld);
+				DeleteObject(hPenCurrent);
 			}
 
 			HeapFree(procHeap, NULL, objVertBuffer);
 		}
 
-		if ( rMode != RM_WIREFRAME ) {
+		if ( rMode != RM_WIREFRAME ) 
+		{
 			sort(scenePolyBuffer.begin(), scenePolyBuffer.end(), ZBufSort);
 
-			hBrObjects	= new HBRUSH[sceneObjCount];
-			for (UINT i = 0; i < sceneObjCount; i++ )
-				hBrObjects[i] = CreateSolidBrush(
-						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
-					);
-
 			scenePolyCount	= scenePolyBuffer.size();
-			for (UINT i = 0; i < scenePolyCount; i++ ) { // AAaaaaand..... Here we go again! 
+			for (UINT i = 0; i < scenePolyCount; i++ ) 
+			{ // AAaaaaand..... Here we go again! 
 				if ( scenePolyBuffer[i].first.first.z > 0
-				  && scenePolyBuffer[i].first.first.z <= 1
-				  && scenePolyBuffer[i].first.second.z >= 0
-				  && scenePolyBuffer[i].first.second.z <= 1
-				  && scenePolyBuffer[i].first.third.z >= 0
-				  && scenePolyBuffer[i].first.third.z <= 1 
+					&& scenePolyBuffer[i].first.first.z <= 1
+					&& scenePolyBuffer[i].first.second.z >= 0
+					&& scenePolyBuffer[i].first.second.z <= 1
+					&& scenePolyBuffer[i].first.third.z >= 0
+					&& scenePolyBuffer[i].first.third.z <= 1 
 
-				  && scenePolyBuffer[i].first.first.x >= 0
-				  && scenePolyBuffer[i].first.first.x <= clientRect.right
-				  && scenePolyBuffer[i].first.second.x >= 0
-			   	  && scenePolyBuffer[i].first.second.x <= clientRect.right
-				  && scenePolyBuffer[i].first.third.x >= 0
-			   	  && scenePolyBuffer[i].first.third.x <= clientRect.right
+					&& scenePolyBuffer[i].first.first.x >= 0
+					&& scenePolyBuffer[i].first.first.x <= clientRect.right
+					&& scenePolyBuffer[i].first.second.x >= 0
+			   		&& scenePolyBuffer[i].first.second.x <= clientRect.right
+					&& scenePolyBuffer[i].first.third.x >= 0
+			   		&& scenePolyBuffer[i].first.third.x <= clientRect.right
 				  
-				  && scenePolyBuffer[i].first.first.y >= 0
-			   	  && scenePolyBuffer[i].first.first.y <= clientRect.bottom
-				  && scenePolyBuffer[i].first.second.y >= 0
-			   	  && scenePolyBuffer[i].first.second.y <= clientRect.bottom
-				  && scenePolyBuffer[i].first.third.y >= 0
-			   	  && scenePolyBuffer[i].first.third.y <= clientRect.bottom)
-				{ 
-					HPEN hPenCur, hPenOld;
-					COLOR3D color = ((LPMESH3D)Scene->getObject(CLS_MESH, scenePolyBuffer[i].second))->getColor();
-					if ( rMode == RM_SHADED )
-						hPenCur = CreatePen(PS_SOLID, 1, RGB(color.Red, color.Green, color.Blue));
-					else
-						hPenCur = CreatePen(PS_SOLID, 1, RGB(
-														(color.Red > 90		?	color.Red - 90	 : 0), 
-														(color.Green > 90	?	color.Green	- 90 : 0),
-														(color.Blue > 90	?	color.Blue - 90  : 0)
-														));
-					hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
+					&& scenePolyBuffer[i].first.first.y >= 0
+			   		&& scenePolyBuffer[i].first.first.y <= clientRect.bottom
+					&& scenePolyBuffer[i].first.second.y >= 0
+			   		&& scenePolyBuffer[i].first.second.y <= clientRect.bottom
+					&& scenePolyBuffer[i].first.third.y >= 0
+			   		&& scenePolyBuffer[i].first.third.y <= clientRect.bottom
+				) { 
+					objToRender	= (LPMESH3D)Scene->getObject(
+												CLS_MESH, 
+												scenePolyBuffer[i].second
+											); 
 
-					/*VECTOR3D normal(scenePolyBuffer[i].first.Normal(1));
-					float nLength = Vector3DLength(&normal);
-					Vector3DNormalize(&normal, &normal);
-					float mult = Vector3DMultS(&normal, &VECTOR3D(0,1,0));
-					float cosLight = mult / nLength;
-					float k = (1 + cosLight);*/
-					float k = scenePolyBuffer[i].first.diffuse;
-					HBRUSH hBrCurr = CreateSolidBrush(RGB(color.Red*k, color.Green*k, color.Blue*k));
-
-					hBrOld		= (HBRUSH)SelectObject(hMemDC, /*hBrCurr*/hBrObjects[scenePolyBuffer[i].second]);
+					// TODO: Make here necessaru calculations of polygon color.
+					//	Than create here a brush of color needed (include lighting)
+					//
+					if ( rMode == RM_SHADEDWF ) 
+						hPenCurrent = CreatePen(PS_SOLID, 1, objToRender->getColorRef());
+					//else
+					//	hPenCurrent = CreatePen(PS_SOLID, 1, RGB(objColor.Red, objColor.Green, objColor.Blue));
+					
+					hPenOld = (HPEN)SelectObject(hMemDC, hPenCurrent);
+					hBrOld	= (HBRUSH)SelectObject(hMemDC, hBrCurrent);
 
 					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
 					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
@@ -339,14 +327,13 @@ BOOL clsViewport::Render() {
 					vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y;
 
 					Polygon( hMemDC, vert2DDrawBuffer, 3 );
+
 					SelectObject(hMemDC, hBrOld);
 					SelectObject(hMemDC, hPenOld);
-					DeleteObject(hPenCur);
+					//DeleteObject(hBrCurrent); Uncomment this when you'll define own brush creation
+					DeleteObject(hPenCurrent);
 				}
 			}
-
-			for (UINT i = 0; i < sceneObjCount; i++ ) DeleteObject(hBrObjects[i]);		
-			delete[] hBrObjects;
 		}
 	}
 
