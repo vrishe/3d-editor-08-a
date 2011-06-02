@@ -9,6 +9,7 @@
 
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+#include <tchar.h>
 #include <map>
 #include <vector>
 
@@ -41,7 +42,7 @@ ATOM ClassRegister (
 			HBRUSH bgrColor
 		);
 
-// Necessary clsControl class type definitions
+// Necessary clsWinBase class type definitions
 enum ANCHOR {
 	ANCR_NONE			= 0x00,
 	ANCR_LEFT			= 0x01,
@@ -65,11 +66,10 @@ typedef pair<UINT, EVENT_FUNC> ELEMENT;					// Short map pair element definition
 // This is a superclass which gives a ground to all
 // derived classes, which implement alternative 
 // functionality.
-class clsControl {
+class clsWinBase {
 private:
-	clsControl				*Parent;
-	vector<clsControl *>	ChildrenList;
-
+	clsWinBase				*Parent;
+	vector<clsWinBase *>	ChildrenList;
 	
 // Default window callback. Don't care about it!
 	static LRESULT CALLBACK CtrlProc ( 
@@ -83,8 +83,8 @@ private:
 	
 // Do you really think you should know about
 // these methods more than their prototypes? 
-	UINT findFirstChild(clsControl *lpCtrlChild);
-	BOOL removeFirstChildFound(clsControl *lpCtrlChild);
+	UINT findFirstChild(clsWinBase *lpCtrlChild) const;
+	BOOL removeFirstChildFound(clsWinBase *lpCtrlChild);
 	BOOL manageWindowState(INT nCmdShow);
 
 protected:
@@ -100,36 +100,36 @@ protected:
 	INT					Height;
 public:
 // Construct/Destruct
-	clsControl();
-	virtual ~clsControl();
+	clsWinBase();
+	virtual ~clsWinBase();
 
 // Create/Destroy
 	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			RECT		ctrlDim,
-			clsControl*	ctrlParent
+			LPCTSTR		wbClsName,
+			DWORD		wbStyle,
+			DWORD		wbStyleEx,
+			RECT		wbDim,
+			clsWinBase*	wbParent
 		);
 	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			POINT		ctrlPos,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsControl*	ctrlParent
+			LPCTSTR		wbClsName,
+			DWORD		wbStyle,
+			DWORD		wbStyleEx,
+			POINT		wbPos,
+			UINT		wbWidth,
+			UINT		wbHeight,
+			clsWinBase*	wbParent
 		);
 	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			INT			ctrlPosX,
-			INT			ctrlPosY,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsControl*	ctrlParent
-		);
+			LPCTSTR		wbClsName,
+			DWORD		wbStyle,
+			DWORD		wbStyleEx,
+			INT			wbPosX,
+			INT			wbPosY,
+			UINT		wbWidth,
+			UINT		wbHeight,
+			clsWinBase*	wbParent
+	);
 	virtual VOID Destroy();
 
 // Interface needed for alternative event handler 
@@ -158,38 +158,39 @@ public:
 	BOOL	MoveTo(INT ptDestX, INT ptDestY);
 	BOOL	SizeTo(UINT cWidth, UINT cHeight);
 
-	BOOL	MoveSizeTo(RECT ctrlSizePos);
+	BOOL	MoveSizeTo(RECT wbSizePos);
 	BOOL	MoveSizeTo(POINT ptDest, UINT cWidth, UINT cHeight);
 	BOOL	MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight);
 
 // Setters.
-	BOOL	setText(LPCTSTR ctrlText);
-	DWORD	setParent(clsControl *lpCtrlParent);						
-	VOID	setAnchors(BYTE ctrlAnchors);
+	BOOL	setText(LPCTSTR wbText);
+	DWORD	setParent(clsWinBase *lpCtrlParent);						
+	VOID	setAnchors(BYTE wbAnchors);
 
 // Getters.
-	UINT		getText(LPTSTR ctrlText, UINT nLengthToCopy);
-	clsControl*	getParent();
-	BYTE		getAnchors();
-	VOID		getBoundaries(LPRECT rcDims);
-	VOID		getPos(LPINT pWhereX, LPINT pWhereY);
-	VOID		getPos(LPPOINT ptWhere);
-	VOID		getSize(LPUINT pWidth, LPUINT pHeight);
-	UINT		getWidth();
-	UINT		getHeight();
-	INT			getWidthMnemonic();
-	INT			getHeightMnemonic();
+	UINT		getText(LPTSTR wbText, UINT nLengthToCopy) const;
+	clsWinBase*	getParent();
+	BYTE		getAnchors() const;
+	VOID		getBoundaries(LPRECT rcDims) const;
+	VOID		getPos(LPINT pWhereX, LPINT pWhereY) const;
+	VOID		getPos(LPPOINT ptWhere) const;
+	VOID		getSize(LPUINT pWidth, LPUINT pHeight) const;
+	UINT		getWidth() const;
+	UINT		getHeight() const;
+	INT			getWidthMnemonic() const;
+	INT			getHeightMnemonic() const;
 	VOID		getDC(HDC *hDC);
 
 	BOOL		dropDC(HDC *hDC);
 // Checkers.
-	BOOL isVisible();
-	BOOL isEnabled();
-	BOOL isActive();
-	BOOL isParent(clsControl *lpCtrlChild);
-	BOOL isChild(clsControl *lpCtrlParent);
+	BOOL isVisible() const;
+	BOOL isEnabled() const;
+	BOOL isActive() const;
+	BOOL isParent(clsWinBase *lpCtrlChild) const;
+	BOOL isChild(clsWinBase *lpCtrlParent) const;
 };
-typedef clsControl CONTROL, *LPCONTROL;
+typedef clsWinBase WINBASE, *LPWINBASE;
+typedef const clsWinBase *LPCWINBASE;
 
 //class Menu {
 //private:
@@ -218,7 +219,7 @@ enum FORM_TYPE {
 // This is a class designed for easy form management. 
 // Forget about WNDPROC because of window subclassing. 
 // Use the event-assigned handler functions!
-class clsForm : public clsControl	{
+class clsForm : public clsWinBase	{
 private:
 	BOOL	frmClsAutoUnreg;
 
@@ -265,25 +266,101 @@ public:
 	BOOL	Maximize();
 	BOOL	Minimize();
 	BOOL	Restore();
-	INT_PTR DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure);
-	INT_PTR MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType);
+	INT_PTR DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure) const;
+	INT_PTR MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType) const;
 
 // Setters.
 	BOOL	setMenu(HMENU frmMenu);
 
 // Getters.
 	//HMENU	getMenu();
-	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight); 
-	VOID	getClientWidth(LPUINT fcWidth);
-	VOID	getClientHeight(LPUINT fcHeight);
+	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight) const; 
+	VOID	getClientWidth(LPUINT fcWidth) const;
+	VOID	getClientHeight(LPUINT fcHeight) const;
 	VOID	getClientDC(HDC *hDC);
 
 // Checkers.
-	BOOL	isMaximized();
-	BOOL	isMinimized();
-	BOOL	isNormal();
+	BOOL	isMaximized() const;
+	BOOL	isMinimized() const;
+	BOOL	isNormal() const;
 };
 typedef clsForm FORM, *LPFORM; 
+typedef const clsForm *LPCFORM;
+
+//class clsControl : public clsWinBase {
+//private:
+//	UINT tabOrder;
+//
+//public:
+//	virtual DWORD Create(
+//			LPCTSTR		wbClsName,
+//			DWORD		wbStyle,
+//			DWORD		wbStyleEx,
+//			RECT		wbDim,
+//			clsWinBase*	wbParent
+//		);
+//	virtual DWORD Create(
+//			LPCTSTR		wbClsName,
+//			DWORD		wbStyle,
+//			DWORD		wbStyleEx,
+//			POINT		wbPos,
+//			UINT		wbWidth,
+//			UINT		wbHeight,
+//			clsWinBase*	wbParent
+//		);
+//	virtual DWORD Create(
+//			LPCTSTR		wbClsName,
+//			DWORD		wbStyle,
+//			DWORD		wbStyleEx,
+//			INT			wbPosX,
+//			INT			wbPosY,
+//			UINT		wbWidth,
+//			UINT		wbHeight,
+//			clsWinBase*	wbParent
+//		);
+//};
+
+class clsButton : public clsWinBase {
+private:
+	UINT	ID;
+
+public:
+	clsButton();
+	virtual ~clsButton();
+
+	virtual DWORD Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				RECT	btnDim,
+				BOOL	setDefault	= FALSE
+			);
+
+	virtual DWORD Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				POINT	btnPos,
+				UINT	btnWidth,
+				UINT	btnHeight,
+				BOOL	setDefault	=	FALSE			
+			);
+
+	virtual DWORD Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				INT		btnPosX,
+				INT		btnPosY,
+				UINT	btnWidth,
+				UINT	btnHeight,
+				BOOL	setDefault	=	FALSE			
+			);
+
+	UINT getID() const;
+};
+typedef clsButton BUTTON, *LPBUTTON;
+typedef const clsButton *LPCBUTTON;
 
 
 

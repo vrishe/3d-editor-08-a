@@ -28,21 +28,21 @@ ATOM ClassRegister(
 }
 
 // ============================================================================
-// clsControl class implementation
+// clsWinBase class implementation
 // ============================================================================
-HINSTANCE clsControl::hInst = GetModuleHandle(NULL);
+HINSTANCE clsWinBase::hInst = GetModuleHandle(NULL);
 
-LRESULT CALLBACK clsControl::CtrlProc ( 
+LRESULT CALLBACK clsWinBase::CtrlProc ( 
 	HWND hWnd, 
 	UINT Event, 
 	WPARAM wParam, 
 	LPARAM lParam 
 ) {
 	EVENT_FUNC_MAP::const_iterator finder;
-	clsControl *ctrlHandled = (clsForm*)GetWindowLongPtr(hWnd, GWL_USERDATA),
-			*ctrlChildHandled;
+	clsWinBase *wbHandled = (clsForm*)GetWindowLongPtr(hWnd, GWL_USERDATA),
+			*wbChildHandled;
 
-	UINT	uChildrenCount = ctrlHandled->ChildrenList.size();
+	UINT	uChildrenCount = wbHandled->ChildrenList.size();
 	HDWP	hDeferWndStruct;
 	LPRECT	rcCtrlRects;
 	RECT	rcOffset;
@@ -53,7 +53,7 @@ LRESULT CALLBACK clsControl::CtrlProc (
 			if ( (BOOL)wParam )
 			{
 				rcCtrlRects		= ((LPNCCALCSIZE_PARAMS)lParam)->rgrc;
-				if ( ctrlHandled->Parent == NULL )
+				if ( wbHandled->Parent == NULL )
 				{
 					rcOffset.left	= rcCtrlRects[1].left 
 										- rcCtrlRects[0].left;
@@ -63,18 +63,18 @@ LRESULT CALLBACK clsControl::CtrlProc (
 										- rcCtrlRects[1].right;
 					rcOffset.bottom	= rcCtrlRects[0].bottom 
 										- rcCtrlRects[1].bottom;
-					ctrlHandled->Offset = rcOffset;
+					wbHandled->Offset = rcOffset;
 				}
 				else
 				{
-					rcOffset = ctrlHandled->Parent->Offset;
-					if ( (ctrlHandled->Parent->Anchors 
+					rcOffset = wbHandled->Parent->Offset;
+					if ( (wbHandled->Parent->Anchors 
 						& ANCR_LEFT) == 0 ) rcOffset.left = 0;
-					if ( (ctrlHandled->Parent->Anchors 
+					if ( (wbHandled->Parent->Anchors 
 						& ANCR_TOP) == 0 ) rcOffset.top = 0;
-					if ( (ctrlHandled->Parent->Anchors 
+					if ( (wbHandled->Parent->Anchors 
 						& ANCR_RIGHT) == 0 ) rcOffset.right = 0;
-					if ( (ctrlHandled->Parent->Anchors 
+					if ( (wbHandled->Parent->Anchors 
 						& ANCR_BOTTOM) == 0 ) rcOffset.bottom = 0;
 				}
 					
@@ -84,54 +84,54 @@ LRESULT CALLBACK clsControl::CtrlProc (
 					&& hDeferWndStruct; 
 					i++ )
 				{
-					ctrlChildHandled = ctrlHandled->ChildrenList[i];
+					wbChildHandled = wbHandled->ChildrenList[i];
 
-					if ( (ctrlChildHandled->Anchors 
+					if ( (wbChildHandled->Anchors 
 							& (ANCR_LEFT | ANCR_RIGHT)) == 0 )
 					{
-						ctrlChildHandled->Position.x
+						wbChildHandled->Position.x
 							+= (rcCtrlRects[0].right - rcCtrlRects[0].left) / 2
 							- (rcCtrlRects[1].right - rcCtrlRects[1].left) / 2;
 					}
 					else
 					{
-						if ( (ctrlChildHandled->Anchors 
+						if ( (wbChildHandled->Anchors 
 							& ANCR_LEFT) == 0 )
 						{
-							ctrlChildHandled->Position.x 
+							wbChildHandled->Position.x 
 								+= rcOffset.left + rcOffset.right;
 						}
 						else
 						{
-							if ( (ctrlChildHandled->Anchors 
+							if ( (wbChildHandled->Anchors 
 									& ANCR_RIGHT) != 0 )
 							{
-								ctrlChildHandled->Width 
+								wbChildHandled->Width 
 									+= rcOffset.left + rcOffset.right;
 							}
 						}
 					}
-					if ( (ctrlChildHandled->Anchors 
+					if ( (wbChildHandled->Anchors 
 							& (ANCR_TOP | ANCR_BOTTOM)) == 0 )
 					{
-						ctrlChildHandled->Position.y
+						wbChildHandled->Position.y
 							+= (rcCtrlRects[0].bottom - rcCtrlRects[0].top) / 2
 							- (rcCtrlRects[1].bottom - rcCtrlRects[1].top) / 2;
 					}
 					else
 					{
-						if ( (ctrlChildHandled->Anchors 
+						if ( (wbChildHandled->Anchors 
 							& ANCR_TOP) == 0 )
 						{
-							ctrlChildHandled->Position.y 
+							wbChildHandled->Position.y 
 								+= rcOffset.top + rcOffset.bottom;
 						}
 						else
 						{
-							if ( (ctrlChildHandled->Anchors 
+							if ( (wbChildHandled->Anchors 
 									& ANCR_BOTTOM) != 0 )
 							{
-								ctrlChildHandled->Height 
+								wbChildHandled->Height 
 									+= rcOffset.top + rcOffset.bottom;
 							}
 						}
@@ -139,12 +139,12 @@ LRESULT CALLBACK clsControl::CtrlProc (
 								
 					hDeferWndStruct = DeferWindowPos(
 										hDeferWndStruct,
-										ctrlChildHandled->hWnd,
+										wbChildHandled->hWnd,
 										NULL,
-										ctrlChildHandled->Position.x,
-										ctrlChildHandled->Position.y,
-										ctrlChildHandled->Width,
-										ctrlChildHandled->Height,
+										wbChildHandled->Position.x,
+										wbChildHandled->Position.y,
+										wbChildHandled->Width,
+										wbChildHandled->Height,
 										SWP_NOZORDER | SWP_NOREDRAW
 									);
 				}
@@ -154,28 +154,28 @@ LRESULT CALLBACK clsControl::CtrlProc (
 			break;
 
 		case WM_WINDOWPOSCHANGED:
-			if ( ctrlHandled->Parent == NULL )
+			if ( wbHandled->Parent == NULL )
 			{
-				ctrlHandled->Position.x = ((LPWINDOWPOS)lParam)->x;
-				ctrlHandled->Position.y = ((LPWINDOWPOS)lParam)->y;
-				ctrlHandled->Width		= ((LPWINDOWPOS)lParam)->cx;
-				ctrlHandled->Height		= ((LPWINDOWPOS)lParam)->cy;
+				wbHandled->Position.x = ((LPWINDOWPOS)lParam)->x;
+				wbHandled->Position.y = ((LPWINDOWPOS)lParam)->y;
+				wbHandled->Width		= ((LPWINDOWPOS)lParam)->cx;
+				wbHandled->Height		= ((LPWINDOWPOS)lParam)->cy;
 			}
 			break;
 
 		case WM_DESTROY:
-			ctrlHandled->hWnd = NULL;
+			wbHandled->hWnd = NULL;
 			break;
 	}
 
-	finder = ctrlHandled->EventHandlers.find(Event);
-	if ( finder == ctrlHandled->EventHandlers.end() )
-		return ctrlHandled->defCtrlProc(hWnd, Event, wParam, lParam);
+	finder = wbHandled->EventHandlers.find(Event);
+	if ( finder == wbHandled->EventHandlers.end() )
+		return wbHandled->defCtrlProc(hWnd, Event, wParam, lParam);
 
-	return finder->second(ctrlHandled, wParam, lParam);	
+	return finder->second(wbHandled, wParam, lParam);	
 }
 
-UINT clsControl::findFirstChild(clsControl *lpCtrlChild)
+UINT clsWinBase::findFirstChild(clsWinBase *lpCtrlChild) const
 {
 	UINT	vCount	= ChildrenList.size(),
 			i		= 0;
@@ -190,7 +190,7 @@ UINT clsControl::findFirstChild(clsControl *lpCtrlChild)
 	return i;
 }
 
-BOOL clsControl::removeFirstChildFound(clsControl *lpCtrlChild)
+BOOL clsWinBase::removeFirstChildFound(clsWinBase *lpCtrlChild)
 {
 	UINT	vCount	= ChildrenList.size(),
 			i		= findFirstChild(lpCtrlChild);
@@ -203,13 +203,13 @@ BOOL clsControl::removeFirstChildFound(clsControl *lpCtrlChild)
 	return FALSE;
 }
 
-BOOL clsControl::manageWindowState(INT nCmdShow)
+BOOL clsWinBase::manageWindowState(INT nCmdShow)
 {
 	ShowWindow(hWnd, nCmdShow);
 	return UpdateWindow(hWnd);
 }
 
-clsControl::clsControl() {
+clsWinBase::clsWinBase() {
 	clsName		= NULL;
 	hWnd		= NULL;
 
@@ -223,47 +223,47 @@ clsControl::clsControl() {
 	SetRectEmpty(&Offset);
 }
 
-clsControl::~clsControl() { Destroy(); }
+clsWinBase::~clsWinBase() { Destroy(); }
 
-DWORD clsControl::Create(
-		LPCTSTR		ctrlClsName,
-		DWORD		ctrlStyle,
-		DWORD		ctrlStyleEx,
-		INT			ctrlPosX,
-		INT			ctrlPosY,
-		UINT		ctrlWidth,
-		UINT		ctrlHeight,
-		clsControl*	ctrlParent
+DWORD clsWinBase::Create(
+		LPCTSTR		wbClsName,
+		DWORD		wbStyle,
+		DWORD		wbStyleEx,
+		INT			wbPosX,
+		INT			wbPosY,
+		UINT		wbWidth,
+		UINT		wbHeight,
+		clsWinBase*	wbParent
 ) {
 	RECT rcRealDimentions;
 	WNDCLASSEX wndClsFound;
 	if ( hWnd != NULL )		return S_ALREADY_EXISTS;
 	if ( hInst == NULL )	return E_HINSTANCE_IS_NULL;
-	if ( !(GetClassInfoEx(hInst, ctrlClsName, &wndClsFound)
-			|| GetClassInfoEx(NULL, ctrlClsName, &wndClsFound)) )
+	if ( !(GetClassInfoEx(hInst, wbClsName, &wndClsFound)
+			|| GetClassInfoEx(NULL, wbClsName, &wndClsFound)) )
 							return E_CLASS_NOT_EXIST;
-	if ( ctrlParent			!= NULL
-		&& ctrlParent->hWnd	== NULL	) 
+	if ( wbParent			!= NULL
+		&& wbParent->hWnd	== NULL	) 
 							return E_BAD_ARGUMENTS;
 	
-	clsName = (LPTSTR)ctrlClsName;
+	clsName = (LPTSTR)wbClsName;
 	hWnd = CreateWindowEx(
-				ctrlStyleEx, 
+				wbStyleEx, 
 				clsName, 
 				NULL, 
-				ctrlStyle, 
-				ctrlPosX, 
-				ctrlPosY, 
-				ctrlWidth, 
-				ctrlHeight, 
-				ctrlParent != NULL ? ctrlParent->hWnd : NULL, 
+				wbStyle, 
+				wbPosX, 
+				wbPosY, 
+				wbWidth, 
+				wbHeight, 
+				wbParent != NULL ? wbParent->hWnd : NULL, 
 				NULL, 
 				hInst, 
 				NULL 
 			); 
 	if ( hWnd == NULL ) return E_HWND_CREATION_FAILED;
 // Setting all necessary data of controling class
-	Parent = ctrlParent;
+	Parent = wbParent;
 	Anchors = ANCR_TOP | ANCR_LEFT;
 	if ( Parent != NULL ) Parent->ChildrenList.push_back(this);
 	getBoundaries(&rcRealDimentions);
@@ -289,47 +289,47 @@ DWORD clsControl::Create(
 	return S_DONE;
 }
 
-DWORD clsControl::Create(
-		LPCTSTR		ctrlClsName,
-		DWORD		ctrlStyle,
-		DWORD		ctrlStyleEx,
-		RECT		ctrlDim,
-		clsControl*	ctrlParent
+DWORD clsWinBase::Create(
+		LPCTSTR		wbClsName,
+		DWORD		wbStyle,
+		DWORD		wbStyleEx,
+		RECT		wbDim,
+		clsWinBase*	wbParent
 ) {
 	return Create(
-				ctrlClsName,
-				ctrlStyle,
-				ctrlStyleEx,
-				ctrlDim.left,
-				ctrlDim.right,
-				ctrlDim.right - ctrlDim.left,
-				ctrlDim.bottom - ctrlDim.top,
-				ctrlParent
+				wbClsName,
+				wbStyle,
+				wbStyleEx,
+				wbDim.left,
+				wbDim.right,
+				wbDim.right - wbDim.left,
+				wbDim.bottom - wbDim.top,
+				wbParent
 			);	
 }
 
-DWORD clsControl::Create(
-		LPCTSTR		ctrlClsName,
-		DWORD		ctrlStyle,
-		DWORD		ctrlStyleEx,
-		POINT		ctrlPos,
-		UINT		ctrlWidth,
-		UINT		ctrlHeight,
-		clsControl*	ctrlParent
+DWORD clsWinBase::Create(
+		LPCTSTR		wbClsName,
+		DWORD		wbStyle,
+		DWORD		wbStyleEx,
+		POINT		wbPos,
+		UINT		wbWidth,
+		UINT		wbHeight,
+		clsWinBase*	wbParent
 ) {
 	return Create(
-				ctrlClsName,
-				ctrlStyle,
-				ctrlStyleEx,
-				ctrlPos.x,
-				ctrlPos.y,
-				ctrlWidth,
-				ctrlHeight,
-				ctrlParent
+				wbClsName,
+				wbStyle,
+				wbStyleEx,
+				wbPos.x,
+				wbPos.y,
+				wbWidth,
+				wbHeight,
+				wbParent
 			);
 }
 
-VOID clsControl::Destroy()
+VOID clsWinBase::Destroy()
 {
 	UINT ancestorIndex;
 	if ( Parent != NULL )
@@ -353,7 +353,7 @@ VOID clsControl::Destroy()
 	Height		= 0;
 }
 
-DWORD clsControl::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Replace )
+DWORD clsWinBase::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Replace )
 {
 	EVENT_FUNC_MAP::iterator finder = EventHandlers.find(Event); 
 	ELEMENT NewEventHandler;
@@ -376,23 +376,23 @@ DWORD clsControl::AssignEventHandler( UINT Event, EVENT_FUNC Handler, BOOL Repla
 	return S_DONE;
 }
 
-EVENT_FUNC clsControl::ObtainEventHandler(UINT Event)
+EVENT_FUNC clsWinBase::ObtainEventHandler(UINT Event)
 {
 	EVENT_FUNC_MAP::iterator finder = EventHandlers.find(Event);
 	if ( finder != EventHandlers.end() ) return finder->second;
 	return NULL;
 }
 
-EVENT_FUNC clsControl::operator[](UINT Event)
+EVENT_FUNC clsWinBase::operator[](UINT Event)
 {
 	return ObtainEventHandler(Event);
 }
 
-//EVENT_FUNC clsControl::operator+=(
+//EVENT_FUNC clsWinBase::operator+=(
 
-VOID clsControl::ResetEventHandlers() { EventHandlers.clear(); }
+VOID clsWinBase::ResetEventHandlers() { EventHandlers.clear(); }
 
-BOOL clsControl::Show(BOOL bRecursive)		
+BOOL clsWinBase::Show(BOOL bRecursive)		
 {
 	BOOL bResult = manageWindowState(SW_SHOWNORMAL); ;
 	for ( UINT i = 0; 
@@ -404,13 +404,13 @@ BOOL clsControl::Show(BOOL bRecursive)
 	return bResult;
 }
 
-BOOL clsControl::Hide()		{ return manageWindowState(SW_HIDE); }
+BOOL clsWinBase::Hide()		{ return manageWindowState(SW_HIDE); }
 
-BOOL clsControl::Enable()		{ return EnableWindow(hWnd, TRUE); }
+BOOL clsWinBase::Enable()		{ return EnableWindow(hWnd, TRUE); }
 
-BOOL clsControl::Disable()		{ return EnableWindow(hWnd, FALSE); }
+BOOL clsWinBase::Disable()		{ return EnableWindow(hWnd, FALSE); }
 
-BOOL clsControl::MoveTo(POINT ptDest) 
+BOOL clsWinBase::MoveTo(POINT ptDest) 
 { 
 	BOOL bResult = SetWindowPos(
 						hWnd, 
@@ -425,7 +425,7 @@ BOOL clsControl::MoveTo(POINT ptDest)
 	return bResult;
 }
 
-BOOL clsControl::MoveTo(INT ptDestX, INT ptDestY)
+BOOL clsWinBase::MoveTo(INT ptDestX, INT ptDestY)
 {
 	POINT ptDest;
 	ptDest.x = ptDestX;
@@ -433,7 +433,7 @@ BOOL clsControl::MoveTo(INT ptDestX, INT ptDestY)
 	return MoveTo(ptDest);
 }
 
-BOOL clsControl::SizeTo(UINT cWidth, UINT cHeight)
+BOOL clsWinBase::SizeTo(UINT cWidth, UINT cHeight)
 {
 	BOOL bResult = SetWindowPos(
 						hWnd, 
@@ -452,61 +452,61 @@ BOOL clsControl::SizeTo(UINT cWidth, UINT cHeight)
 	return bResult;
 }
 
-BOOL clsControl::MoveSizeTo(RECT ctrlSizePos)
+BOOL clsWinBase::MoveSizeTo(RECT wbSizePos)
 {
-	INT		ctrlPosX	= ctrlSizePos.left < ctrlSizePos.right ? 
-								ctrlSizePos.left : ctrlSizePos.right,
-			ctrlPosY	= ctrlSizePos.top < ctrlSizePos.bottom ? 
-								ctrlSizePos.top : ctrlSizePos.bottom;
-	UINT	ctrlWidth	= abs(ctrlSizePos.right - ctrlSizePos.left),
-			ctrlHeight	= abs(ctrlSizePos.bottom - ctrlSizePos.top);
+	INT		wbPosX	= wbSizePos.left < wbSizePos.right ? 
+								wbSizePos.left : wbSizePos.right,
+			wbPosY	= wbSizePos.top < wbSizePos.bottom ? 
+								wbSizePos.top : wbSizePos.bottom;
+	UINT	wbWidth	= abs(wbSizePos.right - wbSizePos.left),
+			wbHeight	= abs(wbSizePos.bottom - wbSizePos.top);
 	return SetWindowPos(
 				hWnd, 
 				NULL,
-				ctrlPosX,
-				ctrlPosY,
-				ctrlWidth,
-				ctrlHeight,
+				wbPosX,
+				wbPosY,
+				wbWidth,
+				wbHeight,
 				SWP_NOZORDER
 			); 
 }
 
-BOOL clsControl::MoveSizeTo(POINT ptDest, UINT cWidth, UINT cHeight)
+BOOL clsWinBase::MoveSizeTo(POINT ptDest, UINT cWidth, UINT cHeight)
 {
-	RECT ctrlSizePos;
+	RECT wbSizePos;
 
 	return SetRect(
-			&ctrlSizePos, 
+			&wbSizePos, 
 			ptDest.x, 
 			ptDest.y, 
 			ptDest.x + cWidth, 
 			ptDest.y + cHeight
 		)
-		&& MoveSizeTo(ctrlSizePos);
+		&& MoveSizeTo(wbSizePos);
 }
 
-BOOL clsControl::MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight)
+BOOL clsWinBase::MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight)
 {
-	RECT ctrlSizePos;
+	RECT wbSizePos;
 
 	return SetRect(
-			&ctrlSizePos, 
+			&wbSizePos, 
 			ptDestX, 
 			ptDestY, 
 			ptDestX + cWidth, 
 			ptDestY + cHeight
 		)
-		&& MoveSizeTo(ctrlSizePos);
+		&& MoveSizeTo(wbSizePos);
 }
 
-BOOL clsControl::setText(LPCTSTR ctrlText)
+BOOL clsWinBase::setText(LPCTSTR wbText)
 {
-	return SetWindowText(hWnd, ctrlText);
+	return SetWindowText(hWnd, wbText);
 }
 
-DWORD clsControl::setParent(clsControl *lpCtrlsParent)
+DWORD clsWinBase::setParent(clsWinBase *lpCtrlsParent)
 {
-	DWORD ctrlStyle = 0;
+	DWORD wbStyle = 0;
 	HWND hWndParent = NULL;
 
 	if ( hWnd == NULL ) return E_DOES_NOT_EXIST;
@@ -525,16 +525,16 @@ DWORD clsControl::setParent(clsControl *lpCtrlsParent)
 
 	if ( hWndParent != NULL )
 	{
-		ctrlStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-		ctrlStyle = ctrlStyle & ~WS_POPUP | WS_CHILD;
-		SetWindowLongPtr(hWnd, GWL_STYLE, ctrlStyle);
+		wbStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+		wbStyle = wbStyle & ~WS_POPUP | WS_CHILD;
+		SetWindowLongPtr(hWnd, GWL_STYLE, wbStyle);
 	}
 	if ( SetParent(hWnd, hWndParent) == NULL ) return E_FAIL;
 	if ( hWndParent == NULL )
 	{
-		ctrlStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-		ctrlStyle = ctrlStyle & ~WS_CHILD | WS_POPUP;
-		SetWindowLongPtr(hWnd, GWL_STYLE, ctrlStyle);			
+		wbStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+		wbStyle = wbStyle & ~WS_CHILD | WS_POPUP;
+		SetWindowLongPtr(hWnd, GWL_STYLE, wbStyle);			
 	}
 	SetWindowPos(
 			hWnd, 
@@ -549,19 +549,19 @@ DWORD clsControl::setParent(clsControl *lpCtrlsParent)
 	return S_OK;
 }
 
-VOID clsControl::setAnchors(BYTE ctrlAnchors) { Anchors = ctrlAnchors; } 
+VOID clsWinBase::setAnchors(BYTE wbAnchors) { Anchors = wbAnchors; } 
 
 
-clsControl *clsControl::getParent() { return Parent; }
+clsWinBase *clsWinBase::getParent() { return Parent; }
 
-UINT clsControl::getText(LPTSTR ctrlText, UINT nLengthToCopy)
+UINT clsWinBase::getText(LPTSTR wbText, UINT nLengthToCopy) const
 {
-	return GetWindowText(hWnd, ctrlText, nLengthToCopy);
+	return GetWindowText(hWnd, wbText, nLengthToCopy);
 }
 
-BYTE clsControl::getAnchors() { return Anchors; }
+BYTE clsWinBase::getAnchors() const { return Anchors; }
 
-VOID clsControl::getBoundaries(LPRECT rcDims)
+VOID clsWinBase::getBoundaries(LPRECT rcDims) const
 {
 	if ( rcDims != NULL )
 	{
@@ -572,7 +572,7 @@ VOID clsControl::getBoundaries(LPRECT rcDims)
 	}
 }
 
-VOID clsControl::getPos(LPINT pWhereX, LPINT pWhereY)
+VOID clsWinBase::getPos(LPINT pWhereX, LPINT pWhereY) const
 {
 	RECT rcDims;
 	getBoundaries(&rcDims);	
@@ -580,7 +580,7 @@ VOID clsControl::getPos(LPINT pWhereX, LPINT pWhereY)
 	if ( pWhereY != NULL ) { *pWhereY = rcDims.top; }
 }
 
-VOID clsControl::getPos(LPPOINT ptWhere)
+VOID clsWinBase::getPos(LPPOINT ptWhere) const
 {
 	RECT rcDims;
 	getBoundaries(&rcDims);	
@@ -591,7 +591,7 @@ VOID clsControl::getPos(LPPOINT ptWhere)
 	}
 }
 
-VOID clsControl::getSize(LPUINT pWidth, LPUINT pHeight)
+VOID clsWinBase::getSize(LPUINT pWidth, LPUINT pHeight) const
 {
 	RECT rcDims;
 	getBoundaries(&rcDims);	
@@ -600,30 +600,30 @@ VOID clsControl::getSize(LPUINT pWidth, LPUINT pHeight)
 	if ( pHeight != NULL ) { *pHeight = rcDims.bottom - rcDims.top; }
 }
 
-UINT clsControl::getWidth()
+UINT clsWinBase::getWidth() const
 {
 	UINT cWidth;
 	getSize(&cWidth, NULL);
 	return cWidth;
 }
 
-UINT clsControl::getHeight()
+UINT clsWinBase::getHeight() const
 {
 	UINT cHeight;
 	getSize(NULL, &cHeight);
 	return cHeight;
 }
 
-INT clsControl::getWidthMnemonic() { return Width; }
+INT clsWinBase::getWidthMnemonic() const { return Width; }
 
-INT clsControl::getHeightMnemonic() { return Height; }
+INT clsWinBase::getHeightMnemonic() const { return Height; }
 
-VOID clsControl::getDC(HDC *hDC) 
+VOID clsWinBase::getDC(HDC *hDC) 
 { 
 	if ( hDC != NULL ) *hDC = GetWindowDC(hWnd); 
 }
 
-BOOL clsControl::dropDC(HDC *hDC) 
+BOOL clsWinBase::dropDC(HDC *hDC) 
 { 
 	BOOL bResult = hDC != NULL;
 	if ( bResult ) 
@@ -634,24 +634,24 @@ BOOL clsControl::dropDC(HDC *hDC)
 	return  bResult; 
 }
 
-BOOL clsControl::isVisible()	{ return IsWindowVisible(hWnd); }
+BOOL clsWinBase::isVisible() const	{ return IsWindowVisible(hWnd); }
 
-BOOL clsControl::isEnabled()	{ return IsWindowEnabled(hWnd); }
+BOOL clsWinBase::isEnabled() const	{ return IsWindowEnabled(hWnd); }
 
-BOOL clsControl::isActive()	{ return GetActiveWindow() == hWnd; }
+BOOL clsWinBase::isActive()	const { return GetActiveWindow() == hWnd; }
 
-BOOL clsControl::isParent(clsControl *lpCtrlChild) 
+BOOL clsWinBase::isParent(clsWinBase *lpCtrlChild) const
 { 
 	return ChildrenList.size() != findFirstChild(lpCtrlChild); 
 } 
 
-BOOL clsControl::isChild(clsControl *lpCtrlParent) { return Parent == lpCtrlParent; }
+BOOL clsWinBase::isChild(clsWinBase *lpCtrlParent) const { return Parent == lpCtrlParent; }
 
 // ============================================================================
 // clsForm class implementation
 // ============================================================================
 clsForm::clsForm() 
-	: clsControl(), frmClsAutoUnreg(FALSE) { }
+	: clsWinBase(), frmClsAutoUnreg(FALSE) { }
 
 clsForm::~clsForm() { }
 
@@ -684,7 +684,7 @@ DWORD clsForm::Create(
 				);
 		frmClsAutoUnreg	= TRUE;
 	}
-	dwResult = clsControl::Create(
+	dwResult = clsWinBase::Create(
 						frmClsName,
 						frmType,
 						frmStyleEx,
@@ -749,7 +749,7 @@ VOID clsForm::Destroy()
 		frmClsAutoUnreg = FALSE;
 		UnregisterClass(clsName, hInst);
 	}
-	clsControl::Destroy();
+	clsWinBase::Destroy();
 }
 
 BOOL clsForm::Validate(LPRECT pValidRect) 
@@ -768,12 +768,12 @@ BOOL clsForm::Minimize() { return ShowWindow(hWnd, SW_SHOWMINIMIZED); }
 
 BOOL clsForm::Restore()  { return ShowWindow(hWnd, SW_SHOWNORMAL); }
 
-INT_PTR clsForm::DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure)
+INT_PTR clsForm::DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure) const
 {
 	return DialogBox(hInst, dbTemplate, hWnd, dbProcedure);
 }
 
-INT_PTR clsForm::MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType)
+INT_PTR clsForm::MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType) const
 {
 	return MessageBox(hWnd, mbText, mbCaption, mbType);
 }
@@ -792,7 +792,7 @@ BOOL clsForm::setMenu(HMENU frmMenu)
 }
 
 //HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
-VOID clsForm::getClientSize(LPUINT fcWidth, LPUINT fcHeight)
+VOID clsForm::getClientSize(LPUINT fcWidth, LPUINT fcHeight) const
 {
 	RECT clientRect;
 	BOOL bResult = GetClientRect(hWnd, &clientRect);
@@ -800,12 +800,12 @@ VOID clsForm::getClientSize(LPUINT fcWidth, LPUINT fcHeight)
 	if ( fcHeight != NULL) *fcHeight = bResult ? clientRect.bottom : 0U;
 }
 
-VOID clsForm::getClientWidth(LPUINT fcWidth)
+VOID clsForm::getClientWidth(LPUINT fcWidth) const
 {
 	getClientSize(fcWidth, NULL);
 }
 
-VOID clsForm::getClientHeight(LPUINT fcHeight)
+VOID clsForm::getClientHeight(LPUINT fcHeight) const
 {
 	getClientSize(NULL, fcHeight);
 }
@@ -816,9 +816,89 @@ VOID clsForm::getClientDC(HDC *hDC)
 }
 
 
-BOOL clsForm::isMaximized() { return IsZoomed(hWnd); }
+BOOL clsForm::isMaximized() const { return IsZoomed(hWnd); }
 
-BOOL clsForm::isMinimized() { return IsIconic(hWnd); }
+BOOL clsForm::isMinimized() const { return IsIconic(hWnd); }
 
-BOOL clsForm::isNormal() { return !(isMaximized() || isMinimized()); }
+BOOL clsForm::isNormal() const { return !(isMaximized() || isMinimized()); }
 
+
+// ============================================================================
+// clsButton class implementation
+// ============================================================================
+clsButton::clsButton() { }
+clsButton::~clsButton() { } 
+
+DWORD clsButton::Create(
+			UINT	btnId,
+			LPCTSTR btnText,
+			LPFORM	btnParent,
+			INT		btnPosX,
+			INT		btnPosY,
+			UINT	btnWidth,
+			UINT	btnHeight,
+			BOOL	setDefault			
+) {
+	DWORD	btnStyle = WS_CHILD | WS_TABSTOP,
+			dwResult = clsWinBase::Create(
+							_T("button"),
+							btnStyle
+							| (setDefault ? BS_DEFPUSHBUTTON 
+											: BS_PUSHBUTTON),
+							NULL,
+							btnPosX,
+							btnPosY,
+							btnWidth,
+							btnHeight,
+							btnParent
+						);
+	if ( SUCCEEDED(dwResult) ) 
+	{ 
+		ID = btnId;
+		SetWindowLongPtr(hWnd, GWL_ID, btnId);
+		setText(btnText); 
+	}
+	return dwResult;
+}
+
+DWORD clsButton::Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				POINT	btnPos,
+				UINT	btnWidth,
+				UINT	btnHeight,
+				BOOL	setDefault		
+) {
+	return Create(
+			btnId,
+			btnText,
+			btnParent,
+			btnPos.x,
+			btnPos.y,
+			btnWidth,
+			btnHeight,
+			setDefault
+		);
+}
+
+DWORD clsButton::Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				RECT	btnDim,
+				BOOL	setDefault		
+) {
+	return Create(
+			btnId,
+			btnText,
+			btnParent,
+			btnDim.left,
+			btnDim.top,
+			btnDim.right - btnDim.left,
+			btnDim.bottom - btnDim.top,
+			setDefault
+		);
+}
+
+UINT clsButton::getID() const { return ID; } 

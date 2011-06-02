@@ -61,48 +61,26 @@ void clsCamera::setFarCP(float farCP)
 
 void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 {
-	VECTOR3D	vF(1.0f, .0f, .0f),
-				vR(.0f, 1.0f, .0f),
-				vU(.0f, .0f, 1.0f);
 	MATRIX3D	M;
 	
-	Matrix3DRotateAxis(&vU, -yaw, &M);
-	Matrix3DTransformNormal(&M, &vF, &vF);
-	Vector3DMultV(&vU, &vF, &vR);
-
-	Matrix3DRotateAxis(&vR, -pitch, &M);
-	Matrix3DTransformNormal(&M, &vF, &vF);
-	Vector3DMultV(&vF, &vR, &vU);
-
-	Matrix3DRotateAxis(&vF, -roll, &M);
-	Matrix3DTransformNormal(&M, &vR, &vR);
-	Vector3DMultV(&vF, &vR, &vU);	
-
-	Vector3DNormalize(&vF, &vF);
-	Vector3DMultV(&vF, &vR, &vU);
-	Vector3DNormalize(&vU, &vU);
-	Vector3DMultV(&vU, &vF, &vR);
-	Vector3DNormalize(&vR, &vR);
-
-
-	mOut->_11 = vR.x;
-	mOut->_12 = vU.x;
-	mOut->_13 = vF.x;
+	mOut->_11 = rWd.x;
+	mOut->_12 = uWd.x;
+	mOut->_13 = fWd.x;
 	mOut->_14 = .0f;
 
-	mOut->_21 = vR.y;
-	mOut->_22 = vU.y;
-	mOut->_23 = vF.y;
+	mOut->_21 = rWd.y;
+	mOut->_22 = uWd.y;
+	mOut->_23 = fWd.y;
 	mOut->_24 = .0f;
 
-	mOut->_31 = vR.z;
-	mOut->_32 = vU.z;
-	mOut->_33 = vF.z;
+	mOut->_31 = rWd.z;
+	mOut->_32 = uWd.z;
+	mOut->_33 = fWd.z;
 	mOut->_34 = .0f;
 
-	mOut->_41 = -Vector3DMultS(&vR, &pos);
-	mOut->_42 = -Vector3DMultS(&vU, &pos);
-	mOut->_43 = -Vector3DMultS(&vF, &pos);
+	mOut->_41 = -Vector3DMultS(&rWd, &pos);
+	mOut->_42 = -Vector3DMultS(&uWd, &pos);
+	mOut->_43 = -Vector3DMultS(&fWd, &pos);
 	mOut->_44 = 1.0f;
 }
 
