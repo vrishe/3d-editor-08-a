@@ -15,7 +15,7 @@ clsDifLight::clsDifLight(float p) : clsObject(CLS_LIGHT), power(p) {}
 float clsDifLight::getPower()	{ return power; }
 COLOR3D clsDifLight::getColor() { return color; }
 
-void clsDifLight::setPower(float p)	{ power = (p > 1 ? 1 : (p < 0 ? 0 : p)); }
+void clsDifLight::setPower(float p)	{ power = (p < 0 ? 0 : p); }
 void clsDifLight::setColor(unsigned char r, unsigned char g, unsigned char b) {
 	color.Red	= r;
 	color.Green = g;
