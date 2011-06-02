@@ -95,7 +95,9 @@ float Vector3DLength(const LPVECTOR3D src) {
 }
 
 void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt) {
-	*rslt = (*src) / Vector3DLength(src);
+	float vLen = Vector3DLength(src);
+	if ( vLen > EPSILON )
+		*rslt = (*src) / vLen;
 }
 
 void Vector3DMultV(
