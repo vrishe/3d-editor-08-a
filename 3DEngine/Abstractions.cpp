@@ -409,6 +409,10 @@ void clsObject::GetScaleMatrix(LPMATRIX3D mOut)
 	mOut->_33 = zScale;
 }
 
+VECTOR3D clsObject::getForwardLookDirection() { return fWd; }
+VECTOR3D clsObject::getRightLookDirection() { return rWd; }
+VECTOR3D clsObject::getUpLookDirection() { return uWd; }
+
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
 { 
 	wcscpy_s(objName, bufSize, Name); 

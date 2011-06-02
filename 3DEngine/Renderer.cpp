@@ -103,6 +103,7 @@ BOOL clsViewport::Render() {
 
 	RECT				clientRect;
 	UINT				sceneObjCount,
+						sceneLightCount,
 						scenePolyCount,
 						objVertCount,
 						objEdgeCount,
@@ -128,7 +129,7 @@ BOOL clsViewport::Render() {
 						viewportMatrix;
 	
 	SCENEPOLY			scenePolyBuffer;
-	DWORD			   *sceneLightBuffer;
+	LPCOLOR3D			scenePolyColorBuffer;
 	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
@@ -154,10 +155,11 @@ BOOL clsViewport::Render() {
 	if ( bResult ) 
 	{
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
+
 		if ( rMode != RM_WIREFRAME ) {
-			scenePolyCount  = Scene->getPolygonsCount();
-			lightToRender	= (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, 0);
-			sceneLightBuffer = new DWORD[scenePolyCount];
+			scenePolyCount			= Scene->getPolygonsCount();
+			sceneLightCount			= Scene->getObjectClassCount(CLS_LIGHT);
+			scenePolyColorBuffer	= new COLOR3D[scenePolyCount];
 		}
 
 		// prepearing camera
@@ -193,20 +195,31 @@ BOOL clsViewport::Render() {
 			// calculate lightning here
 			if ( rMode != RM_WIREFRAME ) {
 				objPolyBuffer	= objToRender->getPolygonsRaw();
-				objPolyCount	= objToRender->getPolygonsCount();	
+				objPolyCount	= objToRender->getPolygonsCount();
+
 				for (UINT j = scenePolyBuffer.size(); j < objPolyCount; j++) {
-					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2)),
-							 lightDirection(lightToRender->getPosition());
-					Vector3DNormalize(&normal, &normal);				
-					FLOAT ratio = Vector3DMultS(&normal, &lightDirection);
-					if (ratio > -EPSILON)
-						ratio += lightToRender->getPower();
-					else
-						ratio = lightToRender->getPower();;
-					COLOR3D newColor = objToRender->getColor();
-					sceneLightBuffer[j] = RGB((newColor.Red	 * ratio > 255 ? 255 : newColor.Red  * ratio), 
-											  (newColor.Green* ratio > 255 ? 255 : newColor.Green* ratio),
-											  (newColor.Blue * ratio > 255 ? 255 : newColor.Blue * ratio));
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
+					Vector3DNormalize(&normal, &normal);
+					scenePolyColorBuffer[j] = objToRender->getColor();
+
+					for (UINT k = 0; k < sceneLightCount; k++) 	{
+						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);
+						FLOAT ratio = Vector3DMultS(&normal, &lightToRender->getForwardLookDirection());
+						if (ratio > -EPSILON)
+							ratio += lightToRender->getPower();
+						else
+							ratio = lightToRender->getPower();
+
+						COLOR3D newColor	= scenePolyColorBuffer[j],
+								lightColor	= lightToRender->getColor();
+						UINT red	= (UINT)(max(newColor.Red,	  lightColor.Red)  * ratio);
+						UINT green	= (UINT)(max(newColor.Green, lightColor.Green) * ratio);
+						UINT blue	= (UINT)(max(newColor.Blue,  lightColor.Blue)  * ratio);
+						newColor.Red	= ( newColor.Red > 255	 ? 255 : red );
+						newColor.Green	= ( newColor.Green > 255 ? 255 : green );
+						newColor.Blue	= ( newColor.Blue > 255  ? 255 : blue );
+						scenePolyColorBuffer[j] = newColor;
+					}
 				}
 			}
 
@@ -250,7 +263,7 @@ BOOL clsViewport::Render() {
 						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-						tmp.colorRef = sceneLightBuffer[j];
+						tmp.colorRef = RGB(scenePolyColorBuffer[j].Red, scenePolyColorBuffer[j].Green, scenePolyColorBuffer[j].Blue);
 						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 					}
 				}
@@ -357,6 +370,7 @@ BOOL clsViewport::Render() {
 				}
 			}
 		}
+		if ( rMode != RM_WIREFRAME ) delete scenePolyColorBuffer;
 	}
 
 	BitBlt(

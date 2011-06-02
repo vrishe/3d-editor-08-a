@@ -176,6 +176,10 @@ public:
 	void GetYawRotationMatrix(LPMATRIX3D mOut);
 	void GetScaleMatrix(LPMATRIX3D mOut);
 
+	VECTOR3D getForwardLookDirection();
+	VECTOR3D getRightLookDirection();
+	VECTOR3D getUpLookDirection();	
+
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
 };
