@@ -287,47 +287,49 @@ public:
 typedef clsForm FORM, *LPFORM; 
 typedef const clsForm *LPCFORM;
 
-//class clsControl : public clsWinBase {
-//private:
-//	UINT tabOrder;
-//
-//public:
-//	virtual DWORD Create(
-//			LPCTSTR		wbClsName,
-//			DWORD		wbStyle,
-//			DWORD		wbStyleEx,
-//			RECT		wbDim,
-//			clsWinBase*	wbParent
-//		);
-//	virtual DWORD Create(
-//			LPCTSTR		wbClsName,
-//			DWORD		wbStyle,
-//			DWORD		wbStyleEx,
-//			POINT		wbPos,
-//			UINT		wbWidth,
-//			UINT		wbHeight,
-//			clsWinBase*	wbParent
-//		);
-//	virtual DWORD Create(
-//			LPCTSTR		wbClsName,
-//			DWORD		wbStyle,
-//			DWORD		wbStyleEx,
-//			INT			wbPosX,
-//			INT			wbPosY,
-//			UINT		wbWidth,
-//			UINT		wbHeight,
-//			clsWinBase*	wbParent
-//		);
-//};
+class clsControl : public clsWinBase {
+private:
+	UINT tabOrder;
 
-class clsButton : public clsWinBase {
+public:
+	virtual DWORD Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			RECT		ctrlDim,
+			clsWinBase*	ctrlParent
+		);
+	virtual DWORD Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			POINT		ctrlPos,
+			UINT		ctrlWidth,
+			UINT		ctrlHeight,
+			clsWinBase*	ctrlParent
+		);
+	virtual DWORD Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			INT			ctrlPosX,
+			INT			ctrlPosY,
+			UINT		ctrlWidth,
+			UINT		ctrlHeight,
+			clsWinBase*	ctrlParent
+		);
+
+	VOID setTabOrder(UINT tbOrder);
+
+
+	UINT getTabOrder() const;
+};
+
+class clsButton : public clsControl {
 private:
 	UINT	ID;
 
 public:
-	clsButton();
-	virtual ~clsButton();
-
 	virtual DWORD Create(
 				UINT	btnId,
 				LPCTSTR btnText,

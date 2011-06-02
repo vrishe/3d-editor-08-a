@@ -679,7 +679,7 @@ DWORD clsForm::Create(
 					0,
 					NULL,
 					NULL,
-					NULL,
+					LoadCursor(hInst, IDC_ARROW),
 					(HBRUSH)(COLOR_WINDOW + 1)
 				);
 		frmClsAutoUnreg	= TRUE;
@@ -822,13 +822,109 @@ BOOL clsForm::isMinimized() const { return IsIconic(hWnd); }
 
 BOOL clsForm::isNormal() const { return !(isMaximized() || isMinimized()); }
 
+// ============================================================================
+// clsControl class implementation
+// ============================================================================
+DWORD clsControl::Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			INT			ctrlPosX,
+			INT			ctrlPosY,
+			UINT		ctrlWidth,
+			UINT		ctrlHeight,
+			clsWinBase*	ctrlParent
+) {
+	HWND	tabSearch;
+	DWORD	cStyle		= WS_CHILD | ctrlStyle,
+			dwResult;	
+	if ( ctrlParent == NULL ) return E_BAD_ARGUMENTS;
 
+	dwResult = clsWinBase::Create(
+						ctrlClsName,
+						cStyle,
+						ctrlStyleEx,
+						ctrlPosX,
+						ctrlPosY,
+						ctrlWidth,
+						ctrlHeight,
+						ctrlParent
+					);
+	if ( SUCCEEDED(dwResult) ) 
+	{
+		tabSearch	= hWnd;
+		tabOrder	= 0U;
+		while ( 
+			(tabSearch = GetWindow(tabSearch, GW_HWNDPREV)) != NULL 
+		) tabOrder++;
+	}
+}
+
+DWORD clsControl::Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			POINT		ctrlPos,
+			UINT		ctrlWidth,
+			UINT		ctrlHeight,
+			clsWinBase*	ctrlParent
+) {
+	return Create(
+				ctrlClsName, 
+				ctrlStyle,
+				ctrlStyleEx,
+				ctrlPos.x,
+				ctrlPos.y,
+				ctrlWidth,
+				ctrlHeight,
+				ctrlParent
+			);
+}
+
+DWORD clsControl::Create(
+			LPCTSTR		ctrlClsName,
+			DWORD		ctrlStyle,
+			DWORD		ctrlStyleEx,
+			RECT		ctrlDim,
+			clsWinBase*	ctrlParent
+) { 
+	return Create(
+				ctrlClsName, 
+				ctrlStyle,
+				ctrlStyleEx,
+				ctrlDim.left,
+				ctrlDim.top,
+				ctrlDim.right - ctrlDim.left,
+				ctrlDim.bottom - ctrlDim.top,
+				ctrlParent
+			);
+}
+
+//BOOL CALLBACK EnumControls
+
+VOID clsControl::setTabOrder(UINT tbOrder)
+{
+	HWND		tabSearch = hWnd;
+	clsControl	*ctrlSearch;
+
+	if ( tbOrder < tabOrder  && tabSearch != NULL )
+	{
+		while ( 
+			(tabSearch = GetWindow(tabSearch, GW_HWNDPREV)) != NULL 
+		) {
+			ctrlSearch = (clsControl*)GetWindowLongPtr(tabSearch, GWL_USERDATA);
+			if (ctrlSearch != NULL)
+			{
+				if ( ctrlSearch->tabOrder >= tbOrder ) ctrlSearch->tabOrder++;
+			}
+		}
+	}
+}
+
+UINT clsControl::getTabOrder() const { return tabOrder; } 
 // ============================================================================
 // clsButton class implementation
 // ============================================================================
-clsButton::clsButton() { }
-clsButton::~clsButton() { } 
-
 DWORD clsButton::Create(
 			UINT	btnId,
 			LPCTSTR btnText,
@@ -839,10 +935,9 @@ DWORD clsButton::Create(
 			UINT	btnHeight,
 			BOOL	setDefault			
 ) {
-	DWORD	btnStyle = WS_CHILD | WS_TABSTOP,
-			dwResult = clsWinBase::Create(
+	DWORD	dwResult = clsControl::Create(
 							_T("button"),
-							btnStyle
+							WS_TABSTOP
 							| (setDefault ? BS_DEFPUSHBUTTON 
 											: BS_PUSHBUTTON),
 							NULL,
