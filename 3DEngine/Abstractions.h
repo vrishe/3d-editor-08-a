@@ -35,8 +35,8 @@ typedef struct tagDirectPolygon {
 	VECTOR3D first;
 	VECTOR3D second;
 	VECTOR3D third;
-	
-	float	diffuse;
+
+	DWORD colorRef;
 
 	VECTOR3D Normal(size_t startVert);
 } DIRECTPOLY3D, *LPDIRECTPOLY3D;
@@ -71,7 +71,8 @@ typedef struct tagColor
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
 	CLS_CAMERA		= 1,
-	CLS_MESH		= 2
+	CLS_MESH		= 2,
+	CLS_LIGHT		= 3
 };
 
 enum CONSTRAINTS {

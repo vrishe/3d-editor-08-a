@@ -481,6 +481,7 @@ clsScene::clsScene()
 	objects.insert(clsObjLst);
 	clsObjLst.first = CLS_MESH;
 	objects.insert(clsObjLst);
+	clsObjLst.first = CLS_LIGHT;
 
 	ambientColor.Red	= 0;
 	ambientColor.Green	= 0;
@@ -724,9 +725,7 @@ DWORD		clsMesh::getColorRef()		{ return RGB(
 													color.Blue); }
 size_t		clsMesh::getVerticesCount()	{ return vertices.size(); }
 size_t		clsMesh::getEdgesCount()	{ return edges.size(); }
-size_t		clsMesh::getPolygonsCount()	{ 
-	return polygons.size(); 
-}
+size_t		clsMesh::getPolygonsCount()	{ return polygons.size(); }
 LPVECTOR3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
 LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }
 LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }

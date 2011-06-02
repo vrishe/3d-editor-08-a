@@ -2,6 +2,8 @@
 
 #include "Primitives.h"
 
+// ============================================================================
+// Microphone class
 class Microphone : public clsMesh {
 	ExCone	*base;				// 0
 	Cone	*upright,			// 3
@@ -42,3 +44,4 @@ public:
 	void setHeadDepth		(float);
 	void setCoreRadius		(float);
 };
+typedef Microphone MICROPHONE3D, *LPMICROPHONE3D;

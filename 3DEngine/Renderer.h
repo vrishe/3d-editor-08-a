@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "Camera.h"
+#include "Lighters.h"
 #include "..\Controls\Controls.h"
 
 

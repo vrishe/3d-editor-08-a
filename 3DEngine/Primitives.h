@@ -59,6 +59,7 @@ public:
 	void setTLength(float n);
 	void setTWidth(float n);
 };
+typedef Pyramid PYRAMID3D, *LPPYRAMID3D;
 
 #endif // PYRAMID_H
 
@@ -111,6 +112,7 @@ public:
 	void setTRadius(float);
 	void setPrecission(int);
 };
+typedef Cone CONE3D, *LPCONE3D;
 
 #endif // CONE_H
 
@@ -158,6 +160,7 @@ public:
 	// setters
 	void setSecant(float); 
 };
+typedef ExCone EXCONE3D, *LPEXCONE3D;
 
 #endif // EXCONE_H
 
@@ -220,5 +223,6 @@ public:
 	void setTHoleRadius(float);
 	void setPrecission(int);
 };
+typedef Hole HOLE3D, *LPHOLE3D;
 
 #endif // HOLE_H

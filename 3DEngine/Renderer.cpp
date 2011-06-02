@@ -116,6 +116,7 @@ BOOL clsViewport::Render() {
 	VECTOR3D			camPos;
 
 	LPCAMERA3D			camToRender;
+	LPDIFLIGHT3D		lightToRender;
 	LPMESH3D			objToRender;
 	LPVECTOR3D			objVertBuffer;
 	LPEDGE3D			objEdgeBuffer;
@@ -127,6 +128,7 @@ BOOL clsViewport::Render() {
 						viewportMatrix;
 	
 	SCENEPOLY			scenePolyBuffer;
+	DWORD			   *sceneLightBuffer;
 	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
@@ -153,6 +155,11 @@ BOOL clsViewport::Render() {
 	{
 		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
+		if ( rMode != RM_WIREFRAME ) {
+			scenePolyCount  = Scene->getPolygonsCount();
+			lightToRender	= (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, 0);
+			sceneLightBuffer = new DWORD[scenePolyCount];
+		}
 
 		// prepearing camera
 		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
@@ -184,6 +191,26 @@ BOOL clsViewport::Render() {
 
 			objToRender->getVerticesTransformed(objVertBuffer);
 
+			// calculate lightning here
+			if ( rMode != RM_WIREFRAME ) {
+				objPolyBuffer	= objToRender->getPolygonsRaw();
+				objPolyCount	= objToRender->getPolygonsCount();	
+				for (UINT j = scenePolyBuffer.size(); j < objPolyCount; j++) {
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2)),
+							 lightDirection(lightToRender->getPosition());
+					Vector3DNormalize(&normal, &normal);				
+					FLOAT ratio = Vector3DMultS(&normal, &lightDirection);
+					if (ratio > -EPSILON)
+						ratio += lightToRender->getPower();
+					else
+						ratio = lightToRender->getPower();;
+					COLOR3D newColor = objToRender->getColor();
+					sceneLightBuffer[j] = RGB((newColor.Red	 * ratio > 255 ? 255 : newColor.Red  * ratio), 
+											  (newColor.Green* ratio > 255 ? 255 : newColor.Green* ratio),
+											  (newColor.Blue * ratio > 255 ? 255 : newColor.Blue * ratio));
+				}
+			}
+
 			// camera projection transformations
 			for ( UINT j = 0; j < objVertCount; j++ ) 
 			{
@@ -214,9 +241,6 @@ BOOL clsViewport::Render() {
 
 			if ( rMode != RM_WIREFRAME ) 
 			{
-				objPolyBuffer	= objToRender->getPolygonsRaw();
-				objPolyCount	= objToRender->getPolygonsCount();	
-
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
 					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
@@ -227,6 +251,7 @@ BOOL clsViewport::Render() {
 						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
+						tmp.colorRef = sceneLightBuffer[j];
 						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 					}
 				}
@@ -239,7 +264,7 @@ BOOL clsViewport::Render() {
 				hPenCurrent		= CreatePen(PS_SOLID, 1, objToRender->getColorRef());
 				hPenOld			= (HPEN)SelectObject(hMemDC, hPenCurrent);
 				for ( UINT j = 0; j < objEdgeCount; j++ ) 
-				{ // Yeah baby, that's the stuff!
+				{
 					if ( objVertBuffer[objEdgeBuffer[j].first].z >= 0
 						&& objVertBuffer[objEdgeBuffer[j].first].z <= 1
 						&& objVertBuffer[objEdgeBuffer[j].second].z >= 0
@@ -279,7 +304,7 @@ BOOL clsViewport::Render() {
 
 			scenePolyCount	= scenePolyBuffer.size();
 			for (UINT i = 0; i < scenePolyCount; i++ ) 
-			{ // AAaaaaand..... Here we go again! 
+			{
 				if ( scenePolyBuffer[i].first.first.z > 0
 					&& scenePolyBuffer[i].first.first.z <= 1
 					&& scenePolyBuffer[i].first.second.z >= 0
@@ -304,15 +329,13 @@ BOOL clsViewport::Render() {
 					objToRender	= (LPMESH3D)Scene->getObject(
 												CLS_MESH, 
 												scenePolyBuffer[i].second
-											); 
+											);
 
-					// TODO: Make here necessaru calculations of polygon color.
-					//	Than create here a brush of color needed (include lighting)
-					//
+					hBrCurrent = CreateSolidBrush(scenePolyBuffer[i].first.colorRef);
 					if ( rMode == RM_SHADEDWF ) 
 						hPenCurrent = CreatePen(PS_SOLID, 1, objToRender->getColorRef());
-					//else
-					//	hPenCurrent = CreatePen(PS_SOLID, 1, RGB(objColor.Red, objColor.Green, objColor.Blue));
+					else
+						hPenCurrent = CreatePen(PS_SOLID, 1, scenePolyBuffer[i].first.colorRef);
 					
 					hPenOld = (HPEN)SelectObject(hMemDC, hPenCurrent);
 					hBrOld	= (HBRUSH)SelectObject(hMemDC, hBrCurrent);
@@ -330,7 +353,7 @@ BOOL clsViewport::Render() {
 
 					SelectObject(hMemDC, hBrOld);
 					SelectObject(hMemDC, hPenOld);
-					//DeleteObject(hBrCurrent); Uncomment this when you'll define own brush creation
+					DeleteObject(hBrCurrent);
 					DeleteObject(hPenCurrent);
 				}
 			}

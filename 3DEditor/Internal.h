@@ -7,5 +7,6 @@
 #define EPSILON .005F
 #include "..\Controls\Controls.h"
 #include "..\3DEngine\Renderer.h"
+#include "..\3DEngine\Lighters.h"
 #include "..\3DEngine\Primitives.h"
 #include "..\3DEngine\Microphone.h"

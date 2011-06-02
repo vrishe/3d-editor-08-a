@@ -11,6 +11,8 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
+CONTROL				testButton;
+
 LPRENDER_POOL		testPool;
 
 SCENE3D				testScene;
@@ -20,10 +22,10 @@ CAMERA3D			CameraTop,
 					CameraRight, 
 					CameraPersp;
 
-CONTROL				testButton;
+DIFLIGHT3D			testLight;
 
-Pyramid				cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
-Microphone			testMic( 80, 80, 200 );
+PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
+MICROPHONE3D		testMic( 130, 130, 200 );
 
 // Win API entry point:
 // ===================================
@@ -69,13 +71,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
-	testScene.setAmbientColor(132, 128, 128);
+	testScene.setAmbientColor(56, 56, 56);
 
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
 	testScene.AddObject(&CameraFront);
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
+	testScene.AddObject(&testLight);
 	testScene.AddObject(&testMic);
 	//testScene.AddObject(&cubeX);
 
@@ -100,29 +103,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	//testPool->addViewport(
-	//			20, 20,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			CameraTop.objID(),
-	//			RM_WIREFRAME
-	//		);
-	//testPool->addViewport(
-	//			25 + ufWidth / 2, 
-	//			20,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			CameraFront.objID(),
-	//			RM_WIREFRAME
-	//		);
-	//testPool->addViewport(
-	//			20, 
-	//			25 + ufHeight / 2,
-	//			ufWidth / 2 - 5,
-	//			ufHeight / 2 - 5,
-	//			CameraRight.objID(),
-	//			RM_WIREFRAME
-	//		);
+	testPool->addViewport(
+				20, 20,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				CameraTop.objID(),
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				25 + ufWidth / 2, 
+				20,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				CameraFront.objID(),
+				RM_WIREFRAME
+			);
+	testPool->addViewport(
+				20, 
+				25 + ufHeight / 2,
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				CameraRight.objID(),
+				RM_WIREFRAME
+			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
 				25 + ufHeight / 2,

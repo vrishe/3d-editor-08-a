@@ -1,5 +1,7 @@
 #include "Microphone.h"
 
+// ============================================================================
+// Implementation of Microphone class:
 Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue) : clsMesh(red, green, blue) {
 	// make a microphone here!
 	base			= new ExCone(15, 85, 85, 70, 24);
@@ -14,7 +16,7 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	handleBridgeUp	= new Pyramid(13, 5, 8, 5, 8);
 	handleBridgeDown= new Pyramid(10, 5, 8, 5, 8);
 	handle			= new Pyramid(108, 9.5, 6.5, 6.5, 6.5, 1.5);
-	handleTop		= new Pyramid(8.f, 9.5, 6.5, 9.5, 6.5, -4.3);
+	handleTop		= new Pyramid(8, 9.5, 6.5, 9.5, 6.5, -4.3f);
 
 	head			= new Hole(30, 40, 30, 40, 30, 24);
 	headFront		= new Hole(3,  43, 30, 43, 27, 24);
@@ -78,6 +80,10 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	addMesh(headFront);
 	addMesh(headBack);
 	addMesh(core);
+
+	vertices.shrink_to_fit();
+	edges.shrink_to_fit();
+	polygons.shrink_to_fit();
 }
 
 Microphone::Microphone(float bR, float totalH) : clsMesh() {
