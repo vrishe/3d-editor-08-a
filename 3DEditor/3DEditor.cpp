@@ -22,7 +22,8 @@ CAMERA3D			CameraTop,
 
 CONTROL				testButton;
 
-Microphone			testMic( 200, 80, 80 );
+Pyramid				cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
+Microphone			testMic( 80, 80, 200 );
 
 // Win API entry point:
 // ===================================
@@ -76,6 +77,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testMic);
+	//testScene.AddObject(&cubeX);
 
 	// Objects here:
 	testMic.Fly(-120);
@@ -98,50 +100,50 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	ufWidth -= 40;
 	ufHeight -= 40;
 	testPool = new RENDER_POOL(&mainForm, &testScene);
-	testPool->addViewport(
-				20, 20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraTop.objID(),
-				RM_WIREFRAME
-			);
-	testPool->addViewport(
-				25 + ufWidth / 2, 
-				20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraFront.objID(),
-				RM_WIREFRAME
-			);
-	testPool->addViewport(
-				20, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraRight.objID(),
-				RM_WIREFRAME
-			);
+	//testPool->addViewport(
+	//			20, 20,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			CameraTop.objID(),
+	//			RM_WIREFRAME
+	//		);
 	//testPool->addViewport(
 	//			25 + ufWidth / 2, 
+	//			20,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			CameraFront.objID(),
+	//			RM_WIREFRAME
+	//		);
+	//testPool->addViewport(
+	//			20, 
 	//			25 + ufHeight / 2,
 	//			ufWidth / 2 - 5,
 	//			ufHeight / 2 - 5,
-	//			CameraPersp.objID(),
-	//			RM_SHADEDWF
+	//			CameraRight.objID(),
+	//			RM_WIREFRAME
 	//		);
-
-	testButton.Create(
-				_T("button"),
-				WS_CHILD | BS_PUSHBUTTON,
-				NULL,
-				25 + ufWidth / 2,
+	testPool->addViewport(
+				25 + ufWidth / 2, 
 				25 + ufHeight / 2,
-				70,
-				30,
-				&mainForm
+				ufWidth / 2 - 5,
+				ufHeight / 2 - 5,
+				CameraPersp.objID(),
+				RM_SHADEDWF
 			);
-	testButton.setText(_T("Click!"));
-	testButton.AssignEventHandler(WM_MOUSEMOVE, button_hover, TRUE); 
+
+	//testButton.Create(
+	//			_T("button"),
+	//			WS_CHILD | BS_PUSHBUTTON,
+	//			NULL,
+	//			25 + ufWidth / 2,
+	//			25 + ufHeight / 2,
+	//			70,
+	//			30,
+	//			&mainForm
+	//		);
+	//testButton.setText(_T("Click!"));
+	//testButton.AssignEventHandler(WM_MOUSEMOVE, button_hover, TRUE); 
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));

@@ -152,7 +152,6 @@ BOOL clsViewport::Render() {
 	if ( bResult ) {
 		const UINT VEC3DSIZE = sizeof(VECTOR3D);
 		sceneObjCount	= Scene->getObjectClassCount(CLS_MESH);
-		scenePolyCount	= Scene->getPolygonsCount();
 		sceneVertCount	= Scene->getVerticesCount();
 
 		// prepearing camera
@@ -188,6 +187,7 @@ BOOL clsViewport::Render() {
 
 			objToRender->getVerticesTransformed(objVertBuffer);
 
+			float lightning[1000];
 			// camera projection transformations
 			for ( UINT j = 0; j < objVertCount; j++ ) {
 				Matrix3DTransformCoord(
@@ -195,6 +195,17 @@ BOOL clsViewport::Render() {
 						objVertBuffer + j,
 						objVertBuffer + j
 					);
+
+				// calculate lightning here
+				for (UINT j = 0; j < objPolyCount; j++) {
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
+					float nLength = Vector3DLength(&normal);
+					Vector3DNormalize(&normal, &normal);
+					float mult = Vector3DMultS(&normal, &VECTOR3D(0,1,0));
+					float cosLight = mult / nLength;
+					float k = (1 + cosLight);
+					lightning[j] = k;
+				}
 
 				divisor = objVertBuffer[j].z + (farClip - nearClip) / 2;
 				Matrix3DTransformCoord(
@@ -218,11 +229,16 @@ BOOL clsViewport::Render() {
 			if ( rMode != RM_WIREFRAME ) {
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
-					DIRECTPOLY3D tmp;
-					tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
-					tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
-					tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-					scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
+					float cosCam = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
+					if (cosCam >= -1 && cosCam < 0) {
+						DIRECTPOLY3D tmp;
+						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
+						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
+						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
+						tmp.diffuse = lightning[j];
+						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
+					}
 				}
 			}
 			else {
@@ -267,6 +283,7 @@ BOOL clsViewport::Render() {
 						((LPMESH3D)Scene->getObject(CLS_MESH, i))->getColorRef()
 					);
 
+			scenePolyCount	= scenePolyBuffer.size();
 			for (UINT i = 0; i < scenePolyCount; i++ ) { // AAaaaaand..... Here we go again! 
 				if ( scenePolyBuffer[i].first.first.z > 0
 				  && scenePolyBuffer[i].first.first.z <= 1
@@ -289,37 +306,42 @@ BOOL clsViewport::Render() {
 				  && scenePolyBuffer[i].first.third.y >= 0
 			   	  && scenePolyBuffer[i].first.third.y <= clientRect.bottom)
 				{ 
-					VECTOR3D normal(scenePolyBuffer[i].first.Normal(2));
-					float cosA = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) / Vector3DLength(&normal);
-					if (cosA >= -1 && cosA <= 0) 
-					{
-						HPEN hPenCur, hPenOld;
-						COLOR3D color = ((LPMESH3D)Scene->getObject(CLS_MESH, scenePolyBuffer[i].second))->getColor();
-						if ( rMode == RM_SHADED )
-							hPenCur = CreatePen(PS_SOLID, 1, RGB(color.Red, color.Green, color.Blue));
-						else
-							hPenCur = CreatePen(PS_SOLID, 1, RGB(
-															(color.Red > 90		?	color.Red - 90	 : 0), 
-															(color.Green > 90	?	color.Green	- 90 : 0),
-															(color.Blue > 90	?	color.Blue - 90  : 0)
-															));
-						hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
-						hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrObjects[scenePolyBuffer[i].second]);
+					HPEN hPenCur, hPenOld;
+					COLOR3D color = ((LPMESH3D)Scene->getObject(CLS_MESH, scenePolyBuffer[i].second))->getColor();
+					if ( rMode == RM_SHADED )
+						hPenCur = CreatePen(PS_SOLID, 1, RGB(color.Red, color.Green, color.Blue));
+					else
+						hPenCur = CreatePen(PS_SOLID, 1, RGB(
+														(color.Red > 90		?	color.Red - 90	 : 0), 
+														(color.Green > 90	?	color.Green	- 90 : 0),
+														(color.Blue > 90	?	color.Blue - 90  : 0)
+														));
+					hPenOld = (HPEN)SelectObject(hMemDC, hPenCur);
 
-						vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
-						vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
+					/*VECTOR3D normal(scenePolyBuffer[i].first.Normal(1));
+					float nLength = Vector3DLength(&normal);
+					Vector3DNormalize(&normal, &normal);
+					float mult = Vector3DMultS(&normal, &VECTOR3D(0,1,0));
+					float cosLight = mult / nLength;
+					float k = (1 + cosLight);*/
+					float k = scenePolyBuffer[i].first.diffuse;
+					HBRUSH hBrCurr = CreateSolidBrush(RGB(color.Red*k, color.Green*k, color.Blue*k));
 
-						vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x;
-						vert2DDrawBuffer[1].y = (LONG)scenePolyBuffer[i].first.second.y;
+					hBrOld		= (HBRUSH)SelectObject(hMemDC, /*hBrCurr*/hBrObjects[scenePolyBuffer[i].second]);
 
-						vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x;
-						vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y;
+					vert2DDrawBuffer[0].x = (LONG)scenePolyBuffer[i].first.first.x;
+					vert2DDrawBuffer[0].y = (LONG)scenePolyBuffer[i].first.first.y;
 
-						Polygon( hMemDC, vert2DDrawBuffer, 3 );
-						SelectObject(hMemDC, hBrOld);
-						SelectObject(hMemDC, hPenOld);
-						DeleteObject(hPenCur);
-					}
+					vert2DDrawBuffer[1].x = (LONG)scenePolyBuffer[i].first.second.x;
+					vert2DDrawBuffer[1].y = (LONG)scenePolyBuffer[i].first.second.y;
+
+					vert2DDrawBuffer[2].x = (LONG)scenePolyBuffer[i].first.third.x;
+					vert2DDrawBuffer[2].y = (LONG)scenePolyBuffer[i].first.third.y;
+
+					Polygon( hMemDC, vert2DDrawBuffer, 3 );
+					SelectObject(hMemDC, hBrOld);
+					SelectObject(hMemDC, hPenOld);
+					DeleteObject(hPenCur);
 				}
 			}
 

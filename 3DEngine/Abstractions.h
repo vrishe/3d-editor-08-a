@@ -35,6 +35,8 @@ typedef struct tagDirectPolygon {
 	VECTOR3D first;
 	VECTOR3D second;
 	VECTOR3D third;
+	
+	float	diffuse;
 
 	VECTOR3D Normal(size_t startVert);
 } DIRECTPOLY3D, *LPDIRECTPOLY3D;
@@ -47,6 +49,7 @@ typedef struct tagPolygon {
 	tagPolygon();
 	tagPolygon(size_t a, size_t b, size_t c);
 	VECTOR3D Normal(LPVERT_LIST, size_t startVert);
+	VECTOR3D Normal(LPVECTOR3D, size_t startVert);
 	bool operator==(const tagPolygon &b) const;
 	bool operator!=(const tagPolygon &b) const;
 	bool isContainingEdge (EDGE3D e);

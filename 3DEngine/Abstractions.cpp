@@ -93,6 +93,37 @@ VECTOR3D tagPolygon::Normal(LPVERT_LIST vs, size_t startVert) {
 	return ans;
 }
 
+VECTOR3D tagPolygon::Normal(LPVECTOR3D vs, size_t startVert) {
+	VECTOR3D v1, v2, ans;
+	switch (startVert) {
+	case 1:
+		v1 = VECTOR3D(vs[second].x - vs[first].x,
+					vs[second].y - vs[first].y,
+					vs[second].z - vs[first].z);
+		v2 = VECTOR3D(vs[third].x - vs[first].x,
+					vs[third].y - vs[first].y,
+					vs[third].z - vs[first].z);
+		break;
+	case 2:
+		v1 = VECTOR3D(vs[first].x - vs[second].x,
+					vs[first].y - vs[second].y,
+					vs[first].z - vs[second].z);
+		v2 = VECTOR3D(vs[third].x - vs[second].x,
+					vs[third].y - vs[second].y,
+					vs[third].z - vs[second].z);
+		break;
+	case 3:
+		v1 = VECTOR3D(vs[first].x - vs[third].x,
+					vs[first].y - vs[third].y,
+					vs[first].z - vs[third].z);
+		v2 = VECTOR3D(vs[second].x - vs[third].x,
+					vs[second].y - vs[third].y,
+					vs[second].z - vs[third].z);
+	}
+	Vector3DMultV(&v1, &v2, &ans);
+	return ans;
+}
+
 bool tagPolygon::operator== (const tagPolygon &b) const
 {
 	return first	== b.first 
