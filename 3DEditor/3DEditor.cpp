@@ -66,7 +66,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testLight1);	
-//	testScene.AddObject(&testLight2);
+	testScene.AddObject(&testLight2);
 	testScene.AddObject(&testMic);
 //	testScene.AddObject(&cubeX);
 
@@ -76,10 +76,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// Lighters here:
 	testLight1.LookAt(-1, 0, 0);
 	testLight1.setColor(200, 80, 80);
-	testLight1.setPower(0.2f);
-	testLight2.LookAt(0, 0, -1);
+	testLight1.setPower(0.8f);
+	testLight2.LookAt(-1, 0, 0);
 	testLight2.setColor(0, 100, 0);
-	testLight2.setPower(0.05f);
+	testLight2.setPower(0.2f);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
@@ -104,7 +104,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraTop.objID(),
-				RM_SHADEDWF
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -112,7 +112,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraFront.objID(),
-				RM_SHADEDWF
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				20, 
@@ -120,7 +120,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraRight.objID(),
-				RM_SHADEDWF
+				RM_WIREFRAME
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -128,7 +128,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraPersp.objID(),
-				RM_SHADED
+				RM_SHADEDWF
 			);
 	mainForm.Show();
 

@@ -6,6 +6,7 @@
 // Microphone class
 class Microphone : public clsMesh {
 	ExCone	*base;				// 0
+	ExCone	*base2;				// 0
 	Cone	*upright,			// 3
 			*shroudHi,			// 5
 			*shroudLow,			// 4
@@ -32,6 +33,9 @@ public:
 		float tH = 243
 		);
 	~Microphone();
+
+	// functionality
+	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// setters
 	void setBaseRadius		(float);

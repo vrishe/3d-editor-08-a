@@ -212,7 +212,10 @@ BOOL clsViewport::Render() {
 						if (ratio < -EPSILON)
 							ratio = power - ratio;
 						else
-							ratio = (FLOAT)DARK_SIDE;
+							if (ratio < EPSILON)
+								ratio = power / 3.3;
+							else
+								ratio = (FLOAT)DARK_SIDE;
 
 						COLOR3D newColor	= objToRender->getColor();								
 						UINT red	= (UINT)(min((newColor.Red + lightColor.Red)/2, 255)     * ratio);
