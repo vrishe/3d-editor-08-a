@@ -9,6 +9,12 @@ tagEdge::tagEdge()
 tagEdge::tagEdge(size_t a, size_t b) 
 	: first(a), second(b) { }
 
+tagEdge& tagEdge::operator+= (const UINT& p) {
+	first += p;
+	second += p;
+	return *this;
+}
+
 bool tagEdge::operator== (const tagEdge &b) const 
 {
 	return (first == b.first && second == b.second)
@@ -122,6 +128,13 @@ VECTOR3D tagPolygon::Normal(LPVECTOR3D vs, size_t startVert) {
 	}
 	Vector3DMultV(&v1, &v2, &ans);
 	return ans;
+}
+
+tagPolygon& tagPolygon::operator+= (const UINT& p) {
+	first += p;
+	second += p;
+	third += p;
+	return *this;
 }
 
 bool tagPolygon::operator== (const tagPolygon &b) const

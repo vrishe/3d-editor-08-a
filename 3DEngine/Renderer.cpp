@@ -213,7 +213,7 @@ BOOL clsViewport::Render() {
 							ratio = power - ratio;
 						else
 							if (ratio < EPSILON)
-								ratio = power / 3.3;
+								ratio = power / 3.3f;
 							else
 								ratio = (FLOAT)DARK_SIDE;
 

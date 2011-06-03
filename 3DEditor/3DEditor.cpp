@@ -75,6 +75,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	// Objects here:
 	testMic.Fly(-120);
+	//testMic.setBaseRadius(100);
+	//testMic.setBaseHeight(50);
 
 	// Lighters here:
 	testLight1.LookAt(-1, 0, 0);

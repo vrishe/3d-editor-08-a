@@ -2,35 +2,64 @@
 
 #include "Primitives.h"
 
+#define PARTS_NUM 15
+
+enum MIC_PART {
+	MIC_BASE		= 0,
+	MIC_BUTTON_L	= 1,
+	MIC_BUTTON_R	= 2,
+	MIC_UPRIGHT		= 3,
+	MIC_SHROUD_LOW	= 4,
+	MIC_SHROUD_HI	= 5,
+	MIC_BRIDGE		= 6,
+	MIC_HANDLE_BU	= 7,
+	MIC_HANDLE_BD	= 8,
+	MIC_HANDLE		= 9,
+	MIC_HANDLE_TOP	= 10,
+	MIC_HEAD		= 11,
+	MIC_HEAD_FRONT	= 12,
+	MIC_HEAD_BACK	= 13,
+	MIC_CORE		= 14
+};
+
 // ============================================================================
 // Microphone class
 class Microphone : public clsMesh {
-	ExCone	*base;				// 0
-	ExCone	*base2;				// 0
-	Cone	*upright,			// 3
-			*shroudHi,			// 5
-			*shroudLow,			// 4
-			*bridge,			// 6
-			*core;				// 13
-	Hole	*head,				// 10
-			*headFront,			// 11
-			*headBack;			// 12
-	Pyramid *buttonL,			// 1
-			*buttonR,			// 2
-			*handle,			// 9
-			*handleBridgeUp,	// 7
-			*handleBridgeDown,	// 8
-			*handleTop;			// 14
+	LPMESH3D	*micParts;
+	float		tH,			// total height
+				bR,			// base radius
+				bH,			// base height
+				bW,			// button width
+				uR,			// upright radius
+				uH,			// upright height
+				uG,			// upright gap
+				hI,			// handle indent
+				hR,			// head radius
+				hD,			// head depth
+				cR;			// core radius
+	float		precission;
 
-	void addMesh(LPMESH3D); // adding vertices, edges and polygons to global microphone lists
+
+	bool getMeshPosition(
+		MIC_PART part,
+		int& vs,
+		int& es,
+		int& ps
+		);
+
+	void addMesh(MIC_PART part, MESH3D&); // adding vertices, edges and polygons as a specific part
+	void deleteMesh(MIC_PART part);
+
+	void replaceMesh(MIC_PART part, MESH3D&);
 
 public:
 	Microphone(
 		unsigned char red	= 0xff,
 		unsigned char green	= 0xff,
 		unsigned char blue	= 0xff,
-		float bR = 85, 
-		float tH = 243
+		float r = 85, 
+		float h = 243,
+		float prec = 24
 		);
 	~Microphone();
 

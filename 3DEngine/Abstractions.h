@@ -24,6 +24,8 @@ typedef struct tagEdge {
 
 	tagEdge();
 	tagEdge(size_t nFirst, size_t nSecond);
+
+	tagEdge& operator+= (const UINT& p);
 	bool operator==(const tagEdge &b) const;
 	bool operator!=(const tagEdge &b) const;
 	bool isContianingVertex(size_t vi);
@@ -50,6 +52,8 @@ typedef struct tagPolygon {
 	tagPolygon(size_t a, size_t b, size_t c);
 	VECTOR3D Normal(LPVERT_LIST, size_t startVert);
 	VECTOR3D Normal(LPVECTOR3D, size_t startVert);
+
+	tagPolygon& operator+= (const UINT& p);
 	bool operator==(const tagPolygon &b) const;
 	bool operator!=(const tagPolygon &b) const;
 	bool isContainingEdge (EDGE3D e);
