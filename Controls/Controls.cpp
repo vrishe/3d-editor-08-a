@@ -175,27 +175,58 @@ LRESULT CALLBACK clsWinBase::CtrlProc (
 	return finder->second(wbHandled, wParam, lParam);	
 }
 
-UINT clsWinBase::findFirstChild(clsWinBase *lpCtrlChild) const
+VOID clsWinBase::restoreControlFocus()
 {
-	UINT	vCount	= ChildrenList.size(),
-			i		= 0;
+	UINT cCount = ChildrenList.size(),
+		 cIndex = findFirstChildIndex(1);
+	if ( cIndex != cCount ) ChildrenList[cIndex]->setFocus();
+}
 
-	while ( i < vCount )
+VOID clsWinBase::tabOrderRecalculate()
+{
+	UINT tabOrderMax			= getChildrenTabOrderMax();
+	clsWinBase	*childCurrent	= NULL,
+				*childNext		= NULL;
+
+	for ( UINT i = 1, j; i < tabOrderMax;)
 	{
-		if ( ChildrenList[i] == lpCtrlChild )
-			return i;
+		j = 0;
+		do
+			childNext = getChildByTabOrder(i+(++j));
+		while ( j <= tabOrderMax && childNext == NULL);
+
+		if ( childNext != NULL )
+		{
+			childCurrent	= getChildByTabOrder(i);
+			if ( childCurrent == NULL )
+			{
+				childNext->tabOrder = i;
+			}
+			else
+			{
+				childNext->tabOrder = childCurrent->tabOrder + 1;
+				SetWindowPos(
+						childNext->hWnd,
+						childCurrent->hWnd,
+						0, 0, 0, 0,
+						SWP_NOSIZE | SWP_NOMOVE /*| SWP_NOSENDCHANGING*/
+					);
+				i++;
+			}
+		}
 		else
-			i++;
+		{
+			i+=j;
+		}
 	}
-	return i;
 }
 
 BOOL clsWinBase::removeFirstChildFound(clsWinBase *lpCtrlChild)
 {
-	UINT	vCount	= ChildrenList.size(),
-			i		= findFirstChild(lpCtrlChild);
+	UINT	cCount	= ChildrenList.size(),
+			i		= findFirstChildIndex(lpCtrlChild);
 
-	if ( i != vCount ) 
+	if ( i != cCount ) 
 	{
 		ChildrenList.erase(ChildrenList.begin() + i);
 		return TRUE;
@@ -263,9 +294,15 @@ DWORD clsWinBase::Create(
 			); 
 	if ( hWnd == NULL ) return E_HWND_CREATION_FAILED;
 // Setting all necessary data of controling class
-	Parent = wbParent;
-	Anchors = ANCR_TOP | ANCR_LEFT;
-	if ( Parent != NULL ) Parent->ChildrenList.push_back(this);
+	Parent		= wbParent;
+	Anchors		= ANCR_TOP | ANCR_LEFT;
+	tabOrder	= 0;
+	if ( Parent != NULL ) 
+	{
+		Parent->ChildrenList.push_back(this);
+		if ( (wbStyle & WS_TABSTOP) != 0 )
+			tabOrder = Parent->getChildrenTabOrderMax() + 1;
+	}
 	getBoundaries(&rcRealDimentions);
 	Position.x	= rcRealDimentions.left;
 	Position.y	= rcRealDimentions.top;
@@ -334,7 +371,7 @@ VOID clsWinBase::Destroy()
 	UINT ancestorIndex;
 	if ( Parent != NULL )
 	{
-		ancestorIndex = Parent->findFirstChild(this);	
+		ancestorIndex = Parent->findFirstChildIndex(this);	
 		if ( ancestorIndex < Parent->ChildrenList.size() )
 			Parent->ChildrenList.erase(Parent->ChildrenList.begin() 
 													+ ancestorIndex);
@@ -388,15 +425,44 @@ EVENT_FUNC clsWinBase::operator[](UINT Event)
 	return ObtainEventHandler(Event);
 }
 
-//EVENT_FUNC clsWinBase::operator+=(
-
 VOID clsWinBase::ResetEventHandlers() { EventHandlers.clear(); }
+
+UINT clsWinBase::findFirstChildIndex(clsWinBase *lpCtrlChild) const
+{
+	UINT	vCount	= ChildrenList.size(),
+			i		= 0;
+
+	while ( i < vCount )
+	{
+		if ( ChildrenList[i] == lpCtrlChild )
+			return i;
+		else
+			i++;
+	}
+	return i;
+}
+
+UINT clsWinBase::findFirstChildIndex(UINT fTabOrder) const
+{
+	UINT	cCount	= ChildrenList.size(),
+			i		= 0;
+
+	while ( i < cCount )
+	{
+		if ( ChildrenList[i]->tabOrder == fTabOrder )
+			return i;
+		else
+			i++;
+	}
+	return i;
+}
 
 BOOL clsWinBase::Show(BOOL bRecursive)		
 {
-	BOOL bResult = manageWindowState(SW_SHOWNORMAL); ;
+	UINT cCount		= ChildrenList.size();
+	BOOL bResult	= manageWindowState(SW_SHOWNORMAL);
 	for ( UINT i = 0; 
-		i < ChildrenList.size() 
+		i < cCount 
 			&& bRecursive 
 			&& bResult; 
 		i++ )
@@ -406,9 +472,9 @@ BOOL clsWinBase::Show(BOOL bRecursive)
 
 BOOL clsWinBase::Hide()		{ return manageWindowState(SW_HIDE); }
 
-BOOL clsWinBase::Enable()		{ return EnableWindow(hWnd, TRUE); }
+BOOL clsWinBase::Enable()	{ return EnableWindow(hWnd, TRUE); }
 
-BOOL clsWinBase::Disable()		{ return EnableWindow(hWnd, FALSE); }
+BOOL clsWinBase::Disable()	{ return EnableWindow(hWnd, FALSE); }
 
 BOOL clsWinBase::MoveTo(POINT ptDest) 
 { 
@@ -504,6 +570,54 @@ BOOL clsWinBase::setText(LPCTSTR wbText)
 	return SetWindowText(hWnd, wbText);
 }
 
+BOOL clsWinBase::setStyle(DWORD wbStyle)
+{
+	BOOL	bResult		= hWnd != NULL;
+	DWORD	curStyle;
+
+	if ( bResult )
+	{
+		curStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+		SetLastError(0);
+		SetWindowLongPtr(hWnd, GWL_STYLE, wbStyle);
+		bResult = GetLastError() == 0;
+		if ( bResult ) bResult = SetWindowPos(
+										hWnd, 
+										NULL, 
+										0, 0, 0, 0, 
+										SWP_NOMOVE 
+										| SWP_NOSIZE 
+										| SWP_NOZORDER 
+										| SWP_FRAMECHANGED
+									);
+	}
+	return bResult;
+}
+
+BOOL clsWinBase::setStyleEx(DWORD wbStyleEx)
+{
+	BOOL	bResult		= hWnd != NULL;
+	DWORD	curStyle;
+
+	if ( bResult )
+	{
+		curStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+		SetLastError(0);
+		SetWindowLongPtr(hWnd, GWL_EXSTYLE, wbStyleEx);
+		bResult = GetLastError() == 0;
+		if ( bResult ) bResult = SetWindowPos(
+										hWnd, 
+										NULL, 
+										0, 0, 0, 0, 
+										SWP_NOMOVE 
+										| SWP_NOSIZE 
+										| SWP_NOZORDER 
+										| SWP_FRAMECHANGED
+									);
+	}
+	return bResult;
+}
+
 DWORD clsWinBase::setParent(clsWinBase *lpCtrlsParent)
 {
 	DWORD wbStyle = 0;
@@ -551,13 +665,105 @@ DWORD clsWinBase::setParent(clsWinBase *lpCtrlsParent)
 
 VOID clsWinBase::setAnchors(BYTE wbAnchors) { Anchors = wbAnchors; } 
 
+BOOL clsWinBase::setTabOrder(UINT tOrder)
+{
+	clsWinBase *finder;
+	UINT tabOrderMax;
+	BOOL bResult		= Parent != NULL;
 
-clsWinBase *clsWinBase::getParent() { return Parent; }
+	if ( bResult )
+	{
+		tabOrderMax = Parent->getChildrenTabOrderMax();
+		bResult 	= tabOrderMax > 0
+					&& tabOrder > 0
+					&& tabOrder != tOrder 
+					&& tOrder > 0
+					&& tOrder <= tabOrderMax;
+		if ( bResult )
+		{
+			for ( UINT i = tabOrder - 1; i >= tOrder; i--)
+			{
+				finder = Parent->getChildByTabOrder(i);
+				if ( finder != NULL ) finder->tabOrder++;
+			}
+
+			tabOrder = tOrder == tabOrderMax ? tOrder + 1 : tOrder;
+			Parent->tabOrderRecalculate();
+		}
+	}
+	return bResult;
+}
+
+VOID clsWinBase::setFocus() { if (hWnd != NULL) SetFocus(hWnd); }
+
+
+clsWinBase* clsWinBase::getParent() { return Parent; }
+
+clsWinBase* clsWinBase::getChildFocused() 
+{
+	HWND		hFocus	= GetFocus();
+	clsWinBase *finder	= NULL;
+
+	UINT		i		= 0,
+				cCount	= ChildrenList.size();
+	if ( hFocus != NULL )
+	{
+		while ( i < cCount && finder == NULL )
+		{
+			if ( ChildrenList[i]->tabOrder	!= 0
+				&& ChildrenList[i]->hWnd	== hFocus )
+				finder = ChildrenList[i];
+			i++;
+		}
+	}
+	return finder;
+}
+
+clsWinBase* clsWinBase::getChildByTabOrder(UINT tOrder)
+{
+	UINT cIndex			= findFirstChildIndex(tOrder);
+	clsWinBase *finder	= NULL;
+
+	if ( cIndex < ChildrenList.size() ) 
+		finder = ChildrenList[cIndex];
+	return finder;
+}
+
+UINT clsWinBase::getChildrenCount() const { return ChildrenList.size(); } 
+
+UINT clsWinBase::getChildrenTabOrderMax() const
+{
+	UINT	i			= 0, 
+			cCount		= ChildrenList.size(),
+			tabOrderMax = 0;
+
+	while ( i < cCount )
+	{
+		if ( ChildrenList[i]->tabOrder > tabOrderMax ) 
+			tabOrderMax = ChildrenList[i]->tabOrder;
+		i++;
+	}
+
+	return tabOrderMax;
+}
+
+UINT clsWinBase::getTabOrder() const { return tabOrder; }
 
 UINT clsWinBase::getText(LPTSTR wbText, UINT nLengthToCopy) const
 {
 	return GetWindowText(hWnd, wbText, nLengthToCopy);
 }
+
+DWORD clsWinBase::getStyle() const 
+{
+	return hWnd != NULL ? GetWindowLongPtr(hWnd, GWL_STYLE) : 0;
+}
+
+DWORD clsWinBase::getStyleEx() const 
+{
+	return hWnd != NULL ? GetWindowLongPtr(hWnd, GWL_EXSTYLE) : 0;
+}
+
 
 BYTE clsWinBase::getAnchors() const { return Anchors; }
 
@@ -642,7 +848,7 @@ BOOL clsWinBase::isActive()	const { return GetActiveWindow() == hWnd; }
 
 BOOL clsWinBase::isParent(clsWinBase *lpCtrlChild) const
 { 
-	return ChildrenList.size() != findFirstChild(lpCtrlChild); 
+	return ChildrenList.size() != findFirstChildIndex(lpCtrlChild); 
 } 
 
 BOOL clsWinBase::isChild(clsWinBase *lpCtrlParent) const { return Parent == lpCtrlParent; }
@@ -651,7 +857,7 @@ BOOL clsWinBase::isChild(clsWinBase *lpCtrlParent) const { return Parent == lpCt
 // clsForm class implementation
 // ============================================================================
 clsForm::clsForm() 
-	: clsWinBase(), frmClsAutoUnreg(FALSE) { }
+	: clsWinBase(), frmClsAutoUnreg(FALSE), cycleIsRunning(FALSE) { }
 
 clsForm::~clsForm() { }
 
@@ -679,7 +885,7 @@ DWORD clsForm::Create(
 					0,
 					NULL,
 					NULL,
-					LoadCursor(hInst, IDC_ARROW),
+					LoadCursor(NULL, IDC_ARROW),
 					(HBRUSH)(COLOR_WINDOW + 1)
 				);
 		frmClsAutoUnreg	= TRUE;
@@ -822,107 +1028,28 @@ BOOL clsForm::isMinimized() const { return IsIconic(hWnd); }
 
 BOOL clsForm::isNormal() const { return !(isMaximized() || isMinimized()); }
 
-// ============================================================================
-// clsControl class implementation
-// ============================================================================
-DWORD clsControl::Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			INT			ctrlPosX,
-			INT			ctrlPosY,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsWinBase*	ctrlParent
-) {
-	HWND	tabSearch;
-	DWORD	cStyle		= WS_CHILD | ctrlStyle,
-			dwResult;	
-	if ( ctrlParent == NULL ) return E_BAD_ARGUMENTS;
-
-	dwResult = clsWinBase::Create(
-						ctrlClsName,
-						cStyle,
-						ctrlStyleEx,
-						ctrlPosX,
-						ctrlPosY,
-						ctrlWidth,
-						ctrlHeight,
-						ctrlParent
-					);
-	if ( SUCCEEDED(dwResult) ) 
-	{
-		tabSearch	= hWnd;
-		tabOrder	= 0U;
-		while ( 
-			(tabSearch = GetWindow(tabSearch, GW_HWNDPREV)) != NULL 
-		) tabOrder++;
-	}
-	return 0;
-}
-
-DWORD clsControl::Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			POINT		ctrlPos,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsWinBase*	ctrlParent
-) {
-	return Create(
-				ctrlClsName, 
-				ctrlStyle,
-				ctrlStyleEx,
-				ctrlPos.x,
-				ctrlPos.y,
-				ctrlWidth,
-				ctrlHeight,
-				ctrlParent
-			);
-}
-
-DWORD clsControl::Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			RECT		ctrlDim,
-			clsWinBase*	ctrlParent
-) { 
-	return Create(
-				ctrlClsName, 
-				ctrlStyle,
-				ctrlStyleEx,
-				ctrlDim.left,
-				ctrlDim.top,
-				ctrlDim.right - ctrlDim.left,
-				ctrlDim.bottom - ctrlDim.top,
-				ctrlParent
-			);
-}
-
-//BOOL CALLBACK EnumControls
-
-VOID clsControl::setTabOrder(UINT tbOrder)
+INT clsForm::DoMSGCycle(HACCEL hAccelTable)
 {
-	HWND		tabSearch = hWnd;
-	clsControl	*ctrlSearch;
-
-	if ( tbOrder < tabOrder  && tabSearch != NULL )
+	INT iResult = -1;
+	MSG msg;
+	if ( !cycleIsRunning )
 	{
-		while ( 
-			(tabSearch = GetWindow(tabSearch, GW_HWNDPREV)) != NULL 
-		) {
-			ctrlSearch = (clsControl*)GetWindowLongPtr(tabSearch, GWL_USERDATA);
-			if (ctrlSearch != NULL)
-			{
-				if ( ctrlSearch->tabOrder >= tbOrder ) ctrlSearch->tabOrder++;
+		cycleIsRunning = TRUE;
+		while (GetMessage(&msg, NULL, 0, 0))
+		{
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg) && 
+				!IsDialogMessage(hWnd, &msg)
+			) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
 			}
 		}
+		cycleIsRunning = FALSE;
+		iResult = (INT)msg.wParam;
 	}
+	return iResult;
 }
 
-UINT clsControl::getTabOrder() const { return tabOrder; } 
 // ============================================================================
 // clsButton class implementation
 // ============================================================================
@@ -936,9 +1063,10 @@ DWORD clsButton::Create(
 			UINT	btnHeight,
 			BOOL	setDefault			
 ) {
-	DWORD	dwResult = clsControl::Create(
+	if ( btnParent == NULL ) return E_BAD_ARGUMENTS;
+	DWORD	dwResult = clsWinBase::Create(
 							_T("button"),
-							WS_TABSTOP
+							WS_CHILD | WS_TABSTOP
 							| (setDefault ? BS_DEFPUSHBUTTON 
 											: BS_PUSHBUTTON),
 							NULL,

@@ -70,6 +70,7 @@ class clsWinBase {
 private:
 	clsWinBase				*Parent;
 	vector<clsWinBase *>	ChildrenList;
+	UINT					tabOrder;
 	
 // Default window callback. Don't care about it!
 	static LRESULT CALLBACK CtrlProc ( 
@@ -83,7 +84,8 @@ private:
 	
 // Do you really think you should know about
 // these methods more than their prototypes? 
-	UINT findFirstChild(clsWinBase *lpCtrlChild) const;
+	VOID restoreControlFocus();
+	VOID tabOrderRecalculate();
 	BOOL removeFirstChildFound(clsWinBase *lpCtrlChild);
 	BOOL manageWindowState(INT nCmdShow);
 
@@ -143,7 +145,10 @@ public:
 	EVENT_FUNC operator[](UINT Event);
 	VOID	ResetEventHandlers();
 
-// Control state management.
+	UINT findFirstChildIndex(clsWinBase *lpCtrlChild)		const;
+	UINT findFirstChildIndex(UINT fTabOrder)				const;
+
+	// Control state management.
 	BOOL	Show(BOOL bRecursive = TRUE);
 	BOOL	Hide();
 	BOOL	Enable();
@@ -164,30 +169,41 @@ public:
 
 // Setters.
 	BOOL	setText(LPCTSTR wbText);
+	BOOL	setStyle(DWORD wbStyle);
+	BOOL	setStyleEx(DWORD wbStylEx);
 	DWORD	setParent(clsWinBase *lpCtrlParent);						
 	VOID	setAnchors(BYTE wbAnchors);
+	BOOL	setTabOrder(UINT tOrder);
+	VOID	setFocus();
 
 // Getters.
-	UINT		getText(LPTSTR wbText, UINT nLengthToCopy) const;
 	clsWinBase*	getParent();
-	BYTE		getAnchors() const;
-	VOID		getBoundaries(LPRECT rcDims) const;
-	VOID		getPos(LPINT pWhereX, LPINT pWhereY) const;
-	VOID		getPos(LPPOINT ptWhere) const;
-	VOID		getSize(LPUINT pWidth, LPUINT pHeight) const;
-	UINT		getWidth() const;
-	UINT		getHeight() const;
-	INT			getWidthMnemonic() const;
-	INT			getHeightMnemonic() const;
+	clsWinBase* getChildFocused();
+	clsWinBase* getChildByTabOrder(UINT tOrder);
+	UINT		getChildrenCount()							const;
+	UINT		getChildrenTabOrderMax()					const;
+	UINT		getTabOrder()								const;
+	UINT		getText(LPTSTR wbText, UINT nLengthToCopy)	const;
+	DWORD		getStyle()									const;
+	DWORD		getStyleEx()								const;
+	BYTE		getAnchors()								const;
+	VOID		getBoundaries(LPRECT rcDims)				const;
+	VOID		getPos(LPINT pWhereX, LPINT pWhereY)		const;
+	VOID		getPos(LPPOINT ptWhere)						const;
+	VOID		getSize(LPUINT pWidth, LPUINT pHeight)		const;
+	UINT		getWidth()									const;
+	UINT		getHeight()									const;
+	INT			getWidthMnemonic()							const;
+	INT			getHeightMnemonic()							const;
 	VOID		getDC(HDC *hDC);
 
 	BOOL		dropDC(HDC *hDC);
 // Checkers.
-	BOOL isVisible() const;
-	BOOL isEnabled() const;
-	BOOL isActive() const;
-	BOOL isParent(clsWinBase *lpCtrlChild) const;
-	BOOL isChild(clsWinBase *lpCtrlParent) const;
+	BOOL isVisible()										const;
+	BOOL isEnabled()										const;
+	BOOL isActive()											const;
+	BOOL isParent(clsWinBase *lpCtrlChild)					const;
+	BOOL isChild(clsWinBase *lpCtrlParent)					const;
 };
 typedef clsWinBase WINBASE, *LPWINBASE;
 typedef const clsWinBase *LPCWINBASE;
@@ -221,6 +237,7 @@ enum FORM_TYPE {
 // Use the event-assigned handler functions!
 class clsForm : public clsWinBase	{
 private:
+	BOOL	cycleIsRunning;
 	BOOL	frmClsAutoUnreg;
 
 public:
@@ -266,66 +283,30 @@ public:
 	BOOL	Maximize();
 	BOOL	Minimize();
 	BOOL	Restore();
-	INT_PTR DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure) const;
-	INT_PTR MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType) const;
+	INT_PTR DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure)			const;
+	INT_PTR MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType)	const;
 
 // Setters.
 	BOOL	setMenu(HMENU frmMenu);
 
 // Getters.
 	//HMENU	getMenu();
-	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight) const; 
-	VOID	getClientWidth(LPUINT fcWidth) const;
-	VOID	getClientHeight(LPUINT fcHeight) const;
+	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight)	const; 
+	VOID	getClientWidth(LPUINT fcWidth)					const;
+	VOID	getClientHeight(LPUINT fcHeight)				const;
 	VOID	getClientDC(HDC *hDC);
 
 // Checkers.
-	BOOL	isMaximized() const;
-	BOOL	isMinimized() const;
-	BOOL	isNormal() const;
+	BOOL	isMaximized()	const;
+	BOOL	isMinimized()	const;
+	BOOL	isNormal()		const;
+
+	INT DoMSGCycle(HACCEL hAccelTable);
 };
 typedef clsForm FORM, *LPFORM; 
 typedef const clsForm *LPCFORM;
 
-class clsControl : public clsWinBase {
-private:
-	UINT tabOrder;
-
-public:
-	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			RECT		ctrlDim,
-			clsWinBase*	ctrlParent
-		);
-	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			POINT		ctrlPos,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsWinBase*	ctrlParent
-		);
-	virtual DWORD Create(
-			LPCTSTR		ctrlClsName,
-			DWORD		ctrlStyle,
-			DWORD		ctrlStyleEx,
-			INT			ctrlPosX,
-			INT			ctrlPosY,
-			UINT		ctrlWidth,
-			UINT		ctrlHeight,
-			clsWinBase*	ctrlParent
-		);
-
-	VOID setTabOrder(UINT tbOrder);
-
-
-	UINT getTabOrder() const;
-};
-
-class clsButton : public clsControl {
+class clsButton : public clsWinBase {
 private:
 	UINT	ID;
 

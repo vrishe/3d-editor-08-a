@@ -11,6 +11,9 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
+BUTTON				testButton1, testButton2, testButton3, testButton4;
+LPWINBASE			testLpButton1;
+
 LPRENDER_POOL		testPool;
 
 SCENE3D				testScene;
@@ -22,8 +25,8 @@ CAMERA3D			CameraTop,
 
 DIFLIGHT3D			testLight1, testLight2;
 
-PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0,  40, 110, 40);
-MICROPHONE3D		testMic( 80, 80, 200 );
+PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
+MICROPHONE3D		testMic( 55, 55, 124 );
 
 // Win API entry point:
 // ===================================
@@ -33,8 +36,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	MSG msg;
-	HACCEL hAccelTable;
+	INT		iResult;
+	HACCEL	hAccelTable;
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -46,7 +49,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.Create(
 				_T("Main form class"),
 				(FORM_TYPE)(APP_FORM | WS_CLIPCHILDREN), 
-				NULL,
+				WS_EX_APPWINDOW | WS_EX_CONTROLPARENT,
 				CW_USEDEFAULT, 0,
 				1024, 768,
 				NULL,
@@ -58,28 +61,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
-	testScene.setAmbientColor(56, 56, 56);
+	testScene.setAmbientColor(128, 125, 125);
 
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
 	testScene.AddObject(&CameraFront);
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
-	testScene.AddObject(&testLight1);	
+	testScene.AddObject(&testLight1);
 	testScene.AddObject(&testLight2);
 	testScene.AddObject(&testMic);
-//	testScene.AddObject(&cubeX);
+	//testScene.AddObject(&cubeX);
 
 	// Objects here:
 	testMic.Fly(-120);
 
 	// Lighters here:
 	testLight1.LookAt(-1, 0, 0);
-	testLight1.setColor(200, 80, 80);
-	testLight1.setPower(0.8f);
-	testLight2.LookAt(-1, 0, 0);
-	testLight2.setColor(0, 100, 0);
-	testLight2.setPower(0.2f);
+	testLight1.setColor(60, 30, 30);
+	testLight1.setPower(0.1f);
+	testLight2.LookAt(0, 0, -1);
+	testLight2.setColor(5, 5, 5);
+	testLight2.setPower(0.1f);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
@@ -122,30 +125,61 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				CameraRight.objID(),
 				RM_WIREFRAME
 			);
-	testPool->addViewport(
-				25 + ufWidth / 2, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraPersp.objID(),
-				RM_SHADEDWF
-			);
+	//testPool->addViewport(
+	//			25 + ufWidth / 2, 
+	//			25 + ufHeight / 2,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			CameraPersp.objID(),
+	//			RM_SHADED
+	//		);
+	testButton1.Create(
+					0,
+					_T("Button1"),
+					&mainForm,
+					25 + ufWidth / 2,
+					25 + ufHeight / 2,
+					110,
+					30,
+					FALSE);
+	testButton2.Create(
+					1,
+					_T("Button2"),
+					&mainForm,
+					25 + ufWidth / 2,
+					25 + ufHeight / 2 + 35,
+					110,
+					30,
+					FALSE);
+	testButton3.Create(
+					1,
+					_T("Button3"),
+					&mainForm,
+					25 + ufWidth / 2,
+					25 + ufHeight / 2 + 70,
+					110,
+					30,
+					FALSE);
+	testButton4.Create(
+					1,
+					_T("Button4"),
+					&mainForm,
+					25 + ufWidth / 2,
+					25 + ufHeight / 2 + 105,
+					110,
+					30,
+					FALSE);
+
+	testButton4.setTabOrder(2);
+	testButton1.setTabOrder(4);
 	mainForm.Show();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
-
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+	iResult = mainForm.DoMSGCycle(hAccelTable);
 
 	delete testPool; 
 	mainForm.Destroy();
-	return (int) msg.wParam;
+	return iResult;
 }
 
  //Form event handler functions
