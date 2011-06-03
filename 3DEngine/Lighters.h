@@ -2,7 +2,7 @@
 
 #include "Abstractions.h"
 
-#define DARK_SIDE 0.2
+#define DARK_SIDE 0.1
 // ============================================================================
 // clsDifLight class
 

@@ -153,6 +153,14 @@ tagColor::tagColor(unsigned char r, unsigned char g, unsigned char b) {
 	Blue = b;
 }
 
+bool tagColor::operator==(const float &b) const {
+	return ( Red == b && Green == b && Blue == b);
+}
+
+bool tagColor::operator!=(const float &b) const {
+	return ( Red != b || Green != b || Blue != b);
+}
+
 // ===========================================================================
 // Implementation of clsObject class:
 size_t clsObject::Counter = 1;

@@ -62,7 +62,12 @@ typedef struct tagColor
 	unsigned char Green;
 	unsigned char Blue;
 	tagColor(unsigned char r = 0, unsigned char g = 0, unsigned char b = 0);
+
+	bool operator==(const float &b) const;
+	bool operator!=(const float &b) const;
 } COLOR3D, *LPCOLOR3D;
+
+#define BLACK 0
 
 // ============================================================================
 // Object class that represents current object

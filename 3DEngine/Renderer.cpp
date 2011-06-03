@@ -200,26 +200,35 @@ BOOL clsViewport::Render() {
 				for (UINT j = scenePolyBuffer.size(); j < objPolyCount; j++) {
 					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 1));
 					Vector3DNormalize(&normal, &normal);
-					scenePolyColorBuffer[j] = COLOR3D(0,0,0);
+					scenePolyColorBuffer[j] = COLOR3D(0,0,0)/*objToRender->getColor()*/;
 
 					for (UINT k = 0; k < sceneLightCount; k++) 	{
 						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);
-						if ( lightToRender->getPower() == 0 )
+						FLOAT power = lightToRender->getPower();
+						COLOR3D lightColor	= lightToRender->getColor();
+						if ( power == 0 || lightColor == BLACK)
 							continue;
 						FLOAT ratio = Vector3DMultS(&normal, &lightToRender->getForwardLookDirection());
 						if (ratio < -EPSILON)
-							ratio = lightToRender->getPower() - ratio;
+							ratio = power - ratio;
 						else
 							ratio = (FLOAT)DARK_SIDE;
 
-						COLOR3D newColor	= objToRender->getColor(),
-								lightColor	= lightToRender->getColor();
-						UINT red	= (UINT)(min(newColor.Red + lightColor.Red, 255)     * ratio);
-						UINT green	= (UINT)(min(newColor.Green + lightColor.Green, 255) * ratio);
-						UINT blue	= (UINT)(min(newColor.Blue + lightColor.Blue, 255)   * ratio);
-						newColor.Red	= max(scenePolyColorBuffer[j].Red,	 ( red > 255	? 255 : red ));
-						newColor.Green	= max(scenePolyColorBuffer[j].Green, ( green > 255	? 255 : green ));
-						newColor.Blue	= max(scenePolyColorBuffer[j].Blue,  ( blue > 255	? 255 : blue ));
+						COLOR3D newColor	= objToRender->getColor();								
+						UINT red	= (UINT)(min((newColor.Red + lightColor.Red)/2, 255)     * ratio);
+						UINT green	= (UINT)(min((newColor.Green + lightColor.Green)/2, 255) * ratio);
+						UINT blue	= (UINT)(min((newColor.Blue + lightColor.Blue)/2, 255)   * ratio);
+
+						if (!(scenePolyColorBuffer[j] == BLACK)) {
+							newColor.Red	= (UINT)(min((red	+ scenePolyColorBuffer[j].Red)  , 255));
+							newColor.Green	= (UINT)(min((green + scenePolyColorBuffer[j].Green), 255));
+							newColor.Blue	= (UINT)(min((blue	+ scenePolyColorBuffer[j].Blue) , 255));
+						}
+						else {
+							newColor.Red	= ( red > 255	? 255 : red );
+							newColor.Green	= ( green > 255	? 255 : green );
+							newColor.Blue	= ( blue > 255	? 255 : blue );
+						}
 						scenePolyColorBuffer[j] = newColor;
 					}
 				}

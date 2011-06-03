@@ -22,8 +22,8 @@ CAMERA3D			CameraTop,
 
 DIFLIGHT3D			testLight1, testLight2;
 
-PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
-MICROPHONE3D		testMic( 55, 55, 124 );
+PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0,  40, 110, 40);
+MICROPHONE3D		testMic( 80, 80, 200 );
 
 // Win API entry point:
 // ===================================
@@ -58,28 +58,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
-	testScene.setAmbientColor(128, 125, 125);
+	testScene.setAmbientColor(56, 56, 56);
 
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
 	testScene.AddObject(&CameraFront);
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
-	testScene.AddObject(&testLight1);
-	testScene.AddObject(&testLight2);
+	testScene.AddObject(&testLight1);	
+//	testScene.AddObject(&testLight2);
 	testScene.AddObject(&testMic);
-	//testScene.AddObject(&cubeX);
+//	testScene.AddObject(&cubeX);
 
 	// Objects here:
 	testMic.Fly(-120);
 
 	// Lighters here:
 	testLight1.LookAt(-1, 0, 0);
-	testLight1.setColor(60, 30, 30);
-	testLight1.setPower(0.1f);
+	testLight1.setColor(200, 80, 80);
+	testLight1.setPower(0.2f);
 	testLight2.LookAt(0, 0, -1);
-	testLight2.setColor(5, 5, 5);
-	testLight2.setPower(0.1f);
+	testLight2.setColor(0, 100, 0);
+	testLight2.setPower(0.05f);
 	
 	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
@@ -104,7 +104,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraTop.objID(),
-				RM_WIREFRAME
+				RM_SHADEDWF
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -112,7 +112,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraFront.objID(),
-				RM_WIREFRAME
+				RM_SHADEDWF
 			);
 	testPool->addViewport(
 				20, 
@@ -120,7 +120,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraRight.objID(),
-				RM_WIREFRAME
+				RM_SHADEDWF
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -128,7 +128,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraPersp.objID(),
-				RM_SHADEDWF
+				RM_SHADED
 			);
 	mainForm.Show();
 

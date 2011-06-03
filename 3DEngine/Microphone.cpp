@@ -13,7 +13,7 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	shroudHi		= new Cone(tH * 0.37f,		 bR * 0.1412f, bR * 0.1412f, 24);
 	bridge			= new Cone(tH * 0.0494f,	 bR * 0.0941f, bR * 0.0588f, 24);
 
-	handleBridgeUp	= new Pyramid(tH * 0.535f, bR * 0.1682f, bR * 0.0941f, bR * 0.1682f, 8);
+	handleBridgeUp	= new Pyramid(tH * 0.0535f, bR * 0.1682f, bR * 0.0941f, bR * 0.1682f, 8);
 	handleBridgeDown= new Pyramid(tH * 0.1,   bR * 0.1682f, bR * 0.0941f, bR * 0.1682f, 8);
 	handle			= new Pyramid(tH / 2.25, 9.5, 6.5, 6.5, 6.5, 1.5);
 	handleTop		= new Pyramid(8, 9.5, 6.5, 9.5, 6.5, -4.3f);
@@ -21,7 +21,7 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	head			= new Hole(30, bR * 0.47f, 30, bR * 0.47f, 30, 24);
 	headFront		= new Hole(3,  43, 30, 43, 27, 24);
 	headBack		= new Hole(3,  43, 30, 43, 27, 24);
-	core			= new Cone(39, 30, 30, 24);
+	core			= new Cone(43, 30, 30, 24);
 
 	base->YawTo(-90.0f * (FLOAT)M_PI / 180.0f);
 
