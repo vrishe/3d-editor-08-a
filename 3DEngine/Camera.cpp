@@ -61,8 +61,6 @@ void clsCamera::setFarCP(float farCP)
 
 void clsCamera::GetViewMatrix(LPMATRIX3D mOut)
 {
-	MATRIX3D	M;
-	
 	mOut->_11 = rWd.x;
 	mOut->_12 = uWd.x;
 	mOut->_13 = fWd.x;
