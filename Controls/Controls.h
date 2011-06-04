@@ -81,13 +81,13 @@ private:
 				);
 	WNDPROC			defCtrlProc;
 	EVENT_FUNC_MAP	EventHandlers;	// STL Map which maps function with an event
-	
+
 // Do you really think you should know about
 // these methods more than their prototypes? 
-	VOID restoreControlFocus();
-	VOID tabOrderRecalculate();
-	BOOL removeFirstChildFound(clsWinBase *lpCtrlChild);
-	BOOL manageWindowState(INT nCmdShow);
+	VOID	restoreControlFocus();
+	VOID	tabOrderRecalculate();
+	BOOL	removeFirstChildFound(clsWinBase *lpCtrlChild);
+	BOOL	manageWindowState(INT nCmdShow);
 
 protected:
 	static HINSTANCE	hInst;		// Hinstance of an application that uses this class.
@@ -239,6 +239,10 @@ class clsForm : public clsWinBase	{
 private:
 	BOOL	cycleIsRunning;
 	BOOL	frmClsAutoUnreg;
+	BOOL	hBrCleanup;
+
+	BOOL	applyBkBrush(HBRUSH hBrToSet);	
+	VOID	releaseBkBrush();
 
 public:
 // Construct/Destruct.
@@ -288,6 +292,8 @@ public:
 
 // Setters.
 	BOOL	setMenu(HMENU frmMenu);
+	BOOL	setBrush(HBRUSH hBrBg);
+	BOOL	setColor(SHORT Red, SHORT Green, SHORT Blue);
 
 // Getters.
 	//HMENU	getMenu();

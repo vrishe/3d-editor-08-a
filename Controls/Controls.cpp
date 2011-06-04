@@ -856,8 +856,42 @@ BOOL clsWinBase::isChild(clsWinBase *lpCtrlParent) const { return Parent == lpCt
 // ============================================================================
 // clsForm class implementation
 // ============================================================================
+BOOL clsForm::applyBkBrush(HBRUSH hBrToSet)
+{
+	HDC		hDC;
+	BOOL	bResult = hWnd != NULL;
+	if ( bResult )
+	{
+		bResult = SetClassLongPtr(
+							hWnd, 
+							GCLP_HBRBACKGROUND, 
+							PtrToLong(hBrToSet)
+						);
+		getClientDC(&hDC);
+		SendMessage(hWnd, WM_ERASEBKGND, (WPARAM)hDC, 0); 
+		dropDC(&hDC);
+	}
+	return bResult;
+}
+
+VOID clsForm::releaseBkBrush()
+{
+	HBRUSH hBr;
+	if ( hBrCleanup )
+	{
+		hBr = (HBRUSH)GetClassLongPtr(hWnd, GCLP_HBRBACKGROUND);
+		if ( DeleteObject(hBr) )
+			hBrCleanup = FALSE;
+	}
+}
+
 clsForm::clsForm() 
-	: clsWinBase(), frmClsAutoUnreg(FALSE), cycleIsRunning(FALSE) { }
+	: clsWinBase()
+{
+	frmClsAutoUnreg	= FALSE;
+	cycleIsRunning	= FALSE;
+	/*hBrCleanup		= FALSE;*/
+}
 
 clsForm::~clsForm() { }
 
@@ -950,12 +984,13 @@ DWORD clsForm::Create(
 
 VOID clsForm::Destroy()
 {
+	clsWinBase::Destroy();
 	if ( frmClsAutoUnreg )
 	{
 		frmClsAutoUnreg = FALSE;
 		UnregisterClass(clsName, hInst);
 	}
-	clsWinBase::Destroy();
+	/*releaseBkBrush();*/
 }
 
 BOOL clsForm::Validate(LPRECT pValidRect) 
@@ -995,6 +1030,22 @@ BOOL clsForm::setMenu(HMENU frmMenu)
 	if ( hMenuPrev != NULL 
 		&& !DestroyMenu(hMenuPrev) ) return FALSE;
 	return DrawMenuBar(hWnd);
+}
+
+BOOL clsForm::setBrush(HBRUSH hBrBg)
+{
+	releaseBkBrush();
+	return applyBkBrush(hBrBg);
+}
+
+BOOL clsForm::setColor(SHORT Red, SHORT Green, SHORT Blue)
+{
+	HBRUSH newHBr	= CreateSolidBrush(RGB(Red, Green, Blue));
+	BOOL bResult	= newHBr != NULL;
+
+	if ( bResult )
+		bResult		= applyBkBrush(newHBr);
+	return hBrCleanup = bResult;
 }
 
 //HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
