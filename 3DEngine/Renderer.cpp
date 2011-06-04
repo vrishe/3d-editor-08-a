@@ -105,6 +105,7 @@ BOOL clsViewport::Render() {
 	UINT				sceneObjCount,
 						sceneLightCount,
 						scenePolyCount,
+						sceneLightedPolyCount,
 						objVertCount,
 						objEdgeCount,
 						objPolyCount;
@@ -160,6 +161,7 @@ BOOL clsViewport::Render() {
 			scenePolyCount			= Scene->getPolygonsCount();
 			sceneLightCount			= Scene->getObjectClassCount(CLS_LIGHT);
 			scenePolyColorBuffer	= new COLOR3D[scenePolyCount];
+			sceneLightedPolyCount	= 0;
 		}
 
 		// prepearing camera
@@ -196,11 +198,12 @@ BOOL clsViewport::Render() {
 			if ( rMode != RM_WIREFRAME ) {
 				objPolyBuffer	= objToRender->getPolygonsRaw();
 				objPolyCount	= objToRender->getPolygonsCount();
+				UINT lightTo	= sceneLightedPolyCount + objPolyCount; // number of polygons to light
 
-				for (UINT j = scenePolyBuffer.size(); j < objPolyCount; j++) {
-					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 1));
+				for (UINT j = sceneLightedPolyCount; j < lightTo; j++) {
+					VECTOR3D normal(objPolyBuffer[j - sceneLightedPolyCount].Normal(objVertBuffer, 1));
 					Vector3DNormalize(&normal, &normal);
-					scenePolyColorBuffer[j] = COLOR3D(0,0,0)/*objToRender->getColor()*/;
+					scenePolyColorBuffer[j] = COLOR3D(0,0,0);
 
 					for (UINT k = 0; k < sceneLightCount; k++) 	{
 						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);
@@ -213,7 +216,7 @@ BOOL clsViewport::Render() {
 							ratio = power - ratio;
 						else
 							if (ratio < EPSILON)
-								ratio = power / 3.3f;
+								ratio = max(power / 3.3f, (FLOAT)DARK_SIDE);
 							else
 								ratio = (FLOAT)DARK_SIDE;
 
@@ -222,7 +225,7 @@ BOOL clsViewport::Render() {
 						UINT green	= (UINT)(min((newColor.Green + lightColor.Green)/2, 255) * ratio);
 						UINT blue	= (UINT)(min((newColor.Blue + lightColor.Blue)/2, 255)   * ratio);
 
-						if (!(scenePolyColorBuffer[j] == BLACK)) {
+						if (scenePolyColorBuffer[j] != BLACK) {
 							newColor.Red	= (UINT)(min((red	+ scenePolyColorBuffer[j].Red)  , 255));
 							newColor.Green	= (UINT)(min((green + scenePolyColorBuffer[j].Green), 255));
 							newColor.Blue	= (UINT)(min((blue	+ scenePolyColorBuffer[j].Blue) , 255));
@@ -277,10 +280,13 @@ BOOL clsViewport::Render() {
 						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-						tmp.colorRef = RGB(scenePolyColorBuffer[j].Red, scenePolyColorBuffer[j].Green, scenePolyColorBuffer[j].Blue);
+						tmp.colorRef = RGB(scenePolyColorBuffer[j + sceneLightedPolyCount].Red, 
+										   scenePolyColorBuffer[j + sceneLightedPolyCount].Green,
+										   scenePolyColorBuffer[j + sceneLightedPolyCount].Blue);
 						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 					}
 				}
+				sceneLightedPolyCount += objPolyCount;
 			}
 			else 
 			{
