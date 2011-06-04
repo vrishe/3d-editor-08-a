@@ -188,10 +188,6 @@ clsObject::clsObject(CLASS_ID clsID)
 
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 
-	pitch	= .0f;
-	roll	= .0f; 
-	yaw		= .0f;
-
 	xScale	= 1.f;
 	yScale	= 1.f; 
 	zScale	= 1.f;
@@ -210,21 +206,17 @@ clsObject::clsObject(
 			CLASS_ID clsID) 
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
-	VECTOR3D	fwd(1.0f, .0f, .0f),
-				rwd(.0f, 1.0f, .0f),
-				uwd(.0f, .0f, 1.0f);
-
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 
 	pos		= pt;
 
-	pitch	= p;
-	yaw		= y;
-	roll	= r;
+	fWd		= VECTOR3D(1.0f, .0f, .0f);
+	rWd		= VECTOR3D(.0f, 1.0f, .0f);
+	uWd		= VECTOR3D(.0f, .0f, 1.0f);
 
-	fWd		= fwd;
-	rWd		= rwd;
-	uWd		= uwd;
+	Pitch(p);
+	Yaw(y);
+	Roll(r);
 }
 
 clsObject::clsObject(
@@ -243,9 +235,13 @@ clsObject::clsObject(
 	pos.y = pY;
 	pos.z = pZ;
 
-	pitch	= p;
-	yaw		= y;
-	roll	= r;
+	fWd		= VECTOR3D(1.0f, .0f, .0f);
+	rWd		= VECTOR3D(.0f, 1.0f, .0f);
+	uWd		= VECTOR3D(.0f, .0f, 1.0f);
+
+	Pitch(p);
+	Yaw(y);
+	Roll(r);
 }
 
 clsObject::~clsObject() 
@@ -273,80 +269,66 @@ void clsObject::ScaleByX(float factor) { xScale += factor; }
 void clsObject::ScaleByY(float factor) { yScale += factor; }
 void clsObject::ScaleByZ(float factor) { zScale += factor; }
 
-void clsObject::PitchYawRoll() {
+void clsObject::Pitch(float angle) 
+{
 	MATRIX3D M;
-	fWd = VECTOR3D(1, 0, 0);
-	rWd = VECTOR3D(0, 1, 0);
-	uWd = VECTOR3D(0, 0, 1);
 
-	Matrix3DRotateAxis(&rWd, pitch, &M);
+	Matrix3DRotateAxis(&rWd, angle, &M);
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
+
+	Vector3DNormalize(&fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+}
+void clsObject::Yaw(float angle) 
+{
+	MATRIX3D M;
 
-	Matrix3DRotateAxis(&uWd, yaw, &M);
+	Matrix3DRotateAxis(&uWd, angle, &M);
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
+
+	Vector3DNormalize(&fWd, &fWd);
 	Vector3DMultV(&uWd, &fWd, &rWd);
-	
-	Matrix3DRotateAxis(&fWd, roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&rWd, &rWd);
 }
-
-void clsObject::PitchTo(float angle) 
+void clsObject::Roll(float angle) 
 {
-	pitch = angle;
-	PitchYawRoll();
-}
-void clsObject::YawTo(float angle) 
-{
-	yaw = angle;
-	PitchYawRoll();
-}
-void clsObject::RollTo(float angle) 
-{
-	roll = angle;
-	PitchYawRoll();
-}
-
-void clsObject::PitchAt(float angle) 
-{
-	pitch += angle;
-	PitchYawRoll();
-}
-void clsObject::YawAt(float angle) 
-{
-	yaw += angle;
-	PitchYawRoll();
-}
-void clsObject::RollAt(float angle) 
-{
-	roll += angle;
-	PitchYawRoll();
-}
-
-void clsObject::RotateX(float angle) {
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&VECTOR3D(1.f, 0.f, 0.f), angle, &M);
+	Matrix3DRotateAxis(&fWd, angle, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+
+	Vector3DNormalize(&fWd, &fWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+}
+
+void clsObject::RotateAxis(const LPVECTOR3D axis, float angle) {
+	MATRIX3D M;
+
+	Matrix3DRotateAxis(axis, angle, &M);
 
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd); 
+	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Vector3DNormalize(&fWd, &fWd);
+	Vector3DNormalize(&rWd, &rWd);
+	Vector3DNormalize(&uWd, &uWd);
 }
 
 void clsObject::LookAt(VECTOR3D lookAt)
 {
-	VECTOR3D lookDir		= lookAt - pos;
+	VECTOR3D lookDir = lookAt - pos;
 
 	Vector3DNormalize(&lookDir, &fWd);
 	Vector3DMultV(&VECTOR3D(.0f, .0f, 1.0f), &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 
-	MATRIX3D M;
-	Matrix3DRotateAxis(&fWd, roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
+	//MATRIX3D M;
+	//Matrix3DRotateAxis(&fWd, roll, &M);
+	//Matrix3DTransformNormal(&M, &rWd, &rWd);
+	//Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }

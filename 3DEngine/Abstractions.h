@@ -101,18 +101,14 @@ private:
 protected:
 	LPTSTR			Name;
 
-	float			pitch,
-					yaw,
-					roll;
-
-	float			xScale,
-					yScale,
-					zScale;
-
 	VECTOR3D		pos,
 					fWd,
 					rWd,
 					uWd;
+
+	float			xScale,
+					yScale,
+					zScale;
 
 	CONSTRAINTS		moveConst;
 
@@ -151,28 +147,16 @@ public:
 	void Strafe(float units);	// Along local-y
 	void Fly(float units);		// Along local-z
 
-	//void ScaleByX(float factor);
-	//void ScaleByY(float factor);
-	//void ScaleByZ(float factor);
-
 	void ScaleByX(float factor);
 	void ScaleByY(float factor);
 	void ScaleByZ(float factor);
 
-	// Absolute rotation
-	void PitchTo(float angle);	// Along local-y
-	void YawTo(float angle);	// Along local-z
-	void RollTo(float angle);	// Along local-x
-
 	// Relative rortaion
-	void PitchAt(float angle);
-	void YawAt(float angle);
-	void RollAt(float angle);
+	void Pitch(float angle);
+	void Yaw(float angle);
+	void Roll(float angle);
 
-	void RotateX(float angle);
-	void RotateY(float angle);
-	void RotateZ(float angle);
-
+	void RotateAxis(const LPVECTOR3D axis, float angle);
 	// Take a look at point or object
 	void LookAt(VECTOR3D lookAt);
 	void LookAt(const clsObject *objToLookAt);
