@@ -159,33 +159,72 @@ void Microphone::replaceMesh(MIC_PART part, MESH3D& m) {
 	addMesh(part, m);
 }
 
+void Microphone::recalcMeshVertices(MIC_PART part, MESH3D& m) {
+	int vFrom, vTo;
+	getMeshPosition(part, vFrom, vTo, vTo);
+	vTo = micParts[part]->getVerticesCount();
+	LPVECTOR3D vs = new VECTOR3D[vTo];
+	micParts[part]->getVerticesTransformed(vs);	
+	vertices.erase(vertices.begin() + vFrom, vertices.begin() + vTo + vFrom);
+	vertices.insert(vertices.begin() + vFrom, vs, vs + vTo);
+	delete [] vs;
+}
+
 
 /* ---------------------------------- setters ---------------------------------- */
 
 void Microphone::setBaseRadius (float r) {
-	Pyramid	buttonL(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, bW * 0.1375f),
-			buttonR(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, bW * 0.1375f);
-	bR = r;	// it's paste right here just because buttons size isn't changed
+	bR = r;
 	ExCone	base(bH, bR, bR, bR * 0.824f, 24);
-
 	base.YawTo(-(FLOAT)M_PI_2);
+	replaceMesh(MIC_BASE, base);
 
+	micParts[MIC_BUTTON_L]->Translate(bR * 0.824f, -bR * 0.2588f, bH * 1.1f);
+	micParts[MIC_BUTTON_R]->Translate(bR * 0.824f, bR * 0.2588f, bH * 1.1f);
+
+	recalcMeshVertices(MIC_BUTTON_L, *micParts[MIC_BUTTON_L]);
+	recalcMeshVertices(MIC_BUTTON_R, *micParts[MIC_BUTTON_R]);
+}
+void Microphone::setBaseHeight (float h) {
+	float shift = h - bH;
+	bH = h;
+	ExCone	base(bH, bR, bR, bR * 0.824f, 24);
+	base.YawTo(-(FLOAT)M_PI_2);
+	replaceMesh(MIC_BASE, base);
+
+	for (int i = MIC_BUTTON_L; i < PARTS_NUM; i++){
+		micParts[i]->Translate(micParts[i]->getPosition().x, micParts[i]->getPosition().y, micParts[i]->getPosition().z + shift);
+		recalcMeshVertices((MIC_PART)i, *micParts[i]);
+	}
+}
+void Microphone::setButtonWidth (float w) {
+	bW = w;
+	Pyramid			buttonL(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, bW * 0.1375f),
+					buttonR(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, bW * 0.1375f);
 	buttonL.Translate(bR * 0.824f, -bR * 0.2588f, bH * 1.1f);
 	buttonL.PitchTo((FLOAT)M_PI);
 	buttonR.Translate(bR * 0.824f, bR * 0.2588f, bH * 1.1f);
 	buttonR.PitchTo((FLOAT)M_PI);
-
-	replaceMesh(MIC_BASE, base);
 	replaceMesh(MIC_BUTTON_L, buttonL);
 	replaceMesh(MIC_BUTTON_R, buttonR);
 }
-void Microphone::setBaseHeight (float h) {
-}
-void Microphone::setButtonWidth (float bW) {}
-void Microphone::setUprightRadius (float uR) {}
-void Microphone::setUprightHeight (float uH) {}
-void Microphone::setUprightGap (float uG) {}
-void Microphone::setHandleIndent (float hI) {}
-void Microphone::setHeadRadius (float hR) {}
-void Microphone::setHeadDepth (float hD) {}
-void Microphone::setCoreRadius (float cR) {}
+void Microphone::setUprightRadius (float r) {}
+void Microphone::setUprightHeight (float h) {}
+void Microphone::setUprightGap (float g) {}
+void Microphone::setHandleIndent (float i) {}
+void Microphone::setHeadRadius (float r) {}
+void Microphone::setHeadDepth (float d) {}
+void Microphone::setCoreRadius (float r) {}
+
+
+/* ---------------------------------- getters ---------------------------------- */
+float Microphone::getBaseRadius		() { return bR; }
+float Microphone::getBaseHeight		() { return bH; }
+float Microphone::getButtonWidth	() { return bW; }
+float Microphone::getUprightRadius	() { return uR; }
+float Microphone::getUprightHeight	() { return uH; }
+float Microphone::getUprightGap		() { return uG; }
+float Microphone::getHandleIndent	() { return hI; }
+float Microphone::getHeadRadius		() { return hR; }
+float Microphone::getHeadDepth		() { return hD; }
+float Microphone::getCoreRadius		() { return cR; }

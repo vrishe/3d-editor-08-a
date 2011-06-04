@@ -201,7 +201,7 @@ BOOL clsViewport::Render() {
 				UINT lightTo	= sceneLightedPolyCount + objPolyCount; // number of polygons to light
 
 				for (UINT j = sceneLightedPolyCount; j < lightTo; j++) {
-					VECTOR3D normal(objPolyBuffer[j - sceneLightedPolyCount].Normal(objVertBuffer, 1));
+					VECTOR3D normal(objPolyBuffer[j - sceneLightedPolyCount].Normal(objVertBuffer, 2));
 					Vector3DNormalize(&normal, &normal);
 					scenePolyColorBuffer[j] = COLOR3D(0,0,0);
 
@@ -272,7 +272,7 @@ BOOL clsViewport::Render() {
 			{
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
-					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 2));
+					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 1));
 					float cosCam = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) 
 													/ Vector3DLength(&normal);
 					if (cosCam >= -1 && cosCam < 0) {

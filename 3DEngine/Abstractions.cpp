@@ -273,32 +273,21 @@ void clsObject::ScaleByX(float factor) { xScale += factor; }
 void clsObject::ScaleByY(float factor) { yScale += factor; }
 void clsObject::ScaleByZ(float factor) { zScale += factor; }
 
-void clsObject::Pitch()
-{
+void clsObject::PitchYawRoll() {
 	MATRIX3D M;
-	
-	Matrix3DRotateAxis(&rWd, pitch, &M);
+	fWd = VECTOR3D(1, 0, 0);
+	rWd = VECTOR3D(0, 1, 0);
+	uWd = VECTOR3D(0, 0, 1);
 
+	Matrix3DRotateAxis(&rWd, pitch, &M);
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
-}
-
-void clsObject::Yaw()
-{
-	MATRIX3D M;
 
 	Matrix3DRotateAxis(&uWd, yaw, &M);
-
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
 	Vector3DMultV(&uWd, &fWd, &rWd);
-}
-
-void clsObject::Roll()
-{
-	MATRIX3D M;
-
+	
 	Matrix3DRotateAxis(&fWd, roll, &M);
-
 	Matrix3DTransformNormal(&M, &rWd, &rWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 }
@@ -306,33 +295,33 @@ void clsObject::Roll()
 void clsObject::PitchTo(float angle) 
 {
 	pitch = angle;
-	Pitch();
+	PitchYawRoll();
 }
 void clsObject::YawTo(float angle) 
 {
 	yaw = angle;
-	Yaw();
+	PitchYawRoll();
 }
 void clsObject::RollTo(float angle) 
 {
 	roll = angle;
-	Roll();
+	PitchYawRoll();
 }
 
 void clsObject::PitchAt(float angle) 
 {
 	pitch += angle;
-	Pitch();
+	PitchYawRoll();
 }
 void clsObject::YawAt(float angle) 
 {
 	yaw += angle;
-	Yaw();
+	PitchYawRoll();
 }
 void clsObject::RollAt(float angle) 
 {
 	roll += angle;
-	Roll();
+	PitchYawRoll();
 }
 
 void clsObject::RotateX(float angle) {
@@ -347,33 +336,17 @@ void clsObject::RotateX(float angle) {
 
 void clsObject::LookAt(VECTOR3D lookAt)
 {
-	VECTOR3D lookDir		= lookAt - pos,
-			 fWdXYProj		= VECTOR3D(lookDir.x, lookDir.y, .0f),
-			 fWdXZProj		= VECTOR3D(lookDir.x, .0f, lookDir.z);
-	FLOAT	lookDirLen		= Vector3DLength(&lookDir),
-			fWdXYProjLen	= Vector3DLength(&fWdXYProj),
-			fWdXZProjLen	= Vector3DLength(&fWdXZProj);
+	VECTOR3D lookDir		= lookAt - pos;
 
 	Vector3DNormalize(&lookDir, &fWd);
 	Vector3DMultV(&VECTOR3D(.0f, .0f, 1.0f), &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 	Vector3DMultV(&fWd, &rWd, &uWd);
 
-	pitch	= .0f;
-	yaw		= .0f;
-	//Vector3DNormalize(&VECTOR3D(fWd.x, fWd.y, .0f), &fWdXYProj);
-	if ( lookDirLen > EPSILON )
-	{
-		if ( fWdXYProjLen > EPSILON )
-			pitch	= acos(Vector3DMultS(&lookDir, &fWdXYProj) / (lookDirLen * fWdXYProjLen)) 
-					* ((fWd.z < .0f) - (fWd.z >= .0f));
-	
-		//Vector3DNormalize(&VECTOR3D(fWd.x, .0f, fWd.z), &fWdXZProj);
-		if ( fWdXZProjLen > EPSILON )
-			yaw		= acos(Vector3DMultS(&lookDir, &fWdXZProj) / (lookDirLen * fWdXZProjLen)) 
-					* ((fWd.y >= .0f) - (fWd.y < .0f));
-	}
-	Roll();
+	MATRIX3D M;
+	Matrix3DRotateAxis(&fWd, roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }
@@ -385,56 +358,34 @@ void clsObject::GetMoveMatrix(LPMATRIX3D mOut)
 	mOut->_43 = pos.z;
 }
 
-void clsObject::GetPitchRotationMatrix(LPMATRIX3D mOut) 
-{
-	//mOut->_11 = cos(pitch);
-	//mOut->_31 = sin(pitch);
-
-	//mOut->_13 = -mOut->_31;
-	//mOut->_33 = mOut->_11;
-
-	mOut->_11 = cos(pitch);
-	mOut->_13 = sin(pitch);
-
-	mOut->_31 = -mOut->_13;
-	mOut->_33 = mOut->_11;
-}
-
-void clsObject::GetYawRotationMatrix(LPMATRIX3D mOut) 
-{
-	//mOut->_11 = cos(yaw);
-	//mOut->_12 = sin(yaw);
-
-	//mOut->_21 = -mOut->_12;
-	//mOut->_22 = mOut->_11;
-
-	mOut->_11 = cos(yaw);
-	mOut->_21 = sin(yaw);
-
-	mOut->_12 = -mOut->_21;
-	mOut->_22 = mOut->_11;
-}
-
-void clsObject::GetRollRotationMatrix(LPMATRIX3D mOut) 
-{
-	//mOut->_22 = cos(roll);
-	//mOut->_23 = sin(roll);
-
-	//mOut->_32 = -mOut->_23;
-	//mOut->_33 = mOut->_22;
-
-	mOut->_22 = cos(roll);
-	mOut->_32 = sin(roll);
-
-	mOut->_23 = -mOut->_32;
-	mOut->_33 = mOut->_22;
-}
-
 void clsObject::GetScaleMatrix(LPMATRIX3D mOut) 
 {
 	mOut->_11 = xScale;
 	mOut->_22 = yScale;
 	mOut->_33 = zScale;
+}
+
+void clsObject::GetRotationMatrix(LPMATRIX3D mOut) 
+{
+	mOut->_11 = rWd.x;
+	mOut->_21 = fWd.x;
+	mOut->_31 = uWd.x;
+	mOut->_41 = .0f;
+
+	mOut->_12 = rWd.y;
+	mOut->_22 = fWd.y;
+	mOut->_32 = uWd.y;
+	mOut->_42 = .0f;
+
+	mOut->_13 = rWd.z;
+	mOut->_23 = fWd.z;
+	mOut->_33 = uWd.z;
+	mOut->_43 = .0f;
+
+	mOut->_14 = 0.f;
+	mOut->_24 = 0.f;
+	mOut->_34 = 0.f;
+	mOut->_44 = 1.0f;
 }
 
 VECTOR3D clsObject::getForwardLookDirection() { return fWd; }
@@ -794,9 +745,10 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 	{
 		GetMoveMatrix(&mScalePos);
 		GetScaleMatrix(&mScalePos);
-		GetPitchRotationMatrix(&mPitchRot);
-		GetYawRotationMatrix(&mYawRot);
-		GetRollRotationMatrix(&mRollRot);
+		GetRotationMatrix(&mPitchRot);
+		//GetPitchRotationMatrix(&mPitchRot);
+		//GetYawRotationMatrix(&mYawRot);
+		//GetRollRotationMatrix(&mRollRot);
 
 		for ( size_t i = 0; i < vertCount; i++ )
 		{
@@ -806,7 +758,7 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 					&vertex,
 					&vertex
 				);
-			Matrix3DTransformNormal(
+			/*Matrix3DTransformNormal(
 					&mYawRot,
 					&vertex,
 					&vertex
@@ -815,7 +767,7 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 					&mRollRot,
 					&vertex,
 					&vertex
-				);
+				);*/
 			Matrix3DTransformCoord(
 					&mScalePos,
 					&vertex,

@@ -116,9 +116,7 @@ protected:
 
 	CONSTRAINTS		moveConst;
 
-	void Pitch();
-	void Yaw();
-	void Roll();
+	void PitchYawRoll();
 
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
@@ -181,10 +179,8 @@ public:
 	void LookAt(float lX, float lY, float lZ);
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
-	void GetRollRotationMatrix(LPMATRIX3D mOut);
-	void GetPitchRotationMatrix(LPMATRIX3D mOut);
-	void GetYawRotationMatrix(LPMATRIX3D mOut);
 	void GetScaleMatrix(LPMATRIX3D mOut);
+	void GetRotationMatrix(LPMATRIX3D mOut);
 
 	VECTOR3D getForwardLookDirection();
 	VECTOR3D getRightLookDirection();

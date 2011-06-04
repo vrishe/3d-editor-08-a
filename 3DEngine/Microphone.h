@@ -47,10 +47,11 @@ class Microphone : public clsMesh {
 		int& ps
 		);
 
-	void addMesh(MIC_PART part, MESH3D&); // adding vertices, edges and polygons as a specific part
-	void deleteMesh(MIC_PART part);
+	void addMesh	(MIC_PART part, MESH3D&); // adding vertices, edges and polygons as a specific part
+	void deleteMesh (MIC_PART part);
 
-	void replaceMesh(MIC_PART part, MESH3D&);
+	void replaceMesh		(MIC_PART part, MESH3D&);
+	void recalcMeshVertices (MIC_PART part, MESH3D&);
 
 public:
 	Microphone(
@@ -77,5 +78,17 @@ public:
 	void setHeadRadius		(float);
 	void setHeadDepth		(float);
 	void setCoreRadius		(float);
+
+	// getters
+	float getBaseRadius		();
+	float getBaseHeight		();
+	float getButtonWidth	();
+	float getUprightRadius	();
+	float getUprightHeight	();
+	float getUprightGap		();
+	float getHandleIndent	();
+	float getHeadRadius		();
+	float getHeadDepth		();
+	float getCoreRadius		();
 };
 typedef Microphone MICROPHONE3D, *LPMICROPHONE3D;

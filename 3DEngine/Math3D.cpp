@@ -155,40 +155,45 @@ void Matrix3DRotateAxis(const LPVECTOR3D axis, float rads, LPMATRIX3D rslt)
 			cosTheta	= cos(rads),
 			_1mCosTheta	= 1 - cosTheta;
 
-	//rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
-	//rslt->_12 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
-	//rslt->_13 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
-	//rslt->_14 = .0f;
-
-	//rslt->_21 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
-	//rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
-	//rslt->_23 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
-	//rslt->_24 = .0f;
-
-	//rslt->_31 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
-	//rslt->_32 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
-	//rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
-	//rslt->_34 = .0f;
-
 	rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
-	rslt->_21 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
-	rslt->_31 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
-	rslt->_41 = .0f;
-
-	rslt->_12 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
-	rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
-	rslt->_32 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
-	rslt->_42 = .0f;
-
-	rslt->_13 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
-	rslt->_23 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
-	rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
-	rslt->_43 = .0f;
-	
+	rslt->_12 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
+	rslt->_13 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
 	rslt->_14 = .0f;
+
+	rslt->_21 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
+	rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
+	rslt->_23 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
 	rslt->_24 = .0f;
+
+	rslt->_31 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
+	rslt->_32 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
+	rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
 	rslt->_34 = .0f;
+
+	rslt->_41 = .0f;
+	rslt->_42 = .0f;
+	rslt->_43 = .0f;
 	rslt->_44 =	1.0f; 
+
+	//rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
+	//rslt->_21 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
+	//rslt->_31 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
+	//rslt->_41 = .0f;
+
+	//rslt->_12 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
+	//rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
+	//rslt->_32 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
+	//rslt->_42 = .0f;
+
+	//rslt->_13 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
+	//rslt->_23 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
+	//rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
+	//rslt->_43 = .0f;
+
+	//rslt->_14 = .0f;
+	//rslt->_24 = .0f;
+	//rslt->_34 = .0f;
+	//rslt->_44 =	1.0f; 
 }
 
 void Matrix3DTransformCoord(

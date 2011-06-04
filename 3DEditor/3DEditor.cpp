@@ -78,8 +78,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testPyramid1.Translate(.0f, .0f, -50.0f);
 
 	testPyramid2.setColor(30, 200, 30);
-	testPyramid2.Translate(-150.0f, .0f, -170.0f);
-	testPyramid2.LookAt(&testPyramid1);
+	testPyramid2.Translate(.0f, -150.0f, -170.0f);
+//	testPyramid2.LookAt(&testPyramid1);
 
 	testPyramid3.setColor(170, 170, 170);
 	testPyramid3.Translate(120.0f, .0f, -50.0f);
@@ -158,8 +158,8 @@ LRESULT mainForm_OnPaint(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 {
-	FLOAT	strafeDir	= 3.0f,
-			flyDir		= 3.0f;
+	FLOAT	strafeDir	= 0.3,
+			flyDir		= 0.3;
 	switch ( wParam )
 	{
 		case VK_SPACE:
@@ -174,19 +174,19 @@ LRESULT mainForm_keyPressed(LPVOID Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case VK_LEFT:
-				testPyramid1.Strafe(-strafeDir);
+				testPyramid1.RollTo(-strafeDir);
 			break;
 
 		case VK_RIGHT:
-				testPyramid1.Strafe(strafeDir);
+				testPyramid1.RollTo(strafeDir);
 			break;
 
 		case VK_DOWN:
-				testPyramid1.Fly(-flyDir);
+				testPyramid1.PitchAt(-flyDir);
 			break;
 
 		case VK_UP:
-				testPyramid1.Fly(flyDir);
+				testPyramid1.PitchAt(flyDir);
 			break;
 	}
 	mainForm.Invalidate();
