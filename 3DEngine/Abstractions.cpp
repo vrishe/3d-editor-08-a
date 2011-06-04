@@ -320,15 +320,16 @@ void clsObject::LookAt(VECTOR3D lookAt)
 {
 	VECTOR3D lookDir = lookAt - pos;
 
-	Vector3DNormalize(&lookDir, &fWd);
-	Vector3DMultV(&VECTOR3D(.0f, .0f, 1.0f), &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-
-	//MATRIX3D M;
-	//Matrix3DRotateAxis(&fWd, roll, &M);
-	//Matrix3DTransformNormal(&M, &rWd, &rWd);
-	//Vector3DMultV(&fWd, &rWd, &uWd);
+	if ( Vector3DLength(&lookDir) > EPSILON )
+	{
+		Vector3DNormalize(&lookDir, &fWd);
+		Vector3DMultV(&VECTOR3D(.0f, .0f, 1.0f), &fWd, &rWd);
+		if ( Vector3DLength(&rWd) > EPSILON )
+			Vector3DNormalize(&rWd, &rWd);
+		else
+			rWd = VECTOR3D(0, 1, 0);
+		Vector3DMultV(&fWd, &rWd, &uWd);
+	}
 }
 
 void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }

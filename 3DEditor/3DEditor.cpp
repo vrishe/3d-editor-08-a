@@ -115,7 +115,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraTop.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
@@ -123,7 +123,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraFront.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				20, 
@@ -131,7 +131,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				ufWidth / 2 - 5,
 				ufHeight / 2 - 5,
 				CameraRight.objID(),
-				RM_WIREFRAME
+				RM_SHADED
 			);
 	testPool->addViewport(
 				25 + ufWidth / 2, 
