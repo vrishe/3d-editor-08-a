@@ -376,7 +376,7 @@ private:
 	COLORREF	textColorRef;
 
 	BOOL		bCustomBrush;
-	VOID		freeBkBrush();
+	VOID		freeBgBrush();
 
 public:
 	clsCtlText();

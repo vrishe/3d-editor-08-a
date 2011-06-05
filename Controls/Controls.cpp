@@ -593,7 +593,7 @@ BOOL clsWinBase::MoveSizeTo(INT ptDestX, INT ptDestY, UINT cWidth, UINT cHeight)
 
 BOOL clsWinBase::setText(LPCTSTR wbText)
 {
-	return SetWindowText(hWnd, wbText);
+	return SetWindowText(hWnd, wbText) && UpdateWindow(hWnd);
 }
 
 BOOL clsWinBase::setStyle(DWORD wbStyle)
@@ -1210,17 +1210,13 @@ LRESULT clsCtlText::defRedrawHandler(LPOBJECT Sender, WPARAM wParam, LPARAM lPar
 												(HWND)lParam, 
 												GWL_USERDATA
 											);
-	INT			fillMode	= OPAQUE;
 
 	SetTextColor((HDC)wParam, ctlText->textColorRef);
-	if ( ctlText->bgFillBrush == GetStockObject(NULL_BRUSH) )
-		fillMode = TRANSPARENT;
-
-	SetBkMode((HDC)wParam, fillMode);
+	SetBkMode((HDC)wParam, TRANSPARENT);	
 	return (LRESULT)ctlText->bgFillBrush;
 }
 
-VOID clsCtlText::freeBkBrush() 
+VOID clsCtlText::freeBgBrush() 
 {
 	if ( 
 		bCustomBrush
@@ -1242,26 +1238,28 @@ clsCtlText::clsCtlText()
 VOID clsCtlText::Destroy()
 {
 	clsWinBase::Destroy();
-	freeBkBrush();
+	freeBgBrush();
 }
 
 BOOL clsCtlText::setTextColor(COLORREF txtColorRef)
 {
 	textColorRef = txtColorRef;
-	return Invalidate();
+	return Invalidate(TRUE);
 }
 
 BOOL clsCtlText::setBgFillBrush(HBRUSH hBr)
 {
+	freeBgBrush();
 	if ( hBr == NULL )
 		bgFillBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
 	else
 		bgFillBrush = hBr;
-	return Invalidate();
+	return Invalidate(TRUE);
 }
 
 BOOL clsCtlText::setBgFillColor(COLORREF bkColorRef)
 {
+	bCustomBrush = TRUE;
 	return setBgFillBrush(CreateSolidBrush(bkColorRef));
 }
 
@@ -1294,7 +1292,7 @@ DWORD clsLabel::Create(
 				BOOL	 isSimple
 ) {
 	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
-	DWORD	dwResult = clsWinBase::Create(
+	DWORD	dwResult = clsCtlText::Create(
 							_T("static"),
 							WS_CHILD
 							| (isSimple ? SS_SIMPLE : 0),
@@ -1382,7 +1380,7 @@ DWORD clsEditBox::Create(
 			ebStyle |= ES_NUMBER;
 			break;
 	}
-	DWORD	dwResult = clsWinBase::Create(
+	DWORD	dwResult = clsCtlText::Create(
 							_T("edit"),
 							ebStyle,
 							NULL,
@@ -1395,7 +1393,7 @@ DWORD clsEditBox::Create(
 	if ( FAILED(dwResult) ) return dwResult; 
 	if ( 
 		!SetWindowProps(hWnd, GWL_ID, ebId)  
-		|| !clsWinBase::setText(ebText)
+		|| !clsCtlText::setText(ebText)
 	) {
 		Destroy();
 		return E_FAILED;
