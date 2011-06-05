@@ -12,7 +12,8 @@ FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
 BUTTON				testButton1, testButton2, testButton3, testButton4;
-LPWINBASE			testLpButton1;
+LABEL				testLabel1;
+EDIT_BOX			testEditBox1;
 
 LPRENDER_POOL		testPool;
 
@@ -29,6 +30,11 @@ PYRAMID3D			cubeX(100, 100, 100, 100, 100, 0, 80, 80, 200);
 Cone				testCone(100.0f, 100.0f, 50.0f, 24);
 Hole				testHole(70.0f, 70.0f, 30.0f, 30.0f, 10.0f, 20); 
 MICROPHONE3D		testMic( 55, 55, 124 );
+
+LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam) 
+{ 
+	return DLGC_WANTARROWS; 
+}
 
 // Win API entry point:
 // ===================================
@@ -61,6 +67,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
+	mainForm.AssignEventHandler(WM_GETDLGCODE, mainForm_ProcKeys, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 
 	testScene.setAmbientColor(128, 125, 125);
@@ -72,10 +79,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testLight1);
 	testScene.AddObject(&testLight2);
-	//testScene.AddObject(&testMic);
+	testScene.AddObject(&testMic);
 	//testScene.AddObject(&cubeX);
-	testScene.AddObject(&testCone);
-	testScene.AddObject(&testHole);
+	//testScene.AddObject(&testCone);
+	//testScene.AddObject(&testHole);
 
 	// Objects here:
 	//testMic.Fly(-120);
@@ -84,6 +91,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//testMic.setBaseHeight(50);
 	testCone.Translate(120, 0, 0);
 	testHole.Translate(-70, 0, 20);
+	testHole.Strafe(100);
 
 	// Lighters here:
 	testLight1.LookAt(-1, 0, 0);
@@ -133,58 +141,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				CameraRight.objID(),
 				RM_SHADED
 			);
-	testPool->addViewport(
-				25 + ufWidth / 2, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraPersp.objID(),
-				RM_SHADED
-			);
-	//testButton1.Create(
-	//				0,
-	//				_T("Button1"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton2.Create(
-	//				1,
-	//				_T("Button2"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 35,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton3.Create(
-	//				1,
-	//				_T("Button3"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 70,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton4.Create(
-	//				1,
-	//				_T("Button4"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 105,
-	//				110,
-	//				30,
-	//				FALSE);
-
-	//testButton4.setTabOrder(2);
-	//testButton1.setTabOrder(4);
+	//testPool->addViewport(
+	//			25 + ufWidth / 2, 
+	//			25 + ufHeight / 2,
+	//			ufWidth / 2 - 5,
+	//			ufHeight / 2 - 5,
+	//			CameraPersp.objID(),
+	//			RM_SHADED
+	//		);
+	
 	mainForm.Show();
 	mainForm.setColor(128, 125, 125);
 
+	
+	testButton1.Create(0, _T("It Works!"), &mainForm, 25 + ufWidth / 2, 25 + ufHeight / 2, 110, 17);
+	testLabel1.Create(_T("This is Sparta!"), &mainForm, 25 + ufWidth / 2, 25 + ufHeight / 2 + 20, 110, 17);
+	testLabel1.setBgFillBrush(NULL);
+	testLabel1.setTextColor(RGB(255, 0, 0));
+
+	testEditBox1.Create(15, _T("Ediiiiiiit!"), &mainForm, 25 + ufWidth / 2, 25 + ufHeight / 2 + 40, 110, 20);
+	testEditBox1.setBgFillBrush(NULL);
+
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
-	iResult = mainForm.DoMSGCycle(hAccelTable);
+	iResult		= mainForm.DoMSGCycle(hAccelTable);
 
 	delete testPool; 
 	mainForm.Destroy();
@@ -221,25 +200,21 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
-		/*case VK_LEFT:
-				testPyramid1.Strafe(-strafeDir);
-				CameraRight.LookAt(&testPyramid1);
+		case VK_LEFT:
+			testLabel1.setTextColor(RGB(0, 255, 0));
 			break;
 
 		case VK_RIGHT:
-				testPyramid1.Strafe(strafeDir);
-				CameraRight.LookAt(&testPyramid1);
+			testLabel1.setTextColor(RGB(255, 0, 0));
 			break;
 
 		case VK_DOWN:
-				testPyramid1.Fly(-flyDir);
-				CameraRight.LookAt(&testPyramid1);
+			testLabel1.setTextColor(RGB(0, 0, 255));
 			break;
 
 		case VK_UP:
-				testPyramid1.Fly(flyDir);
-				CameraRight.LookAt(&testPyramid1);
-			break;*/
+			testLabel1.setTextColor(RGB(0, 0, 0));
+			break;
 	}
 	mainForm.Invalidate();
 

@@ -27,6 +27,30 @@ ATOM ClassRegister(
 	return RegisterClassEx(&wndClsEx);
 }
 
+BOOL SetWindowProps(HWND hWnd, INT index, LONG lProp, LPLONG lPropOld)
+{
+	BOOL bResult;
+	DWORD prevProp;
+	SetLastError(0);
+	bResult = (prevProp = SetWindowLongPtr(hWnd, index, lProp))	!= 0
+			|| GetLastError()									== 0;
+	if ( bResult ) 
+	{
+		if ( IsWindowVisible(hWnd) )
+			bResult = SetWindowPos(
+							hWnd, 
+							NULL, 
+							0, 0, 0, 0, 
+							SWP_NOMOVE 
+							| SWP_NOSIZE 
+							| SWP_NOZORDER 
+							| SWP_FRAMECHANGED
+						);
+		if ( lPropOld != NULL ) *lPropOld = prevProp;
+	}
+	return bResult;
+}
+
 // ============================================================================
 // clsWinBase class implementation
 // ============================================================================
@@ -209,7 +233,7 @@ VOID clsWinBase::tabOrderRecalculate()
 						childNext->hWnd,
 						childCurrent->hWnd,
 						0, 0, 0, 0,
-						SWP_NOSIZE | SWP_NOMOVE /*| SWP_NOSENDCHANGING*/
+						SWP_NOSIZE | SWP_NOMOVE
 					);
 				i++;
 			}
@@ -241,7 +265,6 @@ BOOL clsWinBase::manageWindowState(INT nCmdShow)
 }
 
 clsWinBase::clsWinBase() {
-	clsName		= NULL;
 	hWnd		= NULL;
 
 	Parent		= NULL;
@@ -277,10 +300,9 @@ DWORD clsWinBase::Create(
 		&& wbParent->hWnd	== NULL	) 
 							return E_BAD_ARGUMENTS;
 	
-	clsName = (LPTSTR)wbClsName;
 	hWnd = CreateWindowEx(
 				wbStyleEx, 
-				clsName, 
+				wbClsName, 
 				NULL, 
 				wbStyle, 
 				wbPosX, 
@@ -311,15 +333,10 @@ DWORD clsWinBase::Create(
 	Height		= rcRealDimentions.bottom 
 					- rcRealDimentions.top;
 // Sublassing process part:
-	SetLastError(0);
-	defCtrlProc = (WNDPROC)SetWindowLongPtr(
-									hWnd, 
-									GWL_WNDPROC, 
-									PtrToLong(CtrlProc)
-								);
-	SetWindowLongPtr(hWnd, GWL_USERDATA, PtrToLong(this));
-	if ( GetLastError() != 0 ) 	
-	{
+	if (
+		!SetWindowProps(hWnd, GWL_WNDPROC, PtrToLong(CtrlProc), (LPLONG)&defCtrlProc)
+	||	!SetWindowProps(hWnd, GWL_USERDATA, PtrToLong(this))								
+	) {
 		Destroy();
 		return E_SUBCLASSING_FAILED;
 	}
@@ -380,7 +397,6 @@ VOID clsWinBase::Destroy()
 	DestroyWindow(hWnd);
 	EventHandlers.clear();
 
-	clsName		= NULL;
 	Parent		= NULL;
 	Anchors		= NULL;
 
@@ -456,6 +472,16 @@ UINT clsWinBase::findFirstChildIndex(UINT fTabOrder) const
 	}
 	return i;
 }
+
+BOOL clsWinBase::Validate() 
+{ 
+	return ValidateRect(hWnd, NULL); 
+}
+
+BOOL clsWinBase::Invalidate(BOOL bErase) 
+{ 
+	return InvalidateRect(hWnd, NULL, bErase); 
+} 
 
 BOOL clsWinBase::Show(BOOL bRecursive)		
 {
@@ -573,38 +599,20 @@ BOOL clsWinBase::setText(LPCTSTR wbText)
 BOOL clsWinBase::setStyle(DWORD wbStyle)
 {
 	BOOL	bResult		= hWnd != NULL;
-	DWORD	curStyle;
-
 	if ( bResult )
-	{
-		curStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
-		SetLastError(0);
-		SetWindowLongPtr(hWnd, GWL_STYLE, wbStyle);
-		bResult = GetLastError() == 0;
-		if ( bResult ) bResult = SetWindowPos(
-										hWnd, 
-										NULL, 
-										0, 0, 0, 0, 
-										SWP_NOMOVE 
-										| SWP_NOSIZE 
-										| SWP_NOZORDER 
-										| SWP_FRAMECHANGED
-									);
-	}
+		bResult = SetWindowProps(hWnd, GWL_STYLE, wbStyle);
 	return bResult;
 }
 
 BOOL clsWinBase::setStyleEx(DWORD wbStyleEx)
 {
 	BOOL	bResult		= hWnd != NULL;
-	DWORD	curStyle;
 
 	if ( bResult )
 	{
-		curStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
 		SetLastError(0);
-		SetWindowLongPtr(hWnd, GWL_EXSTYLE, wbStyleEx);
-		bResult = GetLastError() == 0;
+		bResult = SetWindowLongPtr(hWnd, GWL_EXSTYLE, wbStyleEx) != 0 
+				|| GetLastError() == 0;
 		if ( bResult ) bResult = SetWindowPos(
 										hWnd, 
 										NULL, 
@@ -866,7 +874,7 @@ BOOL clsForm::applyBkBrush(HBRUSH hBrToSet)
 							hWnd, 
 							GCLP_HBRBACKGROUND, 
 							PtrToLong(hBrToSet)
-						);
+						) != 0;
 		getClientDC(&hDC);
 		SendMessage(hWnd, WM_ERASEBKGND, (WPARAM)hDC, 0); 
 		dropDC(&hDC);
@@ -880,8 +888,9 @@ VOID clsForm::releaseBkBrush()
 	if ( hBrCleanup )
 	{
 		hBr = (HBRUSH)GetClassLongPtr(hWnd, GCLP_HBRBACKGROUND);
-		if ( DeleteObject(hBr) )
-			hBrCleanup = FALSE;
+		SetClassLongPtr(hWnd, GCLP_HBRBACKGROUND, (LONG)BRUSH_DEFAULT);
+		DeleteObject(hBr);
+		hBrCleanup = FALSE;
 	}
 }
 
@@ -890,7 +899,7 @@ clsForm::clsForm()
 {
 	frmClsAutoUnreg	= FALSE;
 	cycleIsRunning	= FALSE;
-	/*hBrCleanup		= FALSE;*/
+	hBrCleanup		= FALSE;
 }
 
 clsForm::~clsForm() { }
@@ -920,7 +929,7 @@ DWORD clsForm::Create(
 					NULL,
 					NULL,
 					LoadCursor(NULL, IDC_ARROW),
-					(HBRUSH)(COLOR_WINDOW + 1)
+					BRUSH_DEFAULT
 				);
 		frmClsAutoUnreg	= TRUE;
 	}
@@ -934,8 +943,20 @@ DWORD clsForm::Create(
 						frmHeight,
 						frmParent
 					);	
-	if ( SUCCEEDED(dwResult) ) setMenu(frmMenu);
-	return dwResult;	
+	if ( FAILED(dwResult) ) return dwResult;
+	dwResult = AssignEventHandler(
+						WM_CTLCOLORSTATIC, 
+						clsCtlText::defRedrawHandler, 
+						TRUE
+					);
+	dwResult &= AssignEventHandler(
+						WM_CTLCOLOREDIT, 
+						clsCtlText::defRedrawHandler, 
+						TRUE
+					);
+	if ( FAILED(dwResult) ) return E_FAILED;
+	setMenu(frmMenu);
+	return S_DONE;	
 }
 
 DWORD clsForm::Create(
@@ -984,24 +1005,18 @@ DWORD clsForm::Create(
 
 VOID clsForm::Destroy()
 {
-	clsWinBase::Destroy();
+	releaseBkBrush();
 	if ( frmClsAutoUnreg )
 	{
 		frmClsAutoUnreg = FALSE;
-		UnregisterClass(clsName, hInst);
+		UnregisterClass(
+			(LPCTSTR)GetClassLongPtr(hWnd, GCW_ATOM), 
+			hInst
+		);
 	}
-	/*releaseBkBrush();*/
-}
 
-BOOL clsForm::Validate(LPRECT pValidRect) 
-{ 
-	return ValidateRect(hWnd, pValidRect); 
+	clsWinBase::Destroy();
 }
-
-BOOL clsForm::Invalidate(LPRECT pInvalidRect, BOOL bErase) 
-{ 
-	return InvalidateRect(hWnd, pInvalidRect, bErase); 
-} 
 
 BOOL clsForm::Maximize() { return ShowWindow(hWnd, SW_SHOWMAXIMIZED); }
 
@@ -1044,8 +1059,11 @@ BOOL clsForm::setColor(SHORT Red, SHORT Green, SHORT Blue)
 	BOOL bResult	= newHBr != NULL;
 
 	if ( bResult )
+	{
 		bResult		= applyBkBrush(newHBr);
-	return hBrCleanup = bResult;
+		hBrCleanup	= bResult;
+	}
+	return bResult;
 }
 
 //HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
@@ -1088,8 +1106,8 @@ INT clsForm::DoMSGCycle(HACCEL hAccelTable)
 		cycleIsRunning = TRUE;
 		while (GetMessage(&msg, NULL, 0, 0))
 		{
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg) && 
-				!IsDialogMessage(hWnd, &msg)
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg) 
+				&& !IsDialogMessage(hWnd, &msg)
 			) {
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -1127,13 +1145,17 @@ DWORD clsButton::Create(
 							btnHeight,
 							btnParent
 						);
-	if ( SUCCEEDED(dwResult) ) 
-	{ 
-		ID = btnId;
-		SetWindowLongPtr(hWnd, GWL_ID, btnId);
-		setText(btnText); 
+	if ( FAILED(dwResult) )	return dwResult; 
+	if ( 
+		!SetWindowProps(hWnd, GWL_ID, btnId) 
+		|| !clsWinBase::setText(btnText) 
+	) {
+		Destroy();
+		return E_FAILED;
 	}
-	return dwResult;
+	ID = btnId;
+	Show();
+	return S_DONE;
 }
 
 DWORD clsButton::Create(
@@ -1177,3 +1199,254 @@ DWORD clsButton::Create(
 }
 
 UINT clsButton::getID() const { return ID; } 
+
+
+// ============================================================================
+// clsCtlText class implementation
+// ============================================================================
+LRESULT clsCtlText::defRedrawHandler(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	clsCtlText	*ctlText	= (clsCtlText*)GetWindowLongPtr(
+												(HWND)lParam, 
+												GWL_USERDATA
+											);
+	INT			fillMode	= OPAQUE;
+
+	SetTextColor((HDC)wParam, ctlText->textColorRef);
+	if ( ctlText->bgFillBrush == GetStockObject(NULL_BRUSH) )
+		fillMode = TRANSPARENT;
+
+	SetBkMode((HDC)wParam, fillMode);
+	return (LRESULT)ctlText->bgFillBrush;
+}
+
+VOID clsCtlText::freeBkBrush() 
+{
+	if ( 
+		bCustomBrush
+		&& bgFillBrush != NULL 
+	) {
+		DeleteObject(bgFillBrush);
+		bCustomBrush	= FALSE;
+	}
+	bgFillBrush	= NULL;
+}
+
+clsCtlText::clsCtlText()
+{
+	textColorRef	= RGB(0, 0, 0);
+	bgFillBrush		= NULL;
+	bCustomBrush	= FALSE;
+}
+
+VOID clsCtlText::Destroy()
+{
+	clsWinBase::Destroy();
+	freeBkBrush();
+}
+
+BOOL clsCtlText::setTextColor(COLORREF txtColorRef)
+{
+	textColorRef = txtColorRef;
+	return Invalidate();
+}
+
+BOOL clsCtlText::setBgFillBrush(HBRUSH hBr)
+{
+	if ( hBr == NULL )
+		bgFillBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+	else
+		bgFillBrush = hBr;
+	return Invalidate();
+}
+
+BOOL clsCtlText::setBgFillColor(COLORREF bkColorRef)
+{
+	return setBgFillBrush(CreateSolidBrush(bkColorRef));
+}
+
+COLORREF clsCtlText::getTextColor() const 
+{
+	return textColorRef;
+}
+
+BOOL clsCtlText::getBkColor(LPCOLORREF cRefOut) const 
+{
+	LOGBRUSH	brLog;
+	BOOL		bResult;
+
+	bResult = bgFillBrush != GetStockObject(NULL_BRUSH)
+			&& GetObject(bgFillBrush, sizeof(LOGBRUSH), &brLog) != 0;
+	if ( cRefOut != NULL ) *cRefOut = bResult ? brLog.lbColor : 0; 
+	return bResult;
+}
+
+// ============================================================================
+// clsLabel class implementation
+// ============================================================================
+DWORD clsLabel::Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				INT		 lbPosX,
+				INT		 lbPosY,
+				UINT	 lbWidth,
+				UINT	 lbHeight,
+				BOOL	 isSimple
+) {
+	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
+	DWORD	dwResult = clsWinBase::Create(
+							_T("static"),
+							WS_CHILD
+							| (isSimple ? SS_SIMPLE : 0),
+							WS_EX_TRANSPARENT,
+							lbPosX,
+							lbPosY,
+							lbWidth,
+							lbHeight,
+							lbParent
+						);
+	if ( FAILED(dwResult) ) return dwResult; 
+	if (!clsCtlText::setText(lbText)) 
+	{
+		Destroy();
+		return E_FAILED;
+	}
+	Show();
+	return S_DONE;
+}
+
+DWORD clsLabel::Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				POINT	 lbPos,
+				UINT	 lbWidth,
+				UINT	 lbHeight,
+				BOOL	 isSimple		
+) {
+	return Create(
+			lbText,
+			lbParent,
+			lbPos.x,
+			lbPos.y,
+			lbWidth,
+			lbHeight,
+			isSimple
+		);
+}
+
+DWORD clsLabel::Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				RECT	 lbDim,
+				BOOL	 isSimple
+) {
+	return Create(
+			lbText,
+			lbParent,
+			lbDim.left,
+			lbDim.top,
+			lbDim.right - lbDim.left,
+			lbDim.bottom - lbDim.top,
+			isSimple
+		);
+}
+
+// ============================================================================
+// clsEditBox class implementation
+// ============================================================================
+clsEditBox::clsEditBox() : ID(0) { }
+
+DWORD clsEditBox::Create(
+				UINT		ebId,
+				LPCTSTR		ebText,
+				LPFORM		ebParent,
+				INT			ebPosX,
+				INT			ebPosY,
+				UINT		ebWidth,
+				UINT		ebHeight,
+				EDIT_TYPE	ebType
+) {
+	DWORD ebStyle = WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL;
+	if ( ebParent == NULL ) return E_BAD_ARGUMENTS;
+	switch (ebType)
+	{
+		case MULTILINE:
+			ebStyle |= ES_MULTILINE | ES_AUTOVSCROLL;
+			break;
+
+		case PASSWORD:
+			ebStyle |= ES_PASSWORD;
+			break;
+
+		case NUMERIC:
+			ebStyle |= ES_NUMBER;
+			break;
+	}
+	DWORD	dwResult = clsWinBase::Create(
+							_T("edit"),
+							ebStyle,
+							NULL,
+							ebPosX,
+							ebPosY,
+							ebWidth,
+							ebHeight,
+							ebParent
+						);
+	if ( FAILED(dwResult) ) return dwResult; 
+	if ( 
+		!SetWindowProps(hWnd, GWL_ID, ebId)  
+		|| !clsWinBase::setText(ebText)
+	) {
+		Destroy();
+		return E_FAILED;
+	}
+	ID	= ebId;
+	Show();
+	return S_DONE;
+}
+
+DWORD clsEditBox::Create(
+				UINT		ebId,
+				LPCTSTR		ebText,
+				LPFORM		ebParent,
+				POINT		ebPos,
+				UINT		ebWidth,
+				UINT		ebHeight,
+				EDIT_TYPE	ebType	
+) {
+	return Create(
+			ebId,
+			ebText,
+			ebParent,
+			ebPos.x,
+			ebPos.y,
+			ebWidth,
+			ebHeight,
+			ebType
+		);
+}
+
+DWORD clsEditBox::Create(
+				UINT		ebId,
+				LPCTSTR  ebText,
+				LPFORM	 ebParent,
+				RECT	 ebDim,
+				EDIT_TYPE	ebType
+) {
+	return Create(
+			ebId,
+			ebText,
+			ebParent,
+			ebDim.left,
+			ebDim.top,
+			ebDim.right - ebDim.left,
+			ebDim.bottom - ebDim.top,
+			ebType
+		);
+}
+
+BOOL clsEditBox::setBgFillBrush(HBRUSH hBr)
+{
+	if ( hBr == NULL ) return FALSE;
+	return clsCtlText::setBgFillBrush(hBr);
+}

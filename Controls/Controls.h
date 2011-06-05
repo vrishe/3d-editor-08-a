@@ -25,6 +25,7 @@ using std::vector;
 #define E_BAD_ARGUMENTS			0x80000004
 #define E_HWND_CREATION_FAILED	0x80000005
 #define E_SUBCLASSING_FAILED	0x80000006
+#define E_BRUSH_CREATION_FAILED 0x80000007
 
 #define S_DONE					0x00000000
 #define S_REPLACED				0x00000001
@@ -41,22 +42,27 @@ ATOM ClassRegister (
 			HCURSOR hCur, 
 			HBRUSH bgrColor
 		);
+BOOL SetWindowProps(HWND hWnd, INT index, LONG lProp, LPLONG lPropOld = NULL);
 
 // Necessary clsWinBase class type definitions
 enum ANCHOR {
-	ANCR_NONE			= 0x00,
-	ANCR_LEFT			= 0x01,
-	ANCR_TOP			= 0x02,
-	ANCR_RIGHT			= 0x04,
-	ANCR_BOTTOM			= 0x08
+	ANCR_NONE				= 0x00,
+	ANCR_LEFT				= 0x01,
+	ANCR_RIGHT				= 0x02,
+	ANCR_LEFTRIGHT			= 0x03,
+	ANCR_TOP				= 0x04,
+	ANCR_TOPLEFT			= 0x05,
+	ANCR_TOPRIGHT			= 0x06,
+	ANCR_TOPLEFTRIGHT		= 0x07,
+	ANCR_BOTTOM				= 0x08,
+	ANCR_BOTTOMLEFT			= 0x09,
+	ANCR_BOTTOMRIGHT		= 0x0A,
+	ANCR_BOTTOMLEFTRIGHT	= 0x0B,
+	ANCR_BOTTOMTOP			= 0x0C,
+	ANCR_BOTTOMTOPLEFT		= 0x0D,
+	ANCR_BOTTOMTOPRIGHT		= 0x0E,
+	ANCR_ALL				= 0x0F
 };
-#define ANCR_TOPLEFT		ANCR_TOP | ANCR_LEFT
-#define ANCR_TOPRIGHT		ANCR_TOP | ANCR_RIGHT
-#define ANCR_BOTTOMLEFT		ANCR_BOTTOM | ANCR_LEFT
-#define ANCR_BOTTOMRIGHT	ANCR_BOTTOM | ANCR_RIGHT
-#define ANCR_LEFTRIGHT		ANCR_LEFT | ANCR_RIGHT
-#define	ANCR_BOTTOMTOP		ANCR_BOTTOM | ANCR_TOP
-#define ANCR_ALL			ANCR_LEFTRIGHT | ANCR_BOTTOMTOP
 
 typedef LPVOID	LPOBJECT;
 typedef LRESULT(*EVENT_FUNC)(LPOBJECT, WPARAM, LPARAM);	// Typical event handler looks like this.
@@ -91,7 +97,6 @@ private:
 
 protected:
 	static HINSTANCE	hInst;		// Hinstance of an application that uses this class.
-	LPTSTR				clsName;	// A class name that defines a window class which contol belongs to.
 	HWND				hWnd;		// A Window handler, specified to this control.
 
 // Some data field needed for stretching
@@ -149,6 +154,8 @@ public:
 	UINT findFirstChildIndex(UINT fTabOrder)				const;
 
 	// Control state management.
+	BOOL	Validate();
+	BOOL	Invalidate(BOOL bErase = FALSE);
 	BOOL	Show(BOOL bRecursive = TRUE);
 	BOOL	Hide();
 	BOOL	Enable();
@@ -224,7 +231,6 @@ typedef const clsWinBase *LPCWINBASE;
 
 // Necessary clsForm class structs/definitions/enums
 #define BRUSH_DEFAULT	(HBRUSH)(COLOR_WINDOW + 1)
-#define CSTYLE_DEFAULT	
 
 enum FORM_TYPE {
 	APP_FORM	= WS_OVERLAPPEDWINDOW,
@@ -282,8 +288,6 @@ public:
 	virtual VOID Destroy();
 
 // Form state management
-	BOOL	Validate(LPRECT pValidRect = NULL);
-	BOOL	Invalidate(LPRECT pInvalidRect = NULL, BOOL bErase = FALSE);
 	BOOL	Maximize();
 	BOOL	Minimize();
 	BOOL	Restore();
@@ -312,6 +316,20 @@ public:
 typedef clsForm FORM, *LPFORM; 
 typedef const clsForm *LPCFORM;
 
+// text alignement enum definition
+//enum TEXT_ALIGN {
+//	ALIGN_CENTER	= 0x00,
+//	ALIGN_LEFT		= 0x01,
+//	ALIGN_RIGHT		= 0x02,
+//	ALIGN_TOP		= 0x04,
+//	ALIGN_TOPLF		= 0x05,
+//	ALIGN_TOPRT		= 0x06,
+//	ALIGN_BOTTOM	= 0x08,
+//	ALIGN_BOTTOMLF	= 0x09,
+//	ALIGN_BOTTOMRT	= 0x0A
+//};
+
+// Necessary clsButton class structs/definitions/enums
 class clsButton : public clsWinBase {
 private:
 	UINT	ID;
@@ -350,6 +368,117 @@ public:
 };
 typedef clsButton BUTTON, *LPBUTTON;
 typedef const clsButton *LPCBUTTON;
+
+// Necessary clsTextControl class structs/definitions/enums
+class clsCtlText : public clsWinBase {
+private:
+	HBRUSH		bgFillBrush;
+	COLORREF	textColorRef;
+
+	BOOL		bCustomBrush;
+	VOID		freeBkBrush();
+
+public:
+	clsCtlText();
+	virtual VOID Destroy();
+	
+	BOOL setTextColor(COLORREF txtColorRef);
+	BOOL setBgFillBrush(HBRUSH hBr);
+	BOOL setBgFillColor(COLORREF bkColorRef);
+
+	COLORREF	getTextColor()					const;
+	BOOL		getBkColor(LPCOLORREF cRefOut)	const;
+
+	static LRESULT defRedrawHandler(
+							LPOBJECT Sender, 
+							WPARAM wParam,
+							LPARAM lParam
+						);
+};
+
+
+// Necessary clsLabel class structs/definitions/enums
+class clsLabel : public clsCtlText {
+public:
+	virtual DWORD Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				RECT	 lbDim,
+				BOOL	 isSimple	= FALSE
+			);
+
+	virtual DWORD Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				POINT	 lbPos,
+				UINT	 lbWidth,
+				UINT	 lbHeight,
+				BOOL	 isSimple	= FALSE	
+			);
+
+	virtual DWORD Create(
+				LPCTSTR  lbText,
+				LPFORM	 lbParent,
+				INT		 lbPosX,
+				INT		 lbPosY,
+				UINT	 lbWidth,
+				UINT	 lbHeight,
+				BOOL	 isSimple	= FALSE	
+			);
+};
+typedef clsLabel LABEL, *LPLABEL;
+typedef const clsLabel *LPCLABEL; 
+
+// Necessary clsEditBox class structs/definitions/enums
+enum EDIT_TYPE {
+	SINGLELINE	= 0,
+	MULTILINE	= 1,
+	PASSWORD	= 2,
+	NUMERIC		= 3
+};
+
+class clsEditBox : public clsCtlText {
+private:
+	UINT	ID;
+
+public:
+	clsEditBox(); 
+
+	virtual DWORD Create(
+				UINT		ebID,
+				LPCTSTR		ebText,
+				LPFORM		ebParent,
+				RECT		ebDim,
+				EDIT_TYPE	ebType = SINGLELINE
+			);
+
+	virtual DWORD Create(
+				UINT		ebID,
+				LPCTSTR		ebText,
+				LPFORM		ebParent,
+				POINT		ebPos,
+				UINT		ebWidth,
+				UINT		ebHeight,
+				EDIT_TYPE	ebType = SINGLELINE
+			);
+
+	virtual DWORD Create(
+				UINT		ebID,
+				LPCTSTR		ebText,
+				LPFORM		ebParent,
+				INT			ebPosX,
+				INT			ebPosY,
+				UINT		ebWidth,
+				UINT		ebHeight,
+				EDIT_TYPE	ebType = SINGLELINE
+			);
+
+	BOOL clsEditBox::setBgFillBrush(HBRUSH hBr);
+
+	UINT getID();
+};
+typedef clsEditBox EDIT_BOX, *LPEDIT_BOX;
+typedef const clsEditBox *LPCEDIT_BOX; 
 
 
 
