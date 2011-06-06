@@ -53,7 +53,7 @@ typedef clsCamera CAMERA3D, *LPCAMERA3D;
 class clsTargCamera : public clsCamera {
 	VECTOR3D target;
 
-		// Relative rortaion - don't work in this camera
+		// Relative rortaion don't work in this camera
 	void Pitch(float angle);
 	void Yaw(float angle);
 

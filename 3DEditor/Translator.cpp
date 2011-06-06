@@ -570,6 +570,8 @@ bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	if (hFile == INVALID_HANDLE_VALUE) 
 		return false;
 
+	bErrorFlag = WriteFile(hFile, "3DEditor scene file", 19, &dwBytesWritten, NULL);
+	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 	char *splitBuffer = "===================================== Cameras =======================================";
 	bErrorFlag = WriteFile(hFile, splitBuffer, (DWORD)strlen(splitBuffer), &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
@@ -711,7 +713,10 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		// loading cameras
 	if ( !fileData.size() )
 		return false;
-	fileData.erase(0, 94);
+	if ( strcmp(fileData.substr(0, 19).c_str(), "3DEditor scene file") )
+		return false;
+
+	fileData.erase(0, 115);
 	UINT objCount = (UINT)readFloat(fileData);
 	fileData.erase(0, 13);
 	for (UINT i = 0; i < objCount; i++) {

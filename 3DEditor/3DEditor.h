@@ -16,4 +16,7 @@ LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK About_DialogBox_Handler(HWND, UINT, WPARAM, LPARAM);
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn);
+BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
 // TODO: define any new event handler prototype here
