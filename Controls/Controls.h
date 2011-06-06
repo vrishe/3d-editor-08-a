@@ -319,7 +319,7 @@ typedef clsForm FORM, *LPFORM;
 typedef const clsForm *LPCFORM;
 
 // Necessary clsTextControl class structs/definitions/enums
-class clsCtlText : public clsWinBase {
+class clsControl : public clsWinBase {
 private:
 	HBRUSH		bgFillBrush;
 	COLORREF	textColorRef;
@@ -328,15 +328,17 @@ private:
 	VOID		freeBgBrush();
 
 public:
-	clsCtlText();
+	clsControl();
 	virtual VOID Destroy();
 	
 	BOOL setTextColor(COLORREF txtColorRef);
 	BOOL setBgFillBrush(HBRUSH hBr);
 	BOOL setBgFillColor(COLORREF bkColorRef);
+	BOOL setID(UINT wbID);
 
 	COLORREF	getTextColor()					const;
 	BOOL		getBkColor(LPCOLORREF cRefOut)	const;
+	UINT		getID()							const;
 
 	static LRESULT defRedrawHandler(
 							LPOBJECT Sender, 
@@ -345,27 +347,11 @@ public:
 						);
 };
 
-// text alignement enum definition
-//enum TEXT_ALIGN {
-//	ALIGN_CENTER	= 0x00,
-//	ALIGN_LEFT		= 0x01,
-//	ALIGN_RIGHT		= 0x02,
-//	ALIGN_TOP		= 0x04,
-//	ALIGN_TOPLF		= 0x05,
-//	ALIGN_TOPRT		= 0x06,
-//	ALIGN_BOTTOM	= 0x08,
-//	ALIGN_BOTTOMLF	= 0x09,
-//	ALIGN_BOTTOMRT	= 0x0A
-//};
-
 // Necessary clsButton class structs/definitions/enums
-class clsButton : public clsCtlText {
-private:
-	UINT	ID;
-
+class clsButton : public clsControl {
 public:
 	virtual DWORD Create(
-				UINT	btnId,
+				UINT	ID,
 				LPCTSTR btnText,
 				LPFORM	btnParent,
 				RECT	btnDim,
@@ -373,7 +359,7 @@ public:
 			);
 
 	virtual DWORD Create(
-				UINT	btnId,
+				UINT	ID,
 				LPCTSTR btnText,
 				LPFORM	btnParent,
 				POINT	btnPos,
@@ -383,7 +369,7 @@ public:
 			);
 
 	virtual DWORD Create(
-				UINT	btnId,
+				UINT	ID,
 				LPCTSTR btnText,
 				LPFORM	btnParent,
 				INT		btnPosX,
@@ -392,46 +378,41 @@ public:
 				UINT	btnHeight,
 				BOOL	setDefault	=	FALSE			
 			);
-
-	UINT getID() const;
 };
 typedef clsButton BUTTON, *LPBUTTON;
 typedef const clsButton *LPCBUTTON;
 
 
 // Necessary clsLabel class structs/definitions/enums
-class clsLabel : public clsCtlText {
+class clsLabel : public clsControl {
 public:
 	virtual DWORD Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				RECT	 lbDim,
-				BOOL	 isSimple	= FALSE
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				RECT	 lDim
 			);
 
 	virtual DWORD Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				POINT	 lbPos,
-				UINT	 lbWidth,
-				UINT	 lbHeight,
-				BOOL	 isSimple	= FALSE	
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				POINT	 lPos,
+				UINT	 lWidth,
+				UINT	 lHeight
 			);
 
 	virtual DWORD Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				INT		 lbPosX,
-				INT		 lbPosY,
-				UINT	 lbWidth,
-				UINT	 lbHeight,
-				BOOL	 isSimple	= FALSE	
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				INT		 lPosX,
+				INT		 lPosY,
+				UINT	 lWidth,
+				UINT	 lHeight
 			);
 };
 typedef clsLabel LABEL, *LPLABEL;
 typedef const clsLabel *LPCLABEL; 
 
-// Necessary clsEditBox class structs/definitions/enums
+// Necessary clsTextBox class structs/definitions/enums
 enum EDIT_TYPE {
 	SINGLELINE	= 0,
 	MULTILINE	= 1,
@@ -439,48 +420,72 @@ enum EDIT_TYPE {
 	NUMERIC		= 3
 };
 
-class clsEditBox : public clsCtlText {
-private:
-	UINT	ID;
-
+class clsTextBox : public clsControl {
 public:
-	clsEditBox(); 
-
 	virtual DWORD Create(
-				UINT		ebID,
-				LPCTSTR		ebText,
-				LPFORM		ebParent,
-				RECT		ebDim,
-				EDIT_TYPE	ebType = SINGLELINE
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				RECT		tbDim,
+				EDIT_TYPE	tbType = SINGLELINE
 			);
 
 	virtual DWORD Create(
-				UINT		ebID,
-				LPCTSTR		ebText,
-				LPFORM		ebParent,
-				POINT		ebPos,
-				UINT		ebWidth,
-				UINT		ebHeight,
-				EDIT_TYPE	ebType = SINGLELINE
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				POINT		tbPos,
+				UINT		tbWidth,
+				UINT		tbHeight,
+				EDIT_TYPE	tbType = SINGLELINE
 			);
 
 	virtual DWORD Create(
-				UINT		ebID,
-				LPCTSTR		ebText,
-				LPFORM		ebParent,
-				INT			ebPosX,
-				INT			ebPosY,
-				UINT		ebWidth,
-				UINT		ebHeight,
-				EDIT_TYPE	ebType = SINGLELINE
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				INT			tbPosX,
+				INT			tbPosY,
+				UINT		tbWidth,
+				UINT		tbHeight,
+				EDIT_TYPE	tbType = SINGLELINE
 			);
-
-	BOOL clsEditBox::setBgFillBrush(HBRUSH hBr);
-
-	UINT getID();
 };
-typedef clsEditBox EDIT_BOX, *LPEDIT_BOX;
-typedef const clsEditBox *LPCEDIT_BOX; 
+typedef clsTextBox TEXTBOX, *LPTEXTBOX;
+typedef const clsTextBox *LPCTEXTBOX; 
+
+
+// Necessary clsListBox class structs/definitions/enums
+class clsListBox : public clsControl {
+public:
+	virtual DWORD Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				RECT		lbDim
+			);
+
+	virtual DWORD Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				POINT		lbPos,
+				UINT		lbWidth,
+				UINT		lbHeight
+			);
+
+	virtual DWORD Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				INT			lbPosX,
+				INT			lbPosY,
+				UINT		lbWidth,
+				UINT		lbHeight
+			);
+};
+typedef clsListBox LISTBOX, *LPLISTBOX;
+typedef const clsListBox *LPCLISTBOX;
 
 
 

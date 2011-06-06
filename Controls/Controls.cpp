@@ -704,7 +704,6 @@ BOOL clsWinBase::setTabOrder(UINT tOrder)
 
 VOID clsWinBase::setFocus() { if (hWnd != NULL) SetFocus(hWnd); }
 
-
 clsWinBase* clsWinBase::getParent() { return Parent; }
 
 clsWinBase* clsWinBase::getChildFocused() 
@@ -946,17 +945,17 @@ DWORD clsForm::Create(
 	if ( FAILED(dwResult) ) return dwResult;
 	dwResult = AssignEventHandler(
 						WM_CTLCOLORSTATIC, 
-						clsCtlText::defRedrawHandler, 
+						clsControl::defRedrawHandler, 
 						TRUE
 					);
 	dwResult &= AssignEventHandler(
 						WM_CTLCOLOREDIT, 
-						clsCtlText::defRedrawHandler, 
+						clsControl::defRedrawHandler, 
 						TRUE
 					);
 	dwResult &= AssignEventHandler(
 						WM_CTLCOLORBTN, 
-						clsCtlText::defRedrawHandler, 
+						clsControl::defRedrawHandler, 
 						TRUE
 					);
 	if ( FAILED(dwResult) ) return E_FAILED;
@@ -1071,8 +1070,6 @@ BOOL clsForm::setColor(COLORREF bgColor)
 	return bResult;
 }
 
-//HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
-
 HBRUSH clsForm::getBrush()
 {
 	return (HBRUSH)GetClassLongPtr(hWnd, GCLP_HBRBACKGROUND);
@@ -1089,13 +1086,6 @@ COLORREF clsForm::getColor()
 	);
 	return logBrush.lbColor;
 }
-
-
-//COLORREF clsForm::getColor()
-//{
-//	LOGBRUSH logBrush	= {0};
-//	GetObject(
-//}
 
 VOID clsForm::getClientSize(LPUINT fcWidth, LPUINT fcHeight) const
 {
@@ -1150,11 +1140,11 @@ INT clsForm::DoMSGCycle(HACCEL hAccelTable)
 }
 
 // ============================================================================
-// clsCtlText class implementation
+// clsControl class implementation
 // ============================================================================
-LRESULT clsCtlText::defRedrawHandler(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+LRESULT clsControl::defRedrawHandler(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
-	clsCtlText	*ctlText	= (clsCtlText*)GetWindowLongPtr(
+	clsControl	*ctlText	= (clsControl*)GetWindowLongPtr(
 												(HWND)lParam, 
 												GWL_USERDATA
 											);
@@ -1164,7 +1154,7 @@ LRESULT clsCtlText::defRedrawHandler(LPOBJECT Sender, WPARAM wParam, LPARAM lPar
 	return (LRESULT)ctlText->bgFillBrush;
 }
 
-VOID clsCtlText::freeBgBrush() 
+VOID clsControl::freeBgBrush() 
 {
 	if ( 
 		bCustomBrush
@@ -1176,26 +1166,26 @@ VOID clsCtlText::freeBgBrush()
 	bgFillBrush	= NULL;
 }
 
-clsCtlText::clsCtlText()
+clsControl::clsControl()
 {
 	textColorRef	= RGB(0, 0, 0);
 	bgFillBrush		= NULL;
 	bCustomBrush	= FALSE;
 }
 
-VOID clsCtlText::Destroy()
+VOID clsControl::Destroy()
 {
 	clsWinBase::Destroy();
 	freeBgBrush();
 }
 
-BOOL clsCtlText::setTextColor(COLORREF txtColorRef)
+BOOL clsControl::setTextColor(COLORREF txtColorRef)
 {
 	textColorRef = txtColorRef;
 	return Invalidate(TRUE);
 }
 
-BOOL clsCtlText::setBgFillBrush(HBRUSH hBr)
+BOOL clsControl::setBgFillBrush(HBRUSH hBr)
 {
 	freeBgBrush();
 	if ( hBr == NULL )
@@ -1205,18 +1195,24 @@ BOOL clsCtlText::setBgFillBrush(HBRUSH hBr)
 	return Invalidate(TRUE);
 }
 
-BOOL clsCtlText::setBgFillColor(COLORREF bkColorRef)
+BOOL clsControl::setBgFillColor(COLORREF bkColorRef)
 {
 	bCustomBrush = TRUE;
 	return setBgFillBrush(CreateSolidBrush(bkColorRef));
 }
 
-COLORREF clsCtlText::getTextColor() const 
+BOOL clsControl::setID(UINT wbID)
+{
+	return SetWindowProps(hWnd, GWLP_ID, wbID);
+}
+
+
+COLORREF clsControl::getTextColor() const 
 {
 	return textColorRef;
 }
 
-BOOL clsCtlText::getBkColor(LPCOLORREF cRefOut) const 
+BOOL clsControl::getBkColor(LPCOLORREF cRefOut) const 
 {
 	LOGBRUSH	brLog;
 	BOOL		bResult;
@@ -1227,11 +1223,13 @@ BOOL clsCtlText::getBkColor(LPCOLORREF cRefOut) const
 	return bResult;
 }
 
+UINT clsControl::getID() const { return GetWindowLongPtr(hWnd, GWLP_ID); }
+
 // ============================================================================
 // clsButton class implementation
 // ============================================================================
 DWORD clsButton::Create(
-			UINT	btnId,
+			UINT	ID,
 			LPCTSTR btnText,
 			LPFORM	btnParent,
 			INT		btnPosX,
@@ -1255,20 +1253,19 @@ DWORD clsButton::Create(
 						);
 	if ( FAILED(dwResult) )	return dwResult; 
 	if ( 
-		!SetWindowProps(hWnd, GWL_ID, btnId) 
-		|| !clsWinBase::setText(btnText) 
-	) {
+		!setID(ID)
+		|| !setText(btnText) 
+	) {		
 		Destroy();
 		return E_FAILED;
 	}
-	ID = btnId;
 	setBgFillBrush(btnParent->getBrush());
 	Show();
 	return S_DONE;
 }
 
 DWORD clsButton::Create(
-				UINT	btnId,
+				UINT	ID,
 				LPCTSTR btnText,
 				LPFORM	btnParent,
 				POINT	btnPos,
@@ -1277,7 +1274,7 @@ DWORD clsButton::Create(
 				BOOL	setDefault		
 ) {
 	return Create(
-			btnId,
+			ID,
 			btnText,
 			btnParent,
 			btnPos.x,
@@ -1289,14 +1286,14 @@ DWORD clsButton::Create(
 }
 
 DWORD clsButton::Create(
-				UINT	btnId,
+				UINT	ID,
 				LPCTSTR btnText,
 				LPFORM	btnParent,
 				RECT	btnDim,
 				BOOL	setDefault		
 ) {
 	return Create(
-			btnId,
+			ID,
 			btnText,
 			btnParent,
 			btnDim.left,
@@ -1307,26 +1304,187 @@ DWORD clsButton::Create(
 		);
 }
 
-UINT clsButton::getID() const { return ID; } 
-
-
 // ============================================================================
 // clsLabel class implementation
 // ============================================================================
 DWORD clsLabel::Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				INT		 lbPosX,
-				INT		 lbPosY,
-				UINT	 lbWidth,
-				UINT	 lbHeight,
-				BOOL	 isSimple
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				INT		 lPosX,
+				INT		 lPosY,
+				UINT	 lWidth,
+				UINT	 lHeight
 ) {
-	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
-	DWORD	dwResult = clsCtlText::Create(
+	if ( lParent == NULL ) return E_BAD_ARGUMENTS;
+	DWORD	dwResult = clsControl::Create(
 							_T("static"),
-							WS_CHILD
-							| (isSimple ? SS_SIMPLE : 0),
+							WS_CHILD,
+							NULL,
+							lPosX,
+							lPosY,
+							lWidth,
+							lHeight,
+							lParent
+						);
+	if ( FAILED(dwResult) ) return dwResult; 
+	if ( !setText(lText) ) 
+	{
+		Destroy();
+		return E_FAILED;
+	}
+	setBgFillBrush(lParent->getBrush());
+	Show();
+	return S_DONE;
+}
+
+DWORD clsLabel::Create(
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				POINT	 lPos,
+				UINT	 lWidth,
+				UINT	 lHeight
+) {
+	return Create(
+			lText,
+			lParent,
+			lPos.x,
+			lPos.y,
+			lWidth,
+			lHeight
+		);
+}
+
+DWORD clsLabel::Create(
+				LPCTSTR  lText,
+				LPFORM	 lParent,
+				RECT	 lDim
+) {
+	return Create(
+			lText,
+			lParent,
+			lDim.left,
+			lDim.top,
+			lDim.right - lDim.left,
+			lDim.bottom - lDim.top
+		);
+}
+
+// ============================================================================
+// clsTextBox class implementation
+// ============================================================================
+DWORD clsTextBox::Create(
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				INT			tbPosX,
+				INT			tbPosY,
+				UINT		tbWidth,
+				UINT		tbHeight,
+				EDIT_TYPE	tbType
+) {
+	DWORD tbStyle = WS_CHILD 
+					| WS_TABSTOP 
+					| WS_BORDER
+					| ES_AUTOHSCROLL;
+	if ( tbParent == NULL ) return E_BAD_ARGUMENTS;
+	switch (tbType)
+	{
+		case MULTILINE:
+			tbStyle |= ES_MULTILINE | ES_AUTOVSCROLL;
+			break;
+
+		case PASSWORD:
+			tbStyle |= ES_PASSWORD;
+			break;
+
+		case NUMERIC:
+			tbStyle |= ES_NUMBER;
+			break;
+	}
+	DWORD	dwResult = clsControl::Create(
+							_T("edit"),
+							tbStyle,
+							NULL,
+							tbPosX,
+							tbPosY,
+							tbWidth,
+							tbHeight,
+							tbParent
+						);
+	if ( FAILED(dwResult) ) return dwResult; 
+	if ( 
+		!setID(ID)
+		|| !setText(tbText) 
+	) {
+		Destroy();
+		return E_FAILED;
+	}
+	Show();
+	return S_DONE;
+}
+
+DWORD clsTextBox::Create(
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				POINT		tbPos,
+				UINT		tbWidth,
+				UINT		tbHeight,
+				EDIT_TYPE	tbType	
+) {
+	return Create(
+			ID,
+			tbText,
+			tbParent,
+			tbPos.x,
+			tbPos.y,
+			tbWidth,
+			tbHeight,
+			tbType
+		);
+}
+
+DWORD clsTextBox::Create(
+				UINT		ID,
+				LPCTSTR		tbText,
+				LPFORM		tbParent,
+				RECT		tbDim,
+				EDIT_TYPE	tbType
+) {
+	return Create(
+			ID,
+			tbText,
+			tbParent,
+			tbDim.left,
+			tbDim.top,
+			tbDim.right - tbDim.left,
+			tbDim.bottom - tbDim.top,
+			tbType
+		);
+}
+
+
+// ============================================================================
+// clsListBox class implementation
+// ============================================================================
+DWORD clsListBox::Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				INT			lbPosX,
+				INT			lbPosY,
+				UINT		lbWidth,
+				UINT		lbHeight
+) {
+	DWORD tbStyle = WS_CHILD 
+					| WS_TABSTOP 
+					| WS_BORDER 
+					| WS_VSCROLL
+					| LBS_USETABSTOPS;
+	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
+	DWORD	dwResult = clsControl::Create(
+							_T("listbox"),
+							tbStyle,
 							NULL,
 							lbPosX,
 							lbPosY,
@@ -1335,148 +1493,50 @@ DWORD clsLabel::Create(
 							lbParent
 						);
 	if ( FAILED(dwResult) ) return dwResult; 
-	if (!clsCtlText::setText(lbText)) 
-	{
+	if ( 
+		!setID(ID)
+		|| !setText(lbText) 
+	) {
 		Destroy();
 		return E_FAILED;
 	}
-	setBgFillBrush(lbParent->getBrush());
 	Show();
 	return S_DONE;
 }
 
-DWORD clsLabel::Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				POINT	 lbPos,
-				UINT	 lbWidth,
-				UINT	 lbHeight,
-				BOOL	 isSimple		
+DWORD clsListBox::Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				POINT		lbPos,
+				UINT		lbWidth,
+				UINT		lbHeight
 ) {
 	return Create(
+			ID,
 			lbText,
 			lbParent,
 			lbPos.x,
 			lbPos.y,
 			lbWidth,
-			lbHeight,
-			isSimple
+			lbHeight
 		);
 }
 
-DWORD clsLabel::Create(
-				LPCTSTR  lbText,
-				LPFORM	 lbParent,
-				RECT	 lbDim,
-				BOOL	 isSimple
+DWORD clsListBox::Create(
+				UINT		ID,
+				LPCTSTR		lbText,
+				LPFORM		lbParent,
+				RECT		lbDim
 ) {
 	return Create(
+			ID,
 			lbText,
 			lbParent,
 			lbDim.left,
 			lbDim.top,
 			lbDim.right - lbDim.left,
-			lbDim.bottom - lbDim.top,
-			isSimple
+			lbDim.bottom - lbDim.top
 		);
 }
 
-// ============================================================================
-// clsEditBox class implementation
-// ============================================================================
-clsEditBox::clsEditBox() : ID(0) { }
-
-DWORD clsEditBox::Create(
-				UINT		ebId,
-				LPCTSTR		ebText,
-				LPFORM		ebParent,
-				INT			ebPosX,
-				INT			ebPosY,
-				UINT		ebWidth,
-				UINT		ebHeight,
-				EDIT_TYPE	ebType
-) {
-	DWORD ebStyle = WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL;
-	if ( ebParent == NULL ) return E_BAD_ARGUMENTS;
-	switch (ebType)
-	{
-		case MULTILINE:
-			ebStyle |= ES_MULTILINE | ES_AUTOVSCROLL;
-			break;
-
-		case PASSWORD:
-			ebStyle |= ES_PASSWORD;
-			break;
-
-		case NUMERIC:
-			ebStyle |= ES_NUMBER;
-			break;
-	}
-	DWORD	dwResult = clsCtlText::Create(
-							_T("edit"),
-							ebStyle,
-							NULL,
-							ebPosX,
-							ebPosY,
-							ebWidth,
-							ebHeight,
-							ebParent
-						);
-	if ( FAILED(dwResult) ) return dwResult; 
-	if ( 
-		!SetWindowProps(hWnd, GWL_ID, ebId)  
-		|| !clsCtlText::setText(ebText)
-	) {
-		Destroy();
-		return E_FAILED;
-	}
-	ID	= ebId;
-	Show();
-	return S_DONE;
-}
-
-DWORD clsEditBox::Create(
-				UINT		ebId,
-				LPCTSTR		ebText,
-				LPFORM		ebParent,
-				POINT		ebPos,
-				UINT		ebWidth,
-				UINT		ebHeight,
-				EDIT_TYPE	ebType	
-) {
-	return Create(
-			ebId,
-			ebText,
-			ebParent,
-			ebPos.x,
-			ebPos.y,
-			ebWidth,
-			ebHeight,
-			ebType
-		);
-}
-
-DWORD clsEditBox::Create(
-				UINT		ebId,
-				LPCTSTR  ebText,
-				LPFORM	 ebParent,
-				RECT	 ebDim,
-				EDIT_TYPE	ebType
-) {
-	return Create(
-			ebId,
-			ebText,
-			ebParent,
-			ebDim.left,
-			ebDim.top,
-			ebDim.right - ebDim.left,
-			ebDim.bottom - ebDim.top,
-			ebType
-		);
-}
-
-BOOL clsEditBox::setBgFillBrush(HBRUSH hBr)
-{
-	if ( hBr == NULL ) return FALSE;
-	return clsCtlText::setBgFillBrush(hBr);
-}
