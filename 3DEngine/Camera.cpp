@@ -101,3 +101,21 @@ void clsCamera::GetPerspectiveMatrix(LPMATRIX3D mOut)
 	mOut->_33 = farClip / (farClip - nearClip);
 	mOut->_43 = mOut->_33 * (-nearClip);
 }
+
+// ============================================================================
+// Implementation of clsCamera class:
+
+VECTOR3D clsTargCamera::getTargetPoint() { return target; }
+void clsTargCamera::setTargetPoint(LPVECTOR3D point) { target = *point; }
+void clsTargCamera::setTargetPoint(float tX, float tY, float tZ) { target = VECTOR3D(tX, tY, tZ); }
+
+void clsTargCamera::Translate(const LPVECTOR3D tV) { pos = *tV; LookAt(target); }
+void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); LookAt(target); }
+
+void clsTargCamera::Follow(float units)	{ pos += fWd * units; LookAt(target); }
+void clsTargCamera::Strafe(float units)	{ pos += rWd * units; LookAt(target); }
+void clsTargCamera::Fly(float units)	{ pos += uWd * units; LookAt(target); }
+
+void clsTargCamera::Pitch(float angle) { /* doing nothing */ }
+void clsTargCamera::Yaw(float angle) { /* doing nothing */ }
+void clsTargCamera::Roll(float angle) { /* doing nothing */ }

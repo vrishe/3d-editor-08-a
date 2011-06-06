@@ -47,3 +47,27 @@ public:
 	void			GetPerspectiveMatrix(LPMATRIX3D mOut);
 };
 typedef clsCamera CAMERA3D, *LPCAMERA3D;
+
+// ============================================================================
+// TargetCamera class
+class clsTargCamera : public clsCamera {
+	VECTOR3D target;
+public:
+	VECTOR3D getTargetPoint();
+	void setTargetPoint(LPVECTOR3D);
+	void setTargetPoint(float tX, float tY, float tZ);
+	// Absolute translation
+	void Translate(const LPVECTOR3D tV);
+	void Translate(float tX, float tY, float tZ);	 
+
+	//Relative translation
+	void Follow(float units);	// Along local-x
+	void Strafe(float units);	// Along local-y
+	void Fly(float units);		// Along local-z
+
+	// Relative rortaion - don't work in this camera
+	void Pitch(float angle);
+	void Yaw(float angle);
+	void Roll(float angle);
+};
+typedef clsTargCamera TARGCAMERA3D, *LPTARGCAMERA3D;
