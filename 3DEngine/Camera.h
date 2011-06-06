@@ -52,7 +52,23 @@ typedef clsCamera CAMERA3D, *LPCAMERA3D;
 // TargetCamera class
 class clsTargCamera : public clsCamera {
 	VECTOR3D target;
+
+		// Relative rortaion - don't work in this camera
+	void Pitch(float angle);
+	void Yaw(float angle);
+
+	void LookAt(VECTOR3D lookAt);
+	void LookAt(const clsObject *objToLookAt);
+	void LookAt(float lX, float lY, float lZ);
 public:
+	clsTargCamera(float lX = 0, float lY = 0, float lZ = 0);
+	clsTargCamera(
+			PROJECTION_TYPE projType,
+			float			horizFov,
+			float			vertFov,
+			float lX = 0, float lY = 0, float lZ = 0
+		);
+
 	VECTOR3D getTargetPoint();
 	void setTargetPoint(LPVECTOR3D);
 	void setTargetPoint(float tX, float tY, float tZ);
@@ -65,9 +81,8 @@ public:
 	void Strafe(float units);	// Along local-y
 	void Fly(float units);		// Along local-z
 
-	// Relative rortaion - don't work in this camera
-	void Pitch(float angle);
-	void Yaw(float angle);
-	void Roll(float angle);
+	void TargetFollow(float units);	// Along local-x
+	void TargetStrafe(float units);	// Along local-y
+	void TargetFly(float units);	// Along local-z
 };
 typedef clsTargCamera TARGCAMERA3D, *LPTARGCAMERA3D;

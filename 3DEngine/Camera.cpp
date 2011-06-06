@@ -105,17 +105,37 @@ void clsCamera::GetPerspectiveMatrix(LPMATRIX3D mOut)
 // ============================================================================
 // Implementation of clsCamera class:
 
+clsTargCamera::clsTargCamera(float lX, float lY, float lZ) : clsCamera() {
+	target = VECTOR3D(lX, lY, lZ);
+	clsCamera::LookAt(target);
+}
+clsTargCamera::clsTargCamera(PROJECTION_TYPE projType, 
+							 float			 horizFov,
+							 float			 vertFov,
+							 float lX, float lY, float lZ
+		) : clsCamera(projType, horizFov, vertFov) {
+	target = VECTOR3D(lX, lY, lZ);
+	clsCamera::LookAt(target);
+}
+
 VECTOR3D clsTargCamera::getTargetPoint() { return target; }
 void clsTargCamera::setTargetPoint(LPVECTOR3D point) { target = *point; }
 void clsTargCamera::setTargetPoint(float tX, float tY, float tZ) { target = VECTOR3D(tX, tY, tZ); }
 
-void clsTargCamera::Translate(const LPVECTOR3D tV) { pos = *tV; LookAt(target); }
-void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); LookAt(target); }
+void clsTargCamera::Translate(const LPVECTOR3D tV) { pos = *tV; clsCamera::LookAt(target); }
+void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); clsCamera::LookAt(target); }
 
-void clsTargCamera::Follow(float units)	{ pos += fWd * units; LookAt(target); }
-void clsTargCamera::Strafe(float units)	{ pos += rWd * units; LookAt(target); }
-void clsTargCamera::Fly(float units)	{ pos += uWd * units; LookAt(target); }
+void clsTargCamera::Follow(float units)	{ pos += fWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::Strafe(float units)	{ pos += rWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::Fly(float units)	{ pos += uWd * units; clsCamera::LookAt(target); }
+
+void clsTargCamera::TargetFollow(float units)	{ target += fWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::TargetStrafe(float units)	{ target += rWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::TargetFly(float units)		{ target += uWd * units; clsCamera::LookAt(target); }
 
 void clsTargCamera::Pitch(float angle) { /* doing nothing */ }
 void clsTargCamera::Yaw(float angle) { /* doing nothing */ }
-void clsTargCamera::Roll(float angle) { /* doing nothing */ }
+
+void clsTargCamera::LookAt(VECTOR3D lookAt) { /* doing nothing */ }
+void clsTargCamera::LookAt(const clsObject *objToLookAt) { /* doing nothing */ }
+void clsTargCamera::LookAt(float lX, float lY, float lZ) { /* doing nothing */ }
