@@ -37,7 +37,7 @@ class Microphone : public clsMesh {
 				hR,			// head radius
 				hD,			// head depth
 				cR;			// core radius
-	float		precission;
+	int			precission;
 
 
 	bool getMeshPosition(
@@ -60,7 +60,7 @@ public:
 		unsigned char blue	= 0xff,
 		float r = 85, 
 		float h = 243,
-		float prec = 24
+		int prec = 24
 		);
 	~Microphone();
 
@@ -68,6 +68,7 @@ public:
 	virtual void Triangulate(); // generate vertices, edges and polygons lists
 
 	// setters
+	void setTotalHeight		(float);
 	void setBaseRadius		(float);
 	void setBaseHeight		(float);
 	void setButtonWidth		(float);
@@ -78,8 +79,10 @@ public:
 	void setHeadRadius		(float);
 	void setHeadDepth		(float);
 	void setCoreRadius		(float);
+	void setPrecission		(int);
 
 	// getters
+	float getTotalHeight	();
 	float getBaseRadius		();
 	float getBaseHeight		();
 	float getButtonWidth	();
@@ -90,5 +93,6 @@ public:
 	float getHeadRadius		();
 	float getHeadDepth		();
 	float getCoreRadius		();
+	int getPrecission		();
 };
 typedef Microphone MICROPHONE3D, *LPMICROPHONE3D;

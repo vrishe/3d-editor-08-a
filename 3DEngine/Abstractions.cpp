@@ -375,14 +375,17 @@ VECTOR3D clsObject::getForwardLookDirection() { return fWd; }
 VECTOR3D clsObject::getRightLookDirection() { return rWd; }
 VECTOR3D clsObject::getUpLookDirection() { return uWd; }
 
+void clsObject::setForwardLookDirection(LPVECTOR3D v) { fWd.x = v->x; fWd.y = v->y; fWd.z = v->z; }
+void clsObject::setRightLookDirection(LPVECTOR3D v) { rWd.x = v->x; rWd.y = v->y; rWd.z = v->z; }
+void clsObject::setUpLookDirection(LPVECTOR3D v) { uWd.x = v->x; uWd.y = v->y; uWd.z = v->z; }
+
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
 { 
-	wcscpy_s(objName, bufSize, Name); 
+	wcscpy_s(objName, (bufSize - 1) * sizeof(TCHAR), Name); 
 }
-
 void clsObject::setName(LPTSTR objName, size_t srcSize)
 {
-	wcscpy_s(Name, MAX_OBJECT_NAME_LEN, objName);
+	wcscpy_s(Name, (MAX_OBJECT_NAME_LEN - 1) * sizeof(TCHAR), objName);
 }
 
 // ============================================================================
@@ -564,6 +567,8 @@ size_t clsScene::getObjectClassCount(CLASS_ID clsID)
 
 // ============================================================================
 // Implementation of clsMesh class:
+MESH_ID clsMesh::MeshID() { return meshID; }
+
 size_t clsMesh::findVertex(VECTOR3D v) 
 {
 	size_t vCount = vertices.size();
@@ -646,18 +651,19 @@ size_t clsMesh::findPolygon(POLY3D p)
 //	return result;
 //}
 
-clsMesh::clsMesh() : clsObject(CLS_MESH) { setColor(COLOR3D()); }
+clsMesh::clsMesh(MESH_ID mID) : clsObject(CLS_MESH), meshID(mID) { setColor(COLOR3D()); }
 
-clsMesh::clsMesh(COLOR3D c) : clsObject(CLS_MESH) { setColor(c); }
+clsMesh::clsMesh(MESH_ID mID, COLOR3D c) : clsObject(CLS_MESH), meshID(mID) { setColor(c); }
 
 clsMesh::clsMesh(
+		MESH_ID mID,
 		unsigned char red, 
 		unsigned char green, 
 		unsigned char blue
-) : clsObject(CLS_MESH) { setColor( red, green, blue ); }
+) : clsObject(CLS_MESH), meshID(mID) { setColor( red, green, blue ); }
 
-clsMesh::clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps)
-	: clsObject(CLS_MESH)
+clsMesh::clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps)
+	: clsObject(CLS_MESH), meshID(mID)
 { 
 	//addListOfVertices(vs);
 	//addListOfPolygons(ps);
@@ -665,12 +671,13 @@ clsMesh::clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps)
 }
 
 clsMesh::clsMesh(
+		MESH_ID mID,
 		unsigned char red, 
 		unsigned char green, 
 		unsigned char blue,
 		VERT_LIST vs, 
 		POLY_LIST ps
-) : clsObject(CLS_MESH) 
+) : clsObject(CLS_MESH), meshID(mID)
 { 
 	//addListOfVertices(vs);
 	//addListOfPolygons(ps);

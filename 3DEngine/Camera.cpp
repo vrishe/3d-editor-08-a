@@ -1,5 +1,6 @@
 
 #include "Camera.h"
+#include <string>
 
 // ============================================================================
 // Implementation of clsCamera class:

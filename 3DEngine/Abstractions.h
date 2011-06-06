@@ -77,12 +77,21 @@ typedef struct tagColor
 // Object class that represents current object
 // space position
 #define MAX_OBJECT_NAME_LEN	256
+#define OBJECTS_NUM			4
 
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
 	CLS_CAMERA		= 1,
 	CLS_MESH		= 2,
 	CLS_LIGHT		= 3
+};
+
+enum MESH_ID {
+	MSH_PYRAMID		= 0,
+	MSH_CONE		= 1,
+	MSH_EXCONE		= 2,
+	MSH_HOLE		= 3,
+	MSH_MIC			= 4  
 };
 
 enum CONSTRAINTS {
@@ -93,12 +102,13 @@ enum CONSTRAINTS {
 };
 
 class clsObject {
-private: 
-	static size_t	Counter;
+private: 	
 	CLASS_ID		ClassID;
 	size_t			ID;
 
 protected:
+	static size_t	Counter;
+
 	LPTSTR			Name;
 
 	VECTOR3D		pos,
@@ -170,6 +180,10 @@ public:
 	VECTOR3D getRightLookDirection();
 	VECTOR3D getUpLookDirection();	
 
+	void setForwardLookDirection(LPVECTOR3D);
+	void setRightLookDirection(LPVECTOR3D);
+	void setUpLookDirection(LPVECTOR3D);
+
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
 };
@@ -230,6 +244,8 @@ protected:
 
 	COLOR3D			color;
 
+	MESH_ID			meshID;
+
 	size_t findVertex(VECTOR3D v);	// returns a vertex position
 	size_t findEdge(EDGE3D e);
 	size_t findPolygon(POLY3D p);	// returns a Polygon_ position
@@ -239,21 +255,25 @@ protected:
 	//size_t	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
 
 public:
-	clsMesh();
-	clsMesh(COLOR3D c);
-	clsMesh(						
+	clsMesh(MESH_ID mID);
+	clsMesh(MESH_ID mID, COLOR3D c);
+	clsMesh(
+		MESH_ID mID,
 		unsigned char red, 
 		unsigned char green, 
 		unsigned char blue
 	);
-	clsMesh(COLOR3D c, VERT_LIST vs, POLY_LIST ps);
+	clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps);
 	clsMesh(
+		MESH_ID mID,
 		unsigned char red, 
 		unsigned char green, 
 		unsigned char blue, 
 		VERT_LIST vs, 
 		POLY_LIST ps
 	);
+
+	MESH_ID MeshID();
 
 	// functionality
 	//void			dropRedundant();
@@ -304,5 +324,4 @@ public:
 	//size_t	delListOfPolygons(POLY_LIST);
 };
 typedef clsMesh MESH3D, *LPMESH3D;
-
 

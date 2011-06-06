@@ -70,7 +70,7 @@ void Pyramid::Triangulate() {
 /* ---------------------- constructors --------------------- */
 
 Pyramid::Pyramid(COLOR3D c) 
-	: clsMesh(c), h(0), bL(0), bW(0), tL(0), tW(0), shift(0) { }
+	: clsMesh(MSH_PYRAMID, c), h(0), bL(0), bW(0), tL(0), tW(0), shift(0) { }
 
 Pyramid::Pyramid(
 		float height, 
@@ -80,7 +80,7 @@ Pyramid::Pyramid(
 		float tWidth,
 		COLOR3D	c,
 		float sh
-) : clsMesh(c)
+) : clsMesh(MSH_PYRAMID, c)
 { 
 	h  = height;
 	bL = bLength;
@@ -95,7 +95,7 @@ Pyramid::Pyramid(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : clsMesh( red, green, blue ) 
+) : clsMesh(MSH_PYRAMID, red, green, blue ) 
 {
 	h	= 0;
 	bL	= 0;
@@ -115,7 +115,7 @@ Pyramid::Pyramid(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : clsMesh( red, green, blue )
+) : clsMesh(MSH_PYRAMID, red, green, blue )
 {
 	h  = height;
 	bL = bLength;
@@ -242,8 +242,8 @@ void Cone::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-Cone::Cone(COLOR3D c) 
-	: clsMesh(c), h(0), bR(0), tR(0), precission(0) { }
+Cone::Cone(COLOR3D c, MESH_ID mID) 
+	: clsMesh(mID, c), h(0), bR(0), tR(0), precission(0) { }
 
 Cone::Cone(
 		float height, 
@@ -251,7 +251,7 @@ Cone::Cone(
 		float tRadius, 
 		int	  prec,
 		COLOR3D	c
-) : clsMesh(c)
+) : clsMesh(MSH_CONE, c)
 { 
 	h			= height;
 	bR			= bRadius;
@@ -263,8 +263,9 @@ Cone::Cone(
 Cone::Cone(
 		unsigned char red,
 		unsigned char green,
-		unsigned char blue
-) : clsMesh( red, green, blue ) 
+		unsigned char blue,
+		MESH_ID mID
+) : clsMesh( mID, red, green, blue ) 
 {
 	h			= 0;
 	bR			= 0;
@@ -280,7 +281,7 @@ Cone::Cone(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : clsMesh( red, green, blue )
+) : clsMesh( MSH_CONE, red, green, blue )
 {
 	h			= height;
 	bR			= bRadius;
@@ -522,7 +523,7 @@ void ExCone::Triangulate() {
 /* ---------------------- constructors --------------------- */
 
 ExCone::ExCone(COLOR3D c) 
-	: Cone( c ) { secant = max(bR, tR); }
+	: Cone( c, MSH_EXCONE ) { secant = max(bR, tR); }
 
 ExCone::ExCone(
 		float height, 
@@ -531,7 +532,7 @@ ExCone::ExCone(
 		float s,
 		int	  prec,
 		COLOR3D	c
-) : Cone( c ) 
+) : Cone( c, MSH_EXCONE ) 
 { 
 	secant		= s;
 	h			= height;
@@ -545,7 +546,7 @@ ExCone::ExCone(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : Cone( red, green, blue ) { secant = max(bR, tR); }
+) : Cone( red, green, blue, MSH_EXCONE ) { secant = max(bR, tR); }
 
 ExCone::ExCone(
 		float height, 
@@ -556,7 +557,7 @@ ExCone::ExCone(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : Cone( red, green, blue ) 
+) : Cone( red, green, blue, MSH_EXCONE ) 
 { 
 	secant		= s;
 	h			= height;
@@ -733,7 +734,7 @@ void Hole::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 Hole::Hole(COLOR3D c) 
-	: clsMesh(c), h(0), bR(0), bRh(0), tR(0), tRh(0), precission(0) { }
+	: clsMesh(MSH_HOLE, c), h(0), bR(0), bRh(0), tR(0), tRh(0), precission(0) { }
 
 Hole::Hole(
 		float height, 
@@ -743,7 +744,7 @@ Hole::Hole(
 		float tHoleRadius,
 		int	  prec,
 		COLOR3D	c
-) : clsMesh(c)
+) : clsMesh(MSH_HOLE, c)
 { 
 	h			= height;
 	bR			= bRadius;
@@ -758,7 +759,7 @@ Hole::Hole(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : clsMesh( red, green, blue ) 
+) : clsMesh( MSH_HOLE, red, green, blue ) 
 {
 	h			= 0;
 	bR			= 0;
@@ -778,7 +779,7 @@ Hole::Hole(
 		unsigned char red,
 		unsigned char green,
 		unsigned char blue
-) : clsMesh( red, green, blue )
+) : clsMesh( MSH_HOLE, red, green, blue )
 {
 	h			= height;
 	bR			= bRadius;
@@ -797,6 +798,7 @@ float Hole::getBRadius() { return bR; }
 float Hole::getTRadius() { return tR; }
 float Hole::getBHoleRadius() { return bRh; }
 float Hole::getTHoleRadius() { return tRh; }
+int Hole::getPrecission() { return precission; }
 
 
 /* ------------------------ setters ------------------------ */
@@ -806,5 +808,6 @@ void Hole::setBRadius(float n) { bR = n; }
 void Hole::setTRadius(float n) { tR = n; }
 void Hole::setBHoleRadius(float n) { bRh = n; }
 void Hole::setTHoleRadius(float n) { tRh = n; }
+void Hole::setPrecission(int n) { precission = n; }
 
 #endif // HOLE_CPP

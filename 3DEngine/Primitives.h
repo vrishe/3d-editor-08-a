@@ -74,7 +74,7 @@ protected:
 	int precission;	// precission of circle approximation in polygons
 
 public:
-	Cone(COLOR3D c);
+	Cone(COLOR3D c, MESH_ID mID = MSH_CONE);
 	Cone(
 		float height, 
 		float bRadius, 
@@ -85,7 +85,8 @@ public:
 	Cone(
 		unsigned char red	= 0xff,
 		unsigned char green	= 0xff,
-		unsigned char blue	= 0xff
+		unsigned char blue	= 0xff,
+		MESH_ID mID = MSH_CONE
 	);
 	Cone(
 		float height, 
@@ -205,7 +206,7 @@ public:
 	);
 
 	// functionality
-	virtual void Triangulate(); // generate vertices, edges and polygons lists
+	void Triangulate(); // generate vertices, edges and polygons lists
 
 	// getters
 	float getHeight();
