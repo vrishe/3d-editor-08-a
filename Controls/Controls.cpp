@@ -954,6 +954,11 @@ DWORD clsForm::Create(
 						clsCtlText::defRedrawHandler, 
 						TRUE
 					);
+	dwResult &= AssignEventHandler(
+						WM_CTLCOLORBTN, 
+						clsCtlText::defRedrawHandler, 
+						TRUE
+					);
 	if ( FAILED(dwResult) ) return E_FAILED;
 	setMenu(frmMenu);
 	return S_DONE;	
@@ -1053,9 +1058,9 @@ BOOL clsForm::setBrush(HBRUSH hBrBg)
 	return applyBkBrush(hBrBg);
 }
 
-BOOL clsForm::setColor(SHORT Red, SHORT Green, SHORT Blue)
+BOOL clsForm::setColor(COLORREF bgColor)
 {
-	HBRUSH newHBr	= CreateSolidBrush(RGB(Red, Green, Blue));
+	HBRUSH newHBr	= CreateSolidBrush(bgColor);
 	BOOL bResult	= newHBr != NULL;
 
 	if ( bResult )
@@ -1067,6 +1072,31 @@ BOOL clsForm::setColor(SHORT Red, SHORT Green, SHORT Blue)
 }
 
 //HMENU clsForm::getMenu() { return GetWindowLongPtr(...) }
+
+HBRUSH clsForm::getBrush()
+{
+	return (HBRUSH)GetClassLongPtr(hWnd, GCLP_HBRBACKGROUND);
+}
+
+COLORREF clsForm::getColor()
+{
+	LOGBRUSH logBrush = {0};
+
+	GetObject(
+		getBrush(),
+		sizeof(LOGBRUSH),
+		&logBrush
+	);
+	return logBrush.lbColor;
+}
+
+
+//COLORREF clsForm::getColor()
+//{
+//	LOGBRUSH logBrush	= {0};
+//	GetObject(
+//}
+
 VOID clsForm::getClientSize(LPUINT fcWidth, LPUINT fcHeight) const
 {
 	RECT clientRect;
@@ -1118,88 +1148,6 @@ INT clsForm::DoMSGCycle(HACCEL hAccelTable)
 	}
 	return iResult;
 }
-
-// ============================================================================
-// clsButton class implementation
-// ============================================================================
-DWORD clsButton::Create(
-			UINT	btnId,
-			LPCTSTR btnText,
-			LPFORM	btnParent,
-			INT		btnPosX,
-			INT		btnPosY,
-			UINT	btnWidth,
-			UINT	btnHeight,
-			BOOL	setDefault			
-) {
-	if ( btnParent == NULL ) return E_BAD_ARGUMENTS;
-	DWORD	dwResult = clsWinBase::Create(
-							_T("button"),
-							WS_CHILD | WS_TABSTOP
-							| (setDefault ? BS_DEFPUSHBUTTON 
-											: BS_PUSHBUTTON),
-							NULL,
-							btnPosX,
-							btnPosY,
-							btnWidth,
-							btnHeight,
-							btnParent
-						);
-	if ( FAILED(dwResult) )	return dwResult; 
-	if ( 
-		!SetWindowProps(hWnd, GWL_ID, btnId) 
-		|| !clsWinBase::setText(btnText) 
-	) {
-		Destroy();
-		return E_FAILED;
-	}
-	ID = btnId;
-	Show();
-	return S_DONE;
-}
-
-DWORD clsButton::Create(
-				UINT	btnId,
-				LPCTSTR btnText,
-				LPFORM	btnParent,
-				POINT	btnPos,
-				UINT	btnWidth,
-				UINT	btnHeight,
-				BOOL	setDefault		
-) {
-	return Create(
-			btnId,
-			btnText,
-			btnParent,
-			btnPos.x,
-			btnPos.y,
-			btnWidth,
-			btnHeight,
-			setDefault
-		);
-}
-
-DWORD clsButton::Create(
-				UINT	btnId,
-				LPCTSTR btnText,
-				LPFORM	btnParent,
-				RECT	btnDim,
-				BOOL	setDefault		
-) {
-	return Create(
-			btnId,
-			btnText,
-			btnParent,
-			btnDim.left,
-			btnDim.top,
-			btnDim.right - btnDim.left,
-			btnDim.bottom - btnDim.top,
-			setDefault
-		);
-}
-
-UINT clsButton::getID() const { return ID; } 
-
 
 // ============================================================================
 // clsCtlText class implementation
@@ -1280,6 +1228,89 @@ BOOL clsCtlText::getBkColor(LPCOLORREF cRefOut) const
 }
 
 // ============================================================================
+// clsButton class implementation
+// ============================================================================
+DWORD clsButton::Create(
+			UINT	btnId,
+			LPCTSTR btnText,
+			LPFORM	btnParent,
+			INT		btnPosX,
+			INT		btnPosY,
+			UINT	btnWidth,
+			UINT	btnHeight,
+			BOOL	setDefault			
+) {
+	if ( btnParent == NULL ) return E_BAD_ARGUMENTS;
+	DWORD	dwResult = clsWinBase::Create(
+							_T("button"),
+							WS_CHILD | WS_TABSTOP
+							| (setDefault ? BS_DEFPUSHBUTTON 
+											: BS_PUSHBUTTON),
+							NULL,
+							btnPosX,
+							btnPosY,
+							btnWidth,
+							btnHeight,
+							btnParent
+						);
+	if ( FAILED(dwResult) )	return dwResult; 
+	if ( 
+		!SetWindowProps(hWnd, GWL_ID, btnId) 
+		|| !clsWinBase::setText(btnText) 
+	) {
+		Destroy();
+		return E_FAILED;
+	}
+	ID = btnId;
+	setBgFillBrush(btnParent->getBrush());
+	Show();
+	return S_DONE;
+}
+
+DWORD clsButton::Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				POINT	btnPos,
+				UINT	btnWidth,
+				UINT	btnHeight,
+				BOOL	setDefault		
+) {
+	return Create(
+			btnId,
+			btnText,
+			btnParent,
+			btnPos.x,
+			btnPos.y,
+			btnWidth,
+			btnHeight,
+			setDefault
+		);
+}
+
+DWORD clsButton::Create(
+				UINT	btnId,
+				LPCTSTR btnText,
+				LPFORM	btnParent,
+				RECT	btnDim,
+				BOOL	setDefault		
+) {
+	return Create(
+			btnId,
+			btnText,
+			btnParent,
+			btnDim.left,
+			btnDim.top,
+			btnDim.right - btnDim.left,
+			btnDim.bottom - btnDim.top,
+			setDefault
+		);
+}
+
+UINT clsButton::getID() const { return ID; } 
+
+
+// ============================================================================
 // clsLabel class implementation
 // ============================================================================
 DWORD clsLabel::Create(
@@ -1296,7 +1327,7 @@ DWORD clsLabel::Create(
 							_T("static"),
 							WS_CHILD
 							| (isSimple ? SS_SIMPLE : 0),
-							WS_EX_TRANSPARENT,
+							NULL,
 							lbPosX,
 							lbPosY,
 							lbWidth,
@@ -1309,6 +1340,7 @@ DWORD clsLabel::Create(
 		Destroy();
 		return E_FAILED;
 	}
+	setBgFillBrush(lbParent->getBrush());
 	Show();
 	return S_DONE;
 }

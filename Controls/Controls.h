@@ -297,14 +297,16 @@ public:
 // Setters.
 	BOOL	setMenu(HMENU frmMenu);
 	BOOL	setBrush(HBRUSH hBrBg);
-	BOOL	setColor(SHORT Red, SHORT Green, SHORT Blue);
+	BOOL	setColor(COLORREF bgColor);
 
 // Getters.
 	//HMENU	getMenu();
-	VOID	getClientSize(LPUINT fcWidth, LPUINT fcHeight)	const; 
-	VOID	getClientWidth(LPUINT fcWidth)					const;
-	VOID	getClientHeight(LPUINT fcHeight)				const;
-	VOID	getClientDC(HDC *hDC);
+	HBRUSH 		getBrush();
+	COLORREF	getColor();
+	VOID		getClientSize(LPUINT fcWidth, LPUINT fcHeight)	const; 
+	VOID		getClientWidth(LPUINT fcWidth)					const;
+	VOID		getClientHeight(LPUINT fcHeight)				const;
+	VOID		getClientDC(HDC *hDC);
 
 // Checkers.
 	BOOL	isMaximized()	const;
@@ -315,6 +317,33 @@ public:
 };
 typedef clsForm FORM, *LPFORM; 
 typedef const clsForm *LPCFORM;
+
+// Necessary clsTextControl class structs/definitions/enums
+class clsCtlText : public clsWinBase {
+private:
+	HBRUSH		bgFillBrush;
+	COLORREF	textColorRef;
+
+	BOOL		bCustomBrush;
+	VOID		freeBgBrush();
+
+public:
+	clsCtlText();
+	virtual VOID Destroy();
+	
+	BOOL setTextColor(COLORREF txtColorRef);
+	BOOL setBgFillBrush(HBRUSH hBr);
+	BOOL setBgFillColor(COLORREF bkColorRef);
+
+	COLORREF	getTextColor()					const;
+	BOOL		getBkColor(LPCOLORREF cRefOut)	const;
+
+	static LRESULT defRedrawHandler(
+							LPOBJECT Sender, 
+							WPARAM wParam,
+							LPARAM lParam
+						);
+};
 
 // text alignement enum definition
 //enum TEXT_ALIGN {
@@ -330,7 +359,7 @@ typedef const clsForm *LPCFORM;
 //};
 
 // Necessary clsButton class structs/definitions/enums
-class clsButton : public clsWinBase {
+class clsButton : public clsCtlText {
 private:
 	UINT	ID;
 
@@ -368,33 +397,6 @@ public:
 };
 typedef clsButton BUTTON, *LPBUTTON;
 typedef const clsButton *LPCBUTTON;
-
-// Necessary clsTextControl class structs/definitions/enums
-class clsCtlText : public clsWinBase {
-private:
-	HBRUSH		bgFillBrush;
-	COLORREF	textColorRef;
-
-	BOOL		bCustomBrush;
-	VOID		freeBgBrush();
-
-public:
-	clsCtlText();
-	virtual VOID Destroy();
-	
-	BOOL setTextColor(COLORREF txtColorRef);
-	BOOL setBgFillBrush(HBRUSH hBr);
-	BOOL setBgFillColor(COLORREF bkColorRef);
-
-	COLORREF	getTextColor()					const;
-	BOOL		getBkColor(LPCOLORREF cRefOut)	const;
-
-	static LRESULT defRedrawHandler(
-							LPOBJECT Sender, 
-							WPARAM wParam,
-							LPARAM lParam
-						);
-};
 
 
 // Necessary clsLabel class structs/definitions/enums
