@@ -65,7 +65,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.setColor(FORM_BG_COLOR);
 
 	Scene.setAmbientColor(VIEWPORT_BG_COLOR);
-	MICROPHONE3D testMic(80, 80, 200);
+	MICROPHONE3D testMic(60, 60, 140);
 	testMic.Fly(-120);
 	Scene.AddObject(&testMic);
 
@@ -200,6 +200,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					SUB_TAB_W, SUB_TAB_H,
 					FALSE);
 
+	LoadString(hInstance, N_LB_OBJECTS, name, 256);
+	lbObjects.Create(name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 3 - 13,
+					VIEWPORT_AREA_H + 52 - LIST_OBJ_H,
+					BT_TOOL_W, BT_TOOL_H);
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	listObjects.Create(LIST_OBJECTS,
 						name,
