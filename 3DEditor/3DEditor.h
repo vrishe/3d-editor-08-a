@@ -59,7 +59,14 @@ enum MF_TEXTBOX {
 	TB_HANDIND		= 120,
 	TB_HEADDIAM		= 121,
 	TB_HEADDEPTH	= 122,
-	TB_COREDIAM		= 123
+	TB_COREDIAM		= 123,
+	TB_R			= 124,
+	TB_G			= 125,
+	TB_B			= 126,
+	TB_NAME			= 127,
+	TB_TX			= 128,
+	TB_TY			= 129,
+	TB_TZ			= 130
 };
 
 enum MF_BUTTON {
@@ -76,15 +83,24 @@ enum MF_BUTTON {
 	BT_LOOK_AROUND	= 1010,
 	BT_MIC			= 1011,
 	BT_QMAKE		= 1012,
-	BT_FMAKE		= 1013
+	BT_FMAKE		= 1013,
+	BT_LIGHT		= 1014,
+	BT_CAMERA		= 1015
 };
 
 // Draw interface functions
 VOID Draw_MainToolbars (HINSTANCE);
+
 VOID Draw_InitCreateToolbar (HINSTANCE);
 VOID Draw_InitModifyToolbar (HINSTANCE);
+
 VOID Draw_InitObjectsToolbar (HINSTANCE);
+VOID Draw_InitLightsToolbar (HINSTANCE);
+VOID Draw_InitCamsToolbar (HINSTANCE hInstance);
+
 VOID Draw_InitMicrophoneToolbar (HINSTANCE);
+VOID Draw_InitLightToolbar (HINSTANCE);
+VOID Draw_InitCameraToolbar (HINSTANCE hInstance);
 
 VOID Draw_DestroyRightToolbar ();
 

@@ -19,6 +19,8 @@ BUTTON				btMove, btRotate, btScale,
 
 BUTTON				btObjects, btCams, btLights;
 BUTTON				btMicrophone;
+BUTTON				btLight;
+BUTTON				btCamera;
 BUTTON				btQMake, btFMake;
 
 LABEL				lbX, lbY, lbZ,
@@ -289,6 +291,34 @@ VOID Draw_InitObjectsToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
+VOID Draw_InitLightsToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_BT_LIGHT, name, 256);
+	btLight.Create(BT_LIGHT,
+					name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 12, 
+					20 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H,				
+					TAB_W, SUB_TAB_H,
+					FALSE);
+
+	delete [] name;
+}
+VOID Draw_InitCamsToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_BT_CAMERA, name, 256);
+	btCamera.Create(BT_CAMERA,
+					name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 12, 
+					20 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H,				
+					TAB_W, SUB_TAB_H,
+					FALSE);
+
+	delete [] name;
+}
 VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 	TCHAR *name = new TCHAR[256];
 
@@ -299,7 +329,7 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
 						46, 16);
 	ZeroMemory(name, 256 * sizeof(TCHAR));
-	tbParams[0].Create(	TB_HEIGHT,
+	tbParams[0].Create(	TB_NAME,
 						name,
 						&mainForm,
 						ufWidth - TAB_W * 2 + 36, 
@@ -410,7 +440,7 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 					name,
 					&mainForm,
 					ufWidth - 80, 
-					456,
+					495,
 					BT_TOOL_W, BT_TOOL_H);
 
 	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
@@ -474,6 +504,185 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 						445,				
 						120, 16);
 
+	LoadString(hInstance, N_LB_R, name, 256);
+	lbParams[14].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W * 3 - 122, 
+				470,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_G, name, 256);
+	lbParams[15].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W*2 - 82, 
+				470,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_B, name, 256);
+	lbParams[16].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W - 40, 
+				470,
+				LB_V_H, LB_V_W);
+
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[16].Create(	TB_R,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W * 2 - 127, 
+				468,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[14].Create(	TB_G,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W - 86, 
+				468,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[15].Create(	TB_B,
+				name,
+				&mainForm, 
+				ufWidth - 45, 
+				468,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+
+	delete [] name;
+}
+VOID Draw_InitLightToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_LB_NAME, name, 256);
+	lbParams[0].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 11, 
+						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+						46, 16);
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[0].Create(	TB_NAME,
+						name,
+						&mainForm,
+						ufWidth - TAB_W * 2 + 36, 
+						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+						LIST_OBJ_W - 44, BT_TOOL_H - 9);
+
+	LoadString(hInstance, N_LB_R, name, 256);
+	lbParams[1].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W * 3 - 122, 
+				152,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_G, name, 256);
+	lbParams[2].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W*2 - 82, 
+				152,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_B, name, 256);
+	lbParams[3].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W - 40, 
+				152,
+				LB_V_H, LB_V_W);
+
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[1].Create(	TB_R,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W * 2 - 127, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[2].Create(	TB_G,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W - 86, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[3].Create(	TB_B,
+				name,
+				&mainForm, 
+				ufWidth - 45, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+
+	LoadString(hInstance, N_TAB_CREATE, name, 256);
+	btFMake.Create(	BT_FMAKE,
+					name,
+					&mainForm,
+					ufWidth - 80, 
+					195,
+					BT_TOOL_W, BT_TOOL_H);
+	
+
+	delete [] name;
+}
+VOID Draw_InitCameraToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_LB_NAME, name, 256);
+	lbParams[0].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 11, 
+						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+						30, 16);
+	LoadString(hInstance, N_LB_TARGET, name, 256);
+	lbParams[10].Create(name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 11, 
+						152,				
+						71, 16);
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[0].Create(	TB_NAME,
+						name,
+						&mainForm,
+						ufWidth - TAB_W * 2 + 36, 
+						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+						LIST_OBJ_W - 44, BT_TOOL_H - 9);
+
+	LoadString(hInstance, N_LB_X, name, 256);
+	lbParams[1].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W * 3 - 122, 
+				152,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_Y, name, 256);
+	lbParams[2].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W*2 - 82, 
+				152,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_Z, name, 256);
+	lbParams[3].Create(	name,
+				&mainForm, 
+				ufWidth - LB_V_W - 40, 
+				152,
+				LB_V_H, LB_V_W);
+
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[1].Create(	TB_TX,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W * 2 - 127, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[2].Create(	TB_TY,
+				name,
+				&mainForm, 
+				ufWidth - LB_V_W - 86, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbParams[3].Create(	TB_TZ,
+				name,
+				&mainForm, 
+				ufWidth - 45, 
+				150,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+
+	LoadString(hInstance, N_TAB_CREATE, name, 256);
+	btFMake.Create(	BT_FMAKE,
+					name,
+					&mainForm,
+					ufWidth - 80, 
+					195,
+					BT_TOOL_W, BT_TOOL_H);
+	
+
 	delete [] name;
 }
 
@@ -483,11 +692,13 @@ VOID Draw_DestroyRightToolbar () {
 	btLights.Destroy();
 
 	btMicrophone.Destroy();
+	btLight.Destroy();
+	btCamera.Destroy();
 
 	lbQuick.Destroy();
 	btQMake.Destroy();
 	btFMake.Destroy();
-	for ( UINT i = 0; i < 15; i++ ) {
+	for ( UINT i = 0; i < MAX_PARAMS_NUM; i++ ) {
 		lbParams[i].Destroy();
 		tbParams[i].Destroy();
 	}
@@ -516,7 +727,7 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 		case VK_RIGHT:
 			break;
-		case VR_UP:
+		case VK_UP:
 			break;
 		case VK_DOWN:
 			break;
@@ -566,15 +777,42 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		Draw_DestroyRightToolbar();
 		Draw_InitCreateToolbar(GetModuleHandle(NULL));
 		break;
-	case TAB_CREATE:
+	case TAB_MODIFY:
 		Draw_DestroyRightToolbar();
 		Draw_InitModifyToolbar(GetModuleHandle(NULL));
 		break;
 	case BT_OBJECTS:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
 		Draw_InitObjectsToolbar(GetModuleHandle(NULL));
 		break;
+	case BT_LIGHTS:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		Draw_InitLightsToolbar(GetModuleHandle(NULL));
+		break;
 	case BT_MIC:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		Draw_InitObjectsToolbar(GetModuleHandle(NULL));
 		Draw_InitMicrophoneToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_LIGHT:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		Draw_InitLightsToolbar(GetModuleHandle(NULL));
+		Draw_InitLightToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_CAMS:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		Draw_InitCamsToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_CAMERA:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		Draw_InitCamsToolbar(GetModuleHandle(NULL));
+		Draw_InitCameraToolbar(GetModuleHandle(NULL));
 		break;
 	case IDM_SAVE:
 		if ( SaveFileDialog((HWND)lParam, ofn) ) {
