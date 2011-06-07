@@ -77,7 +77,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	Scene.setAmbientColor(VIEWPORT_BG_COLOR);
 	MICROPHONE3D testMic(60, 60, 140);
 	testMic.Fly(-120);
-	Scene.AddObject(&testMic);
+//	Scene.AddObject(&testMic);
 
 	// Viewports here:
 	Pool = new VIEWPORT_POOL(&mainForm, &Scene);
@@ -297,9 +297,7 @@ VOID Draw_InitCreateToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {
-
-}
+VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {}
 VOID Draw_InitObjectsToolbar (HINSTANCE hInstance) {
 	TCHAR *name = new TCHAR[256];
 
@@ -547,19 +545,19 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 				LB_V_H, LB_V_W);
 
 	ZeroMemory(name, 256 * sizeof(TCHAR));
-	tbParams[16].Create(	TB_R,
+	tbParams[14].Create(	TB_R,
 				name,
 				&mainForm, 
 				ufWidth - LB_V_W * 2 - 127, 
 				468,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
-	tbParams[14].Create(	TB_G,
+	tbParams[15].Create(	TB_G,
 				name,
 				&mainForm, 
 				ufWidth - LB_V_W - 86, 
 				468,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
-	tbParams[15].Create(	TB_B,
+	tbParams[16].Create(	TB_B,
 				name,
 				&mainForm, 
 				ufWidth - 45, 
@@ -729,7 +727,144 @@ VOID Draw_DestroyRightToolbar () {
 
  //Controls functions
  //============================================================================
+BOOL CreateMicFast() {
+	TCHAR *buf = new TCHAR[256];
 
+	tbParams[2].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT h = (FLOAT)_wtof(buf);
+	if ( h < 10 ) {
+		delete [] buf;
+		return false;
+	}
+
+	tbParams[3].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT bR = (FLOAT)_wtof(buf) / 2;
+	if ( bR < 3 ) {
+		delete [] buf;
+		return false;
+	}
+	
+	tbParams[14].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR r = _wtoi(buf);
+	tbParams[15].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR g = _wtoi(buf);
+	tbParams[16].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR b = _wtoi(buf);
+
+	if ( r == 0 && g == 0 && b == 0 ) {
+		r = 200; g = 200; b = 200;
+	}
+
+	
+	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, h);
+	
+	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
+	if ( wcslen(buf) == 0 ) {
+		delete [] buf;
+		return false;
+	}
+	mic->setName(buf, 256);
+
+	Scene.AddObject(mic);
+	delete [] buf;
+	return true;
+}
+
+UINT CreateMicFull() {
+	TCHAR *buf = new TCHAR[256];
+	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT bH = (FLOAT)_wtof(buf);
+	if ( bH < 10 ) {
+		delete [] buf;
+		return 1;
+	}
+
+	tbParams[5].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT bR = (FLOAT)_wtof(buf) / 2;
+	if ( bR < 1 ) {
+		delete [] buf;
+		return 2;
+	}
+	
+	tbParams[6].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT bW = (FLOAT)_wtof(buf);
+	if ( bW < 1 /* || */ ) {
+		delete [] buf;
+		return 3;
+	}
+
+	tbParams[12].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT hD = (FLOAT)_wtof(buf);
+	if ( hD < 1 || hD > bR ) {
+		delete [] buf;
+		return 9;
+	}
+
+	tbParams[7].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT uR = (FLOAT)_wtof(buf) / 2;
+	if ( uR < 1 || uR > hD) {
+		delete [] buf;
+		return 4;
+	}
+
+	tbParams[8].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT uH = (FLOAT)_wtof(buf);
+	if ( uH < 1) {
+		delete [] buf;
+		return 5;
+	}
+
+	tbParams[9].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT uG = (FLOAT)_wtof(buf);
+	if ( uG < 1) {
+		delete [] buf;
+		return 6;
+	}
+
+	tbParams[10].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT hI = (FLOAT)_wtof(buf);
+	if ( hI < 1) {
+		delete [] buf;
+		return 7;
+	}
+
+	tbParams[11].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT hR = (FLOAT)_wtof(buf) / 2;
+	if ( hR < 1) {
+		delete [] buf;
+		return 8;
+	}
+
+	tbParams[13].getText(buf, 256 * sizeof(TCHAR));
+	FLOAT cR = (FLOAT)_wtof(buf) / 2;
+	if ( cR < 1 || cR > hR ) {
+		delete [] buf;
+		return 10;
+	}
+
+	tbParams[14].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR r = _wtoi(buf);
+	tbParams[15].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR g = _wtoi(buf);
+	tbParams[16].getText(buf, 256 * sizeof(TCHAR));
+	UCHAR b = _wtoi(buf);
+
+	if ( r == 0 && g == 0 && b == 0 ) {
+		r = 200; g = 200; b = 200;
+	}
+
+	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
+	if ( wcslen(buf) == 0 ) {
+		delete [] buf;
+		return 11;
+	}
+	
+	delete [] buf;
+	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
+	mic->setName(buf, 256);
+	Scene.AddObject(mic);
+	return 0;
+}
 
 
  //Form event handler functions
@@ -836,6 +971,16 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		Draw_InitCreateToolbar(GetModuleHandle(NULL));
 		Draw_InitCamsToolbar(GetModuleHandle(NULL));
 		Draw_InitCameraToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_QMAKE:
+		if ( !CreateMicFast() )
+			MessageBox(NULL, _T("To small parametr."), _T("Error"), MB_OK | MB_ICONERROR );
+		mainForm.Invalidate();
+		break;
+	case BT_FMAKE:
+		if ( CreateMicFull() )
+			MessageBox(NULL, _T("ERROR."), _T("Error"), MB_OK | MB_ICONERROR );
+		mainForm.Invalidate();
 		break;
 	case IDM_SAVE:
 		if ( SaveFileDialog((HWND)lParam, ofn) ) {

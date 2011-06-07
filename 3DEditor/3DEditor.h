@@ -16,7 +16,7 @@
 #define VIEWPORT_AREA_W 968
 
 #define FORM_BG_COLOR RGB(120, 120, 126)
-#define VIEWPORT_BG_COLOR 90, 90, 95
+#define VIEWPORT_BG_COLOR RGB(90, 90, 95)
 #define TEXT_BG_COLOR RGB(155, 155, 155)
 
 #define LIST_OBJ_H	200
@@ -85,7 +85,8 @@ enum MF_BUTTON {
 	BT_QMAKE		= 1012,
 	BT_FMAKE		= 1013,
 	BT_LIGHT		= 1014,
-	BT_CAMERA		= 1015
+	BT_CAMERA		= 1015,
+	BT_SETMODIF		= 1016
 };
 
 // Draw interface functions
@@ -105,8 +106,8 @@ VOID Draw_InitCameraToolbar (HINSTANCE hInstance);
 VOID Draw_DestroyRightToolbar ();
 
  //Controls functions
-void ClearActiveTool();
-
+BOOL CreateMicFast();
+UINT CreateMicFull();
 
  //Form event handler functions
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);

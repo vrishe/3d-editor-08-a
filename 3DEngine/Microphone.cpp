@@ -24,6 +24,40 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 	Triangulate();
 }
 
+Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue, 
+						float br, 
+						float bh,
+						float bw,		
+						float ur,		
+						float uh,			
+						float ug,			
+						float hi,	
+						float hr,		
+						float hd,			
+						float cr,		
+						int prec
+						) : clsMesh( MSH_MIC, red, green, blue ) {
+	precission = prec;
+
+	bR = br;
+	bH = bh;
+	bW = bw;
+
+	uR = ur;
+	uH = uh;
+	uG = ug;
+	hI = hi;
+
+	hR = hr;
+	hD = hd;
+	cR = cr;
+
+	tH = bH + uH + uG + hR;
+
+	micParts = new LPMESH3D[PARTS_NUM];
+	Triangulate();
+}
+
 void Microphone::Triangulate() {
 	vertices.clear();
 	edges.clear();

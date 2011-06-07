@@ -62,6 +62,22 @@ public:
 		float h = 243,
 		int prec = 24
 		);
+	Microphone(
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
+		float br, 
+		float bh,
+		float bW,		
+		float uR,		
+		float uH,			
+		float uG,			
+		float hI,	
+		float hR,		
+		float hD,			
+		float cR,		
+		int prec = 24
+		);
 	~Microphone();
 
 	// functionality
