@@ -58,14 +58,8 @@ UINT clsViewport::getCameraObjectID()		{ return cameraObjectID; }
 RENDER_MODE clsViewport::getRenderMode()	{ return rMode; }
 
 BOOL clsViewport::setScene(LPSCENE3D lpSceneHost) {
-	BOOL bResult 
-		= lpSceneHost	!= NULL 
-		&& lpSceneHost->getObjectClassCount(CLS_CAMERA) != 0;
-	if ( bResult ) { 
-		Scene = lpSceneHost;
-		if ( Scene->getObject(cameraObjectID) == NULL )
-			cameraObjectID = Scene->getObject(CLS_CAMERA, 0)->objID();
-	}
+	BOOL bResult = lpSceneHost	!= NULL;
+	if ( bResult ) Scene = lpSceneHost;
 	return bResult;
 }
 
@@ -521,9 +515,7 @@ clsViewportPool::~clsViewportPool()
 
 BOOL clsViewportPool::assignScene(LPSCENE3D lpScene)
 {
-	BOOL bResult
-		= lpScene != NULL
-		&& lpScene->getObjectClassCount(CLS_CAMERA);
+	BOOL bResult = lpScene != NULL;
 	if ( bResult ) Scene = lpScene;
 	return bResult;
 }

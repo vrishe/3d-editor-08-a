@@ -181,21 +181,17 @@ size_t clsObject::Counter = 1;
 clsObject::clsObject(CLASS_ID clsID) 
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
-	VECTOR3D	p(.0f, .0f, .0f),
-				fwd(1.0f, .0f, .0f),
-				rwd(.0f, 1.0f, .0f),
-				uwd(.0f, .0f, 1.0f);
-
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
+	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
 
-	xScale	= 1.f;
-	yScale	= 1.f; 
-	zScale	= 1.f;
+	xScale	= 1.0f;
+	yScale	= 1.0f; 
+	zScale	= 1.0f;
 
-	pos		= p;
-	fWd		= fwd;
-	rWd		= rwd;
-	uWd		= uwd;
+	pos		= VECTOR3D(.0f, .0f, .0f);
+	fWd		= VECTOR3D(1.0f, .0f, .0f);
+	rWd		= VECTOR3D(.0f, 1.0f, .0f);
+	uWd		= VECTOR3D(.0f, .0f, 1.0f);
 }
 
 clsObject::clsObject(
@@ -206,7 +202,10 @@ clsObject::clsObject(
 			CLASS_ID clsID) 
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
+	TCHAR		countText[11];
+
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
+	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
 
 	pos		= pt;
 
@@ -229,7 +228,10 @@ clsObject::clsObject(
 		CLASS_ID clsID)
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
+	TCHAR		countText[11];
+
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
+	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
 
 	pos.x = pX;
 	pos.y = pY;
@@ -323,11 +325,11 @@ void clsObject::LookAt(VECTOR3D lookAt)
 	if ( Vector3DLength(&lookDir) > EPSILON )
 	{
 		Vector3DNormalize(&lookDir, &fWd);
-		Vector3DMultV(&VECTOR3D(.0f, .0f, 1.0f), &fWd, &rWd);
-		if ( Vector3DLength(&rWd) > EPSILON )
-			Vector3DNormalize(&rWd, &rWd);
-		else
-			rWd = VECTOR3D(0, 1, 0);
+		Vector3DMultV(&uWd/*&VECTOR3D(.0f, .0f, 1.0f)*/, &fWd, &rWd);
+		Vector3DNormalize(&rWd, &rWd);
+		if ( Vector3DLength(&rWd) < EPSILON )
+			rWd = VECTOR3D(0, 1, 0) 
+				* ((uWd.z >= 0) - (uWd.z < 0));
 		Vector3DMultV(&fWd, &rWd, &uWd);
 	}
 }
@@ -381,11 +383,17 @@ void clsObject::setUpLookDirection(LPVECTOR3D v) { uWd.x = v->x; uWd.y = v->y; u
 
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
 { 
-	wcscpy_s(objName, (bufSize - 1) * sizeof(TCHAR), Name); 
+	UINT bSize = bufSize > MAX_OBJECT_NAME_LEN 
+		? MAX_OBJECT_NAME_LEN : bufSize;
+
+	_tcsncpy_s(objName, bufSize, Name, bSize); 
 }
 void clsObject::setName(LPTSTR objName, size_t srcSize)
 {
-	wcscpy_s(Name, (MAX_OBJECT_NAME_LEN - 1) * sizeof(TCHAR), objName);
+	UINT bSize = srcSize > MAX_OBJECT_NAME_LEN 
+		? MAX_OBJECT_NAME_LEN : srcSize;
+
+	_tcsncpy_s(Name, MAX_OBJECT_NAME_LEN, objName, bSize);
 }
 
 // ============================================================================

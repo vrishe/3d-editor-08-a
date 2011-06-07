@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+#include <tchar.h>
 #include <math.h>
 #include <vector>
 #include <map>
