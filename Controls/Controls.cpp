@@ -948,13 +948,18 @@ DWORD clsForm::Create(
 						clsControl::defRedrawHandler, 
 						TRUE
 					);
-	dwResult &= AssignEventHandler(
+	dwResult = AssignEventHandler(
 						WM_CTLCOLOREDIT, 
 						clsControl::defRedrawHandler, 
 						TRUE
 					);
-	dwResult &= AssignEventHandler(
+	dwResult = AssignEventHandler(
 						WM_CTLCOLORBTN, 
+						clsControl::defRedrawHandler, 
+						TRUE
+					);
+	dwResult = AssignEventHandler(
+						WM_CTLCOLORLISTBOX, 
 						clsControl::defRedrawHandler, 
 						TRUE
 					);
@@ -1540,3 +1545,80 @@ DWORD clsListBox::Create(
 		);
 }
 
+INT clsListBox::addItem(LPCTSTR ItemString, LPVOID ItemData)
+{
+	INT newStringIndex = SendMessage(hWnd, LB_ADDSTRING, 0, (LPARAM)ItemString);
+
+	if ( newStringIndex >= 0 )
+		SendMessage(hWnd, LB_SETITEMDATA, newStringIndex, (LPARAM)ItemData); 
+
+	return newStringIndex;
+}
+
+INT clsListBox::delItem(INT ItemIndex)
+{
+	return SendMessage(hWnd, LB_DELETESTRING, ItemIndex, 0);
+}
+
+VOID clsListBox::clear()
+{
+	SendMessage(hWnd, LB_RESETCONTENT, 0, 0);
+}
+
+
+BOOL clsListBox::getItem(
+			INT		ItemIndex,  
+			LPTSTR	ItemString, 
+			INT		buffSize,
+			LPVOID	*ItemData
+) const {
+	INT		ItemStringLength;
+	BOOL	bResult				= ItemIndex >= 0;
+	
+	if ( bResult )
+	{
+		ItemStringLength	= SendMessage(hWnd, LB_GETTEXTLEN, ItemIndex, 0);
+		if ( (bResult = ItemStringLength != LB_ERR) )
+		{
+			if ((bResult = ItemStringLength < buffSize))
+			{
+				if ( ItemString != NULL )
+					SendMessage(
+							hWnd, 
+							LB_GETTEXT,
+							ItemIndex, 
+							(LPARAM)ItemString
+						);
+
+				if ( ItemData != NULL )
+					*ItemData = (LPVOID)SendMessage(
+												hWnd, 
+												LB_GETITEMDATA, 
+												ItemIndex, 
+												0
+											);
+			}
+		}
+	}
+	return bResult;
+}
+
+INT clsListBox::getItemCount() const
+{
+	return SendMessage(hWnd, LB_GETCOUNT, 0, 0);
+}
+
+INT clsListBox::getCurSel() const
+{
+	return SendMessage(hWnd, LB_GETCURSEL, 0, 0);
+}
+
+VOID clsListBox::setCurSel(INT ItemIndex) 
+{
+	SendMessage(hWnd, LB_SETCURSEL, ItemIndex, 0);
+}
+
+BOOL clsListBox::isSelItem(INT ItemIndex) const
+{
+	return SendMessage(hWnd, LB_GETSEL, ItemIndex, 0) > 0; 
+}

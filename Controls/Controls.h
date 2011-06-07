@@ -483,6 +483,23 @@ public:
 				UINT		lbWidth,
 				UINT		lbHeight
 			);
+
+	INT	addItem(LPCTSTR ItemString, LPVOID ItemData);
+	INT delItem(INT ItemIndex);
+	VOID clear();
+
+	BOOL getItem(
+			INT		ItemIndex, 
+			LPTSTR	ItemString, 
+			INT		ItemStringLen,
+			LPVOID	*ItemData
+		)							const; 
+	INT	getItemCount()				const;
+	INT getCurSel()					const;
+
+	VOID setCurSel(INT ItemIndex);
+
+	BOOL isSelItem(INT ItemIndex)	const;
 };
 typedef clsListBox LISTBOX, *LPLISTBOX;
 typedef const clsListBox *LPCLISTBOX;
