@@ -78,7 +78,7 @@ void Microphone::Triangulate() {
 	headFront.Strafe(-head.getPosition().y);
 	headFront.Pitch((FLOAT)M_PI_2);
 	headFront.Roll((FLOAT)M_PI_2);
-	headBack.Translate(&head.getPosition());
+	headBack.Translate(head.getPosition());
 	headBack.Pitch((FLOAT)M_PI_2);
 	headBack.Roll((FLOAT)M_PI_2);
 	core.Fly(head.getPosition().z);
@@ -350,7 +350,7 @@ void Microphone::setHeadRadius (float r) {
 	headFront.Strafe(-head.getPosition().y);
 	headFront.Pitch((FLOAT)M_PI_2);
 	headFront.Roll((FLOAT)M_PI_2);
-	headBack.Translate(&head.getPosition());
+	headBack.Translate(head.getPosition());
 	headBack.Pitch((FLOAT)M_PI_2);
 	headBack.Roll((FLOAT)M_PI_2);
 
@@ -382,7 +382,7 @@ void Microphone::setHeadDepth (float d) {
 	headFront.Pitch((FLOAT)M_PI_2);
 	headFront.Roll((FLOAT)M_PI_2);
 
-	headBack.Translate(&head.getPosition());
+	headBack.Translate(head.getPosition());
 	headBack.Pitch((FLOAT)M_PI_2);
 	headBack.Roll((FLOAT)M_PI_2);
 

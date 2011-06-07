@@ -357,7 +357,7 @@ VECTOR3D clsTranslator::readVector(string& data) {
 }
 void clsTranslator::readPosition(LPOBJECT3D obj, string& fileData) {
 	VECTOR3D v = readVector(fileData);
-	obj->Translate(&v);	
+	obj->Translate(v);	
 }
 void clsTranslator::readRotation(VECTOR3D& fwd, VECTOR3D& uwd, VECTOR3D& rwd, string& fileData) {
 	fwd = readVector(fileData);
@@ -405,7 +405,7 @@ void clsTranslator::readPyramid(LPPYRAMID3D obj, string& fileData, LPSCENE3D Sce
 	VECTOR3D fwd, rwd, uwd;
 	readRotation(fwd, uwd, rwd, fileData);
 	fileData.erase(0, 10);
-	obj->Translate(&pos);
+	obj->Translate(pos);
 	obj->setForwardLookDirection(&fwd);
 	obj->setUpLookDirection(&uwd);
 	obj->setRightLookDirection(&rwd);
@@ -432,7 +432,7 @@ void clsTranslator::readCone(LPCONE3D obj, string& fileData, LPSCENE3D Scene) {
 	VECTOR3D fwd, rwd, uwd;
 	readRotation(fwd, uwd, rwd, fileData);
 	fileData.erase(0, 10);
-	obj->Translate(&pos);
+	obj->Translate(pos);
 	obj->setForwardLookDirection(&fwd);
 	obj->setUpLookDirection(&uwd);
 	obj->setRightLookDirection(&rwd);
@@ -457,7 +457,7 @@ void clsTranslator::readExCone(LPEXCONE3D obj, string& fileData, LPSCENE3D Scene
 	VECTOR3D fwd, rwd, uwd;
 	readRotation(fwd, uwd, rwd, fileData);
 	fileData.erase(0, 10);
-	obj->Translate(&pos);
+	obj->Translate(pos);
 	obj->setForwardLookDirection(&fwd);
 	obj->setUpLookDirection(&uwd);
 	obj->setRightLookDirection(&rwd);
@@ -484,7 +484,7 @@ void clsTranslator::readHole(LPHOLE3D obj, string& fileData, LPSCENE3D Scene) {
 	VECTOR3D fwd, rwd, uwd;
 	readRotation(fwd, uwd, rwd, fileData);
 	fileData.erase(0, 10);
-	obj->Translate(&pos);
+	obj->Translate(pos);
 	obj->setForwardLookDirection(&fwd);
 	obj->setUpLookDirection(&uwd);
 	obj->setRightLookDirection(&rwd);
@@ -520,7 +520,7 @@ void clsTranslator::readMic(LPMICROPHONE3D obj, string& fileData, LPSCENE3D Scen
 	fileData.erase(0, 14);
 
 	obj = new MICROPHONE3D(255, 255, 255, tmp2, tmp);
-	obj->Translate(&pos);
+	obj->Translate(pos);
 	obj->setForwardLookDirection(&fwd);
 	obj->setUpLookDirection(&uwd);
 	obj->setRightLookDirection(&rwd);

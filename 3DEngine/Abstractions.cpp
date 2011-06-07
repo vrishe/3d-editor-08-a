@@ -255,7 +255,7 @@ size_t clsObject::objID()	{ return ID; }
 
 VECTOR3D clsObject::getPosition() { return pos; }
 
-void clsObject::Translate(const LPVECTOR3D tV) { pos = *tV; }
+void clsObject::Translate(VECTOR3D tV) { pos = tV; }
 void clsObject::Translate(float tX, float tY, float tZ) 
 { 
 	pos = VECTOR3D(tX, tY, tZ); 

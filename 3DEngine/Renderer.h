@@ -46,6 +46,8 @@ typedef struct tagTHREAD_CONTROLS {
 typedef vector < pair <DIRECTPOLY3D, UINT> > SCENEPOLY;
 typedef vector < VECTOR3D > SCENEVERT;
 
+#define DEFAULT_CAMERA_ID	UINT_MAX
+
 class clsViewport : public clsForm {
 private:
 	UINT			cameraObjectID;
@@ -53,10 +55,12 @@ private:
 	LPSCENE3D		Scene;
 
 public:
+	CAMERA3D		camDefault;
+
 	clsViewport();
 	clsViewport(
 		LPSCENE3D lpScene,
-		UINT uCameraObjectID		= 0, 
+		UINT uCameraObjectID		= DEFAULT_CAMERA_ID, 
 		RENDER_MODE renderMode		= RM_WIREFRAME
 	);
 	virtual ~clsViewport();
@@ -81,6 +85,18 @@ public:
 };
 typedef clsViewport VIEWPORT, *LPVIEWPORT;
 
+#define VIEW_DISTANCE_DEFAULT	500
+enum VIEW_TYPE {
+		VIEW_LEFT			= 1,
+		VIEW_RIGHT			= 2,
+		VIEW_FRONT			= 3,
+		VIEW_BACK			= 4,
+		VIEW_TOP			= 5,
+		VIEW_BOTTOM			= 6,
+		VIEW_PERSPECTIVE	= 7
+};
+VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt);
+
 typedef struct tagTHREAD_DATA {
 	LPVIEWPORT		Viewport;
 
@@ -90,7 +106,7 @@ typedef struct tagTHREAD_DATA {
 
 typedef vector<LPTHREAD_DATA> LPVIEWPORTS_LIST;
 typedef vector<EVENT> LPEVENTS_LIST;
-class clsRenderPool {
+class clsViewportPool {
 private:
 	LPFORM				Owner;
 	LPSCENE3D			Scene;
@@ -102,9 +118,9 @@ private:
 	static DWORD WINAPI Render(LPVOID renderInfo);
 	UINT				findViewport(DWORD vpID);
 public:
-	clsRenderPool(LPFORM Owner);
-	clsRenderPool(LPFORM Owner, LPSCENE3D lpScene);
-	~clsRenderPool();
+	clsViewportPool(LPFORM Owner);
+	clsViewportPool(LPFORM Owner, LPSCENE3D lpScene);
+	~clsViewportPool();
 
 	BOOL assignScene(LPSCENE3D lpScene);
 	DWORD addViewport(
@@ -112,7 +128,7 @@ public:
 				INT			vpPosY,
 				UINT		vpWidth,
 				UINT		vpHeight,
-				UINT		vpCameraObjectID,
+				VIEW_TYPE	vpVType,
 				RENDER_MODE vpRMode
 			);
 	BOOL delViewport(UINT vpIndex);
@@ -124,4 +140,4 @@ public:
 
 	DWORD RenderWorld();
 };
-typedef clsRenderPool RENDER_POOL, *LPRENDER_POOL;
+typedef clsViewportPool VIEWPORT_POOL, *LPVIEWPORT_POOL;

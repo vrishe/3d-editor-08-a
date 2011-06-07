@@ -6,7 +6,7 @@
 LRESULT BkGndSaver(LPVOID Sender, WPARAM wParam, LPARAM lParam) { return 1L; }
 
 clsViewport::clsViewport(){
-	cameraObjectID	= 0;
+	cameraObjectID	= DEFAULT_CAMERA_ID;
 	rMode			= RM_WIREFRAME;
 	Scene			= NULL;
 
@@ -18,9 +18,9 @@ clsViewport::clsViewport(
 	UINT uCameraObjectID, 
 	RENDER_MODE renderMode) 
 {
-	cameraObjectID	= 0;
-	Scene	= NULL;
-	rMode	= RM_WIREFRAME;
+	cameraObjectID	= DEFAULT_CAMERA_ID;
+	rMode			= RM_WIREFRAME;
+	Scene			= NULL;
 
 	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
 	
@@ -70,10 +70,15 @@ BOOL clsViewport::setScene(LPSCENE3D lpSceneHost) {
 }
 
 BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID) {	
-	BOOL bResult 
-		= Scene		!= NULL 
-		&& Scene->getObject(uCameraObjectID)->clsID() == CLS_CAMERA;
-	if ( bResult ) cameraObjectID = uCameraObjectID;
+	BOOL bResult = TRUE;
+
+	cameraObjectID = DEFAULT_CAMERA_ID;
+	if ( uCameraObjectID != DEFAULT_CAMERA_ID )
+	{
+			bResult = Scene != NULL
+				&& Scene->getObject(uCameraObjectID)->clsID() == CLS_CAMERA;
+			if ( bResult ) cameraObjectID = uCameraObjectID;		
+	}
 	return bResult;
 }
 
@@ -165,7 +170,9 @@ BOOL clsViewport::Render() {
 		}
 
 		// prepearing camera
-		camToRender		= (LPCAMERA3D)Scene->getObject(cameraObjectID);
+		camToRender		= cameraObjectID == DEFAULT_CAMERA_ID ? 
+							&camDefault
+							: (LPCAMERA3D)Scene->getObject(cameraObjectID);
 		nearClip		= camToRender->getNearCP();
 		farClip			= camToRender->getFarCP();
 		
@@ -414,9 +421,51 @@ BOOL clsViewport::Render() {
 	return bResult;
 }
 
+VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
+{
+	VECTOR3D	defCamPos;
+	FLOAT		perspCoords = VIEW_DISTANCE_DEFAULT;
+
+	switch ( vt )
+	{
+		case VIEW_LEFT:
+			defCamPos.y = perspCoords;
+			break;
+
+		case VIEW_RIGHT:
+			defCamPos.y = -perspCoords;
+			break;
+
+		case VIEW_FRONT:
+			defCamPos.x = perspCoords;
+			break;	
+
+		case VIEW_BACK:
+			defCamPos.x = -perspCoords;
+			break;	
+
+		case VIEW_TOP:
+			defCamPos.z = perspCoords;
+			break;
+
+		case VIEW_BOTTOM:
+			defCamPos.z = -perspCoords;
+			break;
+
+		case VIEW_PERSPECTIVE:
+			perspCoords = sqrt((perspCoords * perspCoords) / 3);
+			defCamPos.x = perspCoords;
+			defCamPos.y = perspCoords;
+			defCamPos.z = perspCoords;
+			break;
+	}
+	vp->camDefault.Translate(defCamPos);
+	vp->camDefault.LookAt(VECTOR3D(0, 0, 0));
+}
+
 // ============================================================================
-// clsRenderPool Implementation
-DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
+// clsViewportPool Implementation
+DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 {
 	DWORD		dwWaitResult;
 	BOOL		bAlive;
@@ -439,7 +488,7 @@ DWORD WINAPI clsRenderPool::Render(LPVOID renderInfo)
 	return SHUTDOWN_ON_DEMAND;
 }
 
-UINT clsRenderPool::findViewport(DWORD vpID)
+UINT clsViewportPool::findViewport(DWORD vpID)
 {
 	UINT vpCount = Viewports.size();
 	for ( UINT i = 0; i < vpCount; i++ )
@@ -449,23 +498,23 @@ UINT clsRenderPool::findViewport(DWORD vpID)
 	return MAX_VIEWPORT_COUNT;
 }
 
-clsRenderPool::clsRenderPool(LPFORM lpOwner) 
+clsViewportPool::clsViewportPool(LPFORM lpOwner) 
 	: Owner(lpOwner), Scene(NULL) 
 {
 	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
 }
-clsRenderPool::clsRenderPool(LPFORM lpOwner, LPSCENE3D lpScene) 
+clsViewportPool::clsViewportPool(LPFORM lpOwner, LPSCENE3D lpScene) 
 	: Owner(lpOwner), Scene(NULL)
 {
 	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
 	assignScene(lpScene);
 }
-clsRenderPool::~clsRenderPool() 
+clsViewportPool::~clsViewportPool() 
 { 
 	if ( renderEvent != NULL )	CloseHandle(renderEvent);
 }
 
-BOOL clsRenderPool::assignScene(LPSCENE3D lpScene)
+BOOL clsViewportPool::assignScene(LPSCENE3D lpScene)
 {
 	BOOL bResult
 		= lpScene != NULL
@@ -474,16 +523,15 @@ BOOL clsRenderPool::assignScene(LPSCENE3D lpScene)
 	return bResult;
 }
 
-DWORD clsRenderPool::addViewport(
-						INT			vpPosX,
-						INT			vpPosY,
-						UINT		vpWidth,
-						UINT		vpHeight,
-						UINT		vpCameraObjectID,
-						RENDER_MODE vpRMode
+DWORD clsViewportPool::addViewport(
+					INT			vpPosX,
+					INT			vpPosY,
+					UINT		vpWidth,
+					UINT		vpHeight,				
+					VIEW_TYPE	vpVType,
+					RENDER_MODE vpRMode
 ) {
 	LPTHREAD_DATA	thData;
-	LPOBJECT3D		camFound;
 	DWORD			vpID		= 0,
 					dwResult;				
 	BOOL			bResult;
@@ -492,13 +540,11 @@ DWORD clsRenderPool::addViewport(
 		= Scene												!= NULL
 		&& Owner											!= NULL
 		&& renderEvent										!= NULL
-		&& Viewports.size()									!= MAX_VIEWPORT_COUNT
-		&& (camFound = Scene->getObject(vpCameraObjectID)) 	!= NULL
-		&& camFound->clsID()								== CLS_CAMERA;
+		&& Viewports.size()									!= MAX_VIEWPORT_COUNT;
 	if ( bResult )
 	{
 		thData				= new THREAD_DATA;
-		thData->Viewport	= new VIEWPORT(Scene, vpCameraObjectID, vpRMode);
+		thData->Viewport	= new VIEWPORT(Scene, DEFAULT_CAMERA_ID, vpRMode);
 		dwResult = thData->Viewport->SetUp(
 										Owner,
 										vpPosX,
@@ -506,7 +552,7 @@ DWORD clsRenderPool::addViewport(
 										vpWidth,
 										vpHeight
 									);
-		if ( bResult = SUCCEEDED(dwResult) )
+		if ( SUCCEEDED(dwResult) )
 		{
 			thData->Thread	= CreateThread(
 									0,
@@ -538,11 +584,15 @@ DWORD clsRenderPool::addViewport(
 			delete thData->Viewport;
 			delete thData;
 		}
+		else
+		{
+			SetViewportDefaultView(thData->Viewport, vpVType);
+		}
 	}
 	return vpID;
 }
 
-BOOL clsRenderPool::delViewport(UINT vpIndex)
+BOOL clsViewportPool::delViewport(UINT vpIndex)
 {
 	BOOL bResult = vpIndex < Viewports.size();
 	if ( bResult ) 
@@ -560,23 +610,23 @@ BOOL clsRenderPool::delViewport(UINT vpIndex)
 	return bResult;
 }
 
-BOOL clsRenderPool::delViewport(DWORD vpID)
+BOOL clsViewportPool::delViewport(DWORD vpID)
 {
 	return delViewport(findViewport(vpID));
 }
 
-LPVIEWPORT clsRenderPool::getViewport(UINT vpIndex)
+LPVIEWPORT clsViewportPool::getViewport(UINT vpIndex)
 {
 	if ( vpIndex < Viewports.size() ) return Viewports[vpIndex]->Viewport;
 	return NULL;
 }
 
-LPVIEWPORT clsRenderPool::getViewport(DWORD vpID)
+LPVIEWPORT clsViewportPool::getViewport(DWORD vpID)
 {
 	return Viewports[findViewport(vpID)]->Viewport;
 }
 
-DWORD clsRenderPool::RenderWorld() 
+DWORD clsViewportPool::RenderWorld() 
 { 
 	SetEvent(renderEvent);
 	return WaitForMultipleObjects(

@@ -3,7 +3,13 @@
 
 // ============================================================================
 // Implementation of tagVector3D struct:
-tagVector3D::tagVector3D() { }
+tagVector3D::tagVector3D() 
+{ 
+	x = 0;
+	y = 0;
+	z = 0;
+}
+
 tagVector3D::tagVector3D(float fX, float fY, float fZ)
 {
 	x = fX;

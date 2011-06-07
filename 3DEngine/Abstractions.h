@@ -149,7 +149,7 @@ public:
 	VECTOR3D getPosition();
 
 	// Absolute translation
-	void Translate(const LPVECTOR3D tV);
+	void Translate(VECTOR3D tV);
 	void Translate(float tX, float tY, float tZ);	 
 
 	//Relative translation
