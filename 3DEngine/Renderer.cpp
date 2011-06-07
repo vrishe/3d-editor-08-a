@@ -210,7 +210,12 @@ BOOL clsViewport::Render() {
 				for (UINT j = sceneLightedPolyCount; j < lightTo; j++) {
 					VECTOR3D normal(objPolyBuffer[j - sceneLightedPolyCount].Normal(objVertBuffer, 2));
 					Vector3DNormalize(&normal, &normal);
-					scenePolyColorBuffer[j] = COLOR3D(0,0,0);
+					if ( !sceneLightCount ) {
+						scenePolyColorBuffer[j] = objToRender->getColor();
+						continue;
+					}
+					else
+						scenePolyColorBuffer[j] = COLOR3D(0,0,0);
 
 					for (UINT k = 0; k < sceneLightCount; k++) 	{
 						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);

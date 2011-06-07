@@ -11,10 +11,18 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
-BUTTON				testButton1, testButton2, testButton3, testButton4;
+BUTTON				btMove, btRotate, btScale,
+					tabCreate, tabModify,
+					btObjects, btCams, btLights,
+					btPan, btCamSphere, btLookAround;
+
+LABEL				lbX, lbY, lbZ;
+
+TEXTBOX				tbX, tbY, tbZ;
+
 LPWINBASE			testLpButton1;
 
-LPRENDER_POOL		testPool;
+LPVIEWPORT_POOL		testPool;
 
 SCENE3D				testScene;
 
@@ -22,14 +30,6 @@ TARGCAMERA3D		CameraTop,
 					CameraFront, 
 					CameraRight, 
 					CameraPersp;
-
-DIFLIGHT3D			testLight1, testLight2;
-
-PYRAMID3D			cubeX(100, 120, 100, 80, 60, 20, 80, 80, 200);
-Cone				testCone(100.0f, 100.0f, 50.0f, 24);
-ExCone				testExCone(100.0f, 100.0f, 50.0f, 40.f, 24);
-Hole				testHole(70.0f, 70.0f, 30.0f, 30.0f, 10.0f, 20); 
-MICROPHONE3D		testMic( 55, 55, 124 );
 
 // Win API entry point:
 // ===================================
@@ -54,7 +54,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				(FORM_TYPE)(APP_FORM | WS_CLIPCHILDREN), 
 				WS_EX_APPWINDOW | WS_EX_CONTROLPARENT,
 				CW_USEDEFAULT, 0,
-				1024, 768,
+				1270, 804,
 				NULL,
 				LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR))
 			); 
@@ -64,134 +64,181 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.AssignEventHandler(WM_GETDLGCODE, mainForm_ProcKeys, TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
+	mainForm.setColor(FORM_BG_COLOR);
 
-	testScene.setAmbientColor(128, 125, 125);
+	testScene.setAmbientColor(VIEWPORT_BG_COLOR);
 
 	// Scene assembly here:
 	testScene.AddObject(&CameraTop);
 	testScene.AddObject(&CameraFront);
 	testScene.AddObject(&CameraRight);
 	testScene.AddObject(&CameraPersp);
-	testScene.AddObject(&testLight1);
-	testScene.AddObject(&testLight2);
-//	testScene.AddObject(&testMic);
-/*	testScene.AddObject(&cubeX);
-	testScene.AddObject(&testCone);
-	testScene.AddObject(&testExCone);
-	testScene.AddObject(&testHole);
-*/
-	// Objects here:
-	testMic.Fly(-120);
-	//testMic.Follow(-120);
-	//testMic.setBaseRadius(100);
-	//testMic.setBaseHeight(50);
-	//testMic.setButtonWidth(80);
-	//testMic.setUprightRadius(60);
-	//testMic.setUprightHeight(132);
-	//testMic.setUprightGap(25);
-
-	cubeX.Follow(60);
-	cubeX.Fly(40);
-
-	// Lighters here:
-	testLight1.LookAt(-1, 0, 0);
-	testLight1.setColor(30, 80, 30);
-	testLight1.setPower(0.4f);
-	testLight2.LookAt(0, 0, -1);
-	testLight2.setColor(5, 5, 5);
-	testLight2.setPower(0.5f);
-	
-	// Cameras here:
 	CameraTop.Translate(.0f, .0f, 200.f);
-//	CameraTop.LookAt(.0f, .0f, .0f);
 	CameraTop.Roll(-(FLOAT)M_PI_2);
-
 	CameraFront.Translate(200.0f, .0f, .0f);
-//	CameraFront.LookAt(.0f, .0f, .0f);
-
 	CameraRight.Translate(.0f, 200.0f, .0f);
-//	CameraRight.LookAt(.0f, .0f, .0f);
-
 	CameraPersp.Translate(200.0f, 200.0f, 200.f);
-//	CameraPersp.LookAt(.0f, .0f, .0f);
 
 	// Viewports here:
-	ufWidth -= 40;
-	ufHeight -= 40;
-	testPool = new RENDER_POOL(&mainForm, &testScene);
+	testPool = new VIEWPORT_POOL(&mainForm, &testScene);
 	testPool->addViewport(
-				20, 20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraTop.objID(),
-				RM_WIREFRAME
-			);
+					10, 
+					BT_TOOL_H + 10,
+					VIEWPORT_AREA_W / 2 - 5,
+					VIEWPORT_AREA_H / 2 - 5,
+					VIEW_TOP,
+					RM_WIREFRAME
+				);
 	testPool->addViewport(
-				25 + ufWidth / 2, 
-				20,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraFront.objID(),
-				RM_WIREFRAME
-			);
+					10 + VIEWPORT_AREA_W / 2, 
+					BT_TOOL_H + 10,
+					VIEWPORT_AREA_W / 2 - 5,
+					VIEWPORT_AREA_H / 2 - 5,
+					VIEW_FRONT,
+					RM_WIREFRAME
+				);
 	testPool->addViewport(
-				20, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraRight.objID(),
-				RM_WIREFRAME
-			);
+					10, 
+					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
+					VIEWPORT_AREA_W / 2 - 5,
+					VIEWPORT_AREA_H / 2 - 5,
+					VIEW_LEFT,
+					RM_WIREFRAME
+				);
 	testPool->addViewport(
-				25 + ufWidth / 2, 
-				25 + ufHeight / 2,
-				ufWidth / 2 - 5,
-				ufHeight / 2 - 5,
-				CameraPersp.objID(),
-				RM_SHADEDWF
-			);
-	//testButton1.Create(
-	//				0,
-	//				_T("Button1"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton2.Create(
-	//				1,
-	//				_T("Button2"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 35,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton3.Create(
-	//				1,
-	//				_T("Button3"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 70,
-	//				110,
-	//				30,
-	//				FALSE);
-	//testButton4.Create(
-	//				1,
-	//				_T("Button4"),
-	//				&mainForm,
-	//				25 + ufWidth / 2,
-	//				25 + ufHeight / 2 + 105,
-	//				110,
-	//				30,
-	//				FALSE);
+					10 + VIEWPORT_AREA_W / 2, 
+					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
+					VIEWPORT_AREA_W / 2 - 5,
+					VIEWPORT_AREA_H / 2 - 5,
+					VIEW_PERSPECTIVE,
+					RM_SHADEDWF
+				);
 
-	//testButton4.setTabOrder(2);
-	//testButton1.setTabOrder(4);
-	//TRANSLATOR3D::loadSceneScript(&testScene, TEXT("new.txt"));
+	TCHAR *name = new TCHAR[256];
+		// object toolbar buttons	
+	LoadString(hInstance, N_BT_MOVE, name, 256);
+	btMove.Create(	BT_MOVE,
+					name,
+					&mainForm,
+					10, 5,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	LoadString(hInstance, N_BT_ROTATE, name, 256);
+	btRotate.Create(BT_ROTATE,
+					name,
+					&mainForm,
+					10 + BT_TOOL_W + 5, 5,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	LoadString(hInstance, N_BT_SCALE, name, 256);
+	btScale.Create(BT_SCALE,
+					name,
+					&mainForm,
+					10 + BT_TOOL_W * 2 + 5 * 2, 5,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	LoadString(hInstance, N_LB_X, name, 256);
+	lbX.Create(	name,
+				&mainForm, 
+				VIEWPORT_AREA_W - LB_V_W * 3 - BT_TOOL_H * 2 - 40, 11,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_Y, name, 256);
+	lbY.Create(	name,
+				&mainForm, 
+				VIEWPORT_AREA_W - LB_V_W*2 - BT_TOOL_H - 40, 11,
+				LB_V_H, LB_V_W);
+	LoadString(hInstance, N_LB_Z, name, 256);
+	lbZ.Create(	name,
+				&mainForm, 
+				VIEWPORT_AREA_W - LB_V_W - 40, 11,
+				LB_V_H, LB_V_W);
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbX.Create(	TB_X,
+				name,
+				&mainForm, 
+				VIEWPORT_AREA_W - LB_V_W * 2 - BT_TOOL_H * 2 - 45, 5,
+				BT_TOOL_H, BT_TOOL_H);
+	tbY.Create(	TB_Y,
+				name,
+				&mainForm, 
+				VIEWPORT_AREA_W - LB_V_W - BT_TOOL_H - 45, 5,
+				BT_TOOL_H, BT_TOOL_H);
+	tbZ.Create(	TB_Z,
+				name,
+				&mainForm, 
+				VIEWPORT_AREA_W - 45, 5,
+				BT_TOOL_H, BT_TOOL_H);
+	tbX.setBgFillColor(TEXTBOX_BG_COLOR);
+	tbY.setBgFillColor(TEXTBOX_BG_COLOR);
+	tbZ.setBgFillColor(TEXTBOX_BG_COLOR);
+
+		// right toolbarr
+	LoadString(hInstance, N_TAB_CREATE, name, 256);
+	tabCreate.Create(TAB_CREATE,
+					name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 12, 10 + BT_TOOL_H / 2,
+					TAB_W, TAB_H,
+					FALSE);
+	LoadString(hInstance, N_TAB_MODIFY, name, 256);
+	tabModify.Create(TAB_MODIFY,
+					name,
+					&mainForm,
+					ufWidth - TAB_W - 6, 10 + BT_TOOL_H / 2,
+					TAB_W, TAB_H,
+					FALSE);
+
+	LoadString(hInstance, N_BT_LIGHTS, name, 256);
+	btLights.Create(BT_LIGHTS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W - 6, 15 + BT_TOOL_H / 2 + TAB_H,					
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
+	LoadString(hInstance, N_BT_CAMS, name, 256);
+	btCams.Create(	BT_CAMS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 2 - 9, 15 + BT_TOOL_H / 2 + TAB_H,
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
+	LoadString(hInstance, N_BT_OBJECTS, name, 256);
+	btObjects.Create(BT_OBJECTS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 3 - 13, 15 + BT_TOOL_H / 2 + TAB_H,
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
+
+		// camera toolbar buttons
+	LoadString(hInstance, N_BT_PAN, name, 256);
+	btPan.Create(BT_PAN,
+					name,
+					&mainForm,
+					VIEWPORT_AREA_W / 2 - BT_TOOL_H * 2 - BT_TOOL_H / 2 - 11, 
+					VIEWPORT_AREA_H + BT_TOOL_H + 10,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	LoadString(hInstance, N_BT_CAMSPHERE, name, 256);
+	btCamSphere.Create(BT_PAN,
+					name,
+					&mainForm,
+					VIEWPORT_AREA_W / 2 - BT_TOOL_H / 2 - 6, 
+					VIEWPORT_AREA_H + BT_TOOL_H + 10,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	LoadString(hInstance, N_BT_LOOK_AROUND, name, 256);
+	btLookAround.Create(BT_LOOK_AROUND,
+					name,
+					&mainForm,
+					VIEWPORT_AREA_W / 2 + BT_TOOL_H * 2 - 16, 
+					VIEWPORT_AREA_H + BT_TOOL_H + 10,
+					BT_TOOL_W, BT_TOOL_H,
+					FALSE);
+	
+
+	delete [] name;
 	mainForm.Show();
-	//mainForm.setColor(128, 125, 125);
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
 	iResult = mainForm.DoMSGCycle(hAccelTable);
@@ -233,22 +280,18 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case VK_LEFT:
-				//cubeX.Strafe(-strafeDir);
 				CameraPersp.Strafe(-strafeDir);
 			break;
 
 		case VK_RIGHT:
-				//cubeX.Strafe(strafeDir);
 				CameraPersp.Strafe(strafeDir);
 			break;
 
 		case VK_DOWN:
-				//cubeX.Follow(-flyDir);
 				CameraPersp.Follow(-flyDir);
 			break;
 
 		case VK_UP:
-				//cubeX.Follow(flyDir);
 				CameraPersp.Follow(flyDir);
 			break;
 	}
@@ -283,18 +326,11 @@ LRESULT mainForm_menuClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			if ( OpenFileDialog((HWND)lParam, ofn) ) {
 				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
 				if ( !TRANSLATOR3D::loadSceneScript(&testScene, fName) ) {
-					MessageBox((HWND)lParam, _T("Невозможноо открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
+					MessageBox((HWND)lParam, _T("Невозможно открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
 					break;
 				}
 				mainForm.Invalidate();
 			}
-			break;
-		case 0: 
-			//((LPFORM)Sender)->MBShow(
-			//		_T("Okay! You've done that!"),
-			//		_T("Lol!"),
-			//		MB_OK
-			//	);
 			break;
 	}
 	return 0L;
@@ -331,7 +367,6 @@ INT_PTR CALLBACK About_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam,
 
 BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn) {	
 	TCHAR szFile[260] = {'\0'};  // buffer for file name
-	HANDLE hf;					 // file handle
 
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -352,7 +387,6 @@ BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn) {
 
 BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn) {	
 	TCHAR szFile[260];  // buffer for file name
-	HANDLE hf;			// file handle
 
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
