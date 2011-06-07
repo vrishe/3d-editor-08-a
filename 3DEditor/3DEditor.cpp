@@ -74,12 +74,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	testScene.AddObject(&CameraPersp);
 	testScene.AddObject(&testLight1);
 	testScene.AddObject(&testLight2);
-	//testScene.AddObject(&testMic);
-	testScene.AddObject(&cubeX);
+//	testScene.AddObject(&testMic);
+/*	testScene.AddObject(&cubeX);
 	testScene.AddObject(&testCone);
 	testScene.AddObject(&testExCone);
 	testScene.AddObject(&testHole);
-
+*/
 	// Objects here:
 	testMic.Fly(-120);
 	//testMic.Follow(-120);
@@ -230,7 +230,6 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 				CameraFront.setProjectionType(PT_PARALLEL);
 				CameraPersp.setProjectionType(PT_PARALLEL);
 			}
-	//		TRANSLATOR3D::saveSceneScript(&testScene, TEXT("new.txt"));
 			break;
 
 		case VK_LEFT:
@@ -283,8 +282,11 @@ LRESULT mainForm_menuClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		case IDM_LOAD:
 			if ( OpenFileDialog((HWND)lParam, ofn) ) {
 				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::loadSceneScript(&testScene, fName) )
+				if ( !TRANSLATOR3D::loadSceneScript(&testScene, fName) ) {
 					MessageBox((HWND)lParam, _T("Невозможноо открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
+					break;
+				}
+				mainForm.Invalidate();
 			}
 			break;
 		case 0: 

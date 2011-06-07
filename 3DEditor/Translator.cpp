@@ -710,12 +710,14 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	string fileData(buffer);
 	delete [] buffer;
 
-		// loading cameras
 	if ( !fileData.size() )
 		return false;
 	if ( strcmp(fileData.substr(0, 19).c_str(), "3DEditor scene file") )
 		return false;
 
+	Scene->Clear();
+
+		// loading cameras
 	fileData.erase(0, 115);
 	UINT objCount = (UINT)readFloat(fileData);
 	fileData.erase(0, 13);
@@ -744,7 +746,7 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		camera->setFarCP(tmp);
 
 		fileData.erase(0, 89);
-	//	Scene->AddObject(camera);
+		Scene->AddObject(camera);
 	}
 
 		// loading lighters
@@ -768,7 +770,7 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		light->setColor(v.x, v.y, v.z);
 
 		fileData.erase(0, 105);
-		//Scene->AddObject(light);
+		Scene->AddObject(light);
 	}
 
 		// loading meshes
@@ -798,7 +800,6 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		}
 
 		fileData.erase(0, 3);
-	//	Scene->AddObject(mesh);
 	}
 	
 	return bErrorFlag;
