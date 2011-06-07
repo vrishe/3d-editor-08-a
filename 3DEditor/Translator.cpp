@@ -1,6 +1,8 @@
 
 #include "Translator.h"
 
+#define _SCL_SECURE_NO_WARNINGS
+
 // ============================================================================
 // Implementation of clsTranslator class:
 // write to file
@@ -8,7 +10,8 @@ bool clsTranslator::pasteFloat(float in, HANDLE hFile) {
 	int  decimal, sign;
 	DWORD dwBytesWritten = 0;
 	BOOL bErrorFlag;
-	char *dataBuffer = _fcvt( in, 5, &decimal, &sign );
+	char *dataBuffer = new char[64];
+	_fcvt_s( dataBuffer, 64, in, 5, &decimal, &sign );
 	if ( sign )
 		bErrorFlag = WriteFile(hFile, "-", 1, &dwBytesWritten, NULL);
 	if ( strlen(dataBuffer) ) {
@@ -18,11 +21,16 @@ bool clsTranslator::pasteFloat(float in, HANDLE hFile) {
 			bErrorFlag = WriteFile(hFile, "0", 1, &dwBytesWritten, NULL);
 		bErrorFlag = WriteFile(hFile, ".", 1, &dwBytesWritten, NULL);
 		dataBuffer += decimal;
-		bErrorFlag = WriteFile(hFile, dataBuffer, (DWORD)(strlen(dataBuffer) - decimal), &dwBytesWritten, NULL);
+		DWORD size = (DWORD)(strlen(dataBuffer));
+		bErrorFlag = WriteFile(hFile, dataBuffer, (DWORD)(strlen(dataBuffer)), &dwBytesWritten, NULL);
+		dataBuffer -= decimal;
 	}
 	else
 		bErrorFlag = WriteFile(hFile, "0.0000", 6, &dwBytesWritten, NULL);
-	return bErrorFlag;
+
+	delete [] dataBuffer;
+
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteName(LPOBJECT3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -35,24 +43,24 @@ bool clsTranslator::pasteName(LPOBJECT3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, dataBuffer, (DWORD)wcslen(dataBuffer), &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteColor(COLOR3D in, HANDLE hFile) {
 	char dataBuffer[5];
 	DWORD dwBytesWritten = 0;
 	BOOL bErrorFlag;
 
-	_itoa(in.Red, dataBuffer, 10);
+	_itoa_s(in.Red, dataBuffer, 10);
 	bErrorFlag = WriteFile(hFile, &dataBuffer, (DWORD)strlen(dataBuffer), &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
-	_itoa(in.Green, dataBuffer, 10);
+	_itoa_s(in.Green, dataBuffer, 10);
 	bErrorFlag = WriteFile(hFile, &dataBuffer, (DWORD)strlen(dataBuffer), &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
-	_itoa(in.Blue, dataBuffer, 10);
+	_itoa_s(in.Blue, dataBuffer, 10);
 	bErrorFlag = WriteFile(hFile, &dataBuffer, (DWORD)strlen(dataBuffer), &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pastePosition(LPOBJECT3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -65,11 +73,11 @@ bool clsTranslator::pastePosition(LPOBJECT3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
 	pasteFloat(tmp.y, hFile);
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
-	pasteFloat(tmp.z, hFile);
+ 	pasteFloat(tmp.z, hFile);
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteRotation(LPOBJECT3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -108,7 +116,7 @@ bool clsTranslator::pasteRotation(LPOBJECT3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, " ", 1, &dwBytesWritten, NULL);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pastePyramid(LPPYRAMID3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -146,7 +154,7 @@ bool clsTranslator::pastePyramid(LPPYRAMID3D obj, HANDLE hFile) {
 	pasteColor(obj->getColor(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteCone(LPCONE3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -173,14 +181,14 @@ bool clsTranslator::pasteCone(LPCONE3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Precission: ", 12, &dwBytesWritten, NULL);
-	pasteFloat(((LPCONE3D)obj)->getPrecission(), hFile);
+	pasteFloat((FLOAT)((LPCONE3D)obj)->getPrecission(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Color (RGB): ", 13, &dwBytesWritten, NULL);
 	pasteColor(obj->getColor(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteExCone(LPEXCONE3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -211,14 +219,14 @@ bool clsTranslator::pasteExCone(LPEXCONE3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Precission: ", 12, &dwBytesWritten, NULL);
-	pasteFloat(((LPEXCONE3D)obj)->getPrecission(), hFile);
+	pasteFloat((FLOAT)((LPEXCONE3D)obj)->getPrecission(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Color (RGB): ", 13, &dwBytesWritten, NULL);
 	pasteColor(obj->getColor(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteHole(LPHOLE3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -253,14 +261,14 @@ bool clsTranslator::pasteHole(LPHOLE3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Precission: ", 12, &dwBytesWritten, NULL);
-	pasteFloat(((LPHOLE3D)obj)->getPrecission(), hFile);
+	pasteFloat((FLOAT)((LPHOLE3D)obj)->getPrecission(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Color (RGB): ", 13, &dwBytesWritten, NULL);
 	pasteColor(obj->getColor(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 bool clsTranslator::pasteMic(LPMICROPHONE3D obj, HANDLE hFile) {
 	char new_line[]="\x0D\x0A";
@@ -319,14 +327,14 @@ bool clsTranslator::pasteMic(LPMICROPHONE3D obj, HANDLE hFile) {
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Precission: ", 12, &dwBytesWritten, NULL);
-	pasteFloat(((LPMICROPHONE3D)obj)->getPrecission(), hFile);
+	pasteFloat((FLOAT)((LPMICROPHONE3D)obj)->getPrecission(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	bErrorFlag = WriteFile( hFile, "Color (RGB): ", 13, &dwBytesWritten, NULL);
 	pasteColor(obj->getColor(), hFile);
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 
 // read from file
@@ -336,7 +344,7 @@ float clsTranslator::readFloat(string& data) {
 	for ( size_t i = 0; i < N; i++ )
 		tmp[i] = data[i];
 	tmp[N] = '\0';
-	float x = atof(tmp);
+	float x = (float)atof(tmp);
 	delete [] tmp;
 	data.erase(0, N + 1);
 	return x;
@@ -413,7 +421,7 @@ void clsTranslator::readPyramid(LPPYRAMID3D obj, string& fileData, LPSCENE3D Sce
 	float tw = readFloat(fileData);
 	fileData.erase(0, 14);
 	pos = readVector(fileData);
-	obj->setColor(pos.x, pos.y, pos.z);
+	obj->setColor((UCHAR)pos.x, (UCHAR)pos.y, (UCHAR)pos.z);
 
 	obj = new PYRAMID3D(h, bl, bw, tl, tw);
 	Scene->AddObject(obj);
@@ -438,9 +446,9 @@ void clsTranslator::readCone(LPCONE3D obj, string& fileData, LPSCENE3D Scene) {
 	float prec = readFloat(fileData);
 	fileData.erase(0, 14);
 	pos = readVector(fileData);
-	obj->setColor(pos.x, pos.y, pos.z);
+	obj->setColor((UCHAR)pos.x, (UCHAR)pos.y, (UCHAR)pos.z);
 
-	obj = new CONE3D(h, br, tr, prec);
+	obj = new CONE3D(h, br, tr, (UINT)prec);
 	Scene->AddObject(obj);
 }
 void clsTranslator::readExCone(LPEXCONE3D obj, string& fileData, LPSCENE3D Scene) {
@@ -465,9 +473,9 @@ void clsTranslator::readExCone(LPEXCONE3D obj, string& fileData, LPSCENE3D Scene
 	float prec = readFloat(fileData);
 	fileData.erase(0, 14);
 	pos = readVector(fileData);
-	obj->setColor(pos.x, pos.y, pos.z);
+	obj->setColor((UCHAR)pos.x, (UCHAR)pos.y, (UCHAR)pos.z);
 
-	obj = new EXCONE3D(h, br, tr, sec, prec);
+	obj = new EXCONE3D(h, br, tr, sec, (UINT)prec);
 	Scene->AddObject(obj);
 }
 void clsTranslator::readHole(LPHOLE3D obj, string& fileData, LPSCENE3D Scene) {
@@ -494,9 +502,9 @@ void clsTranslator::readHole(LPHOLE3D obj, string& fileData, LPSCENE3D Scene) {
 	float prec = readFloat(fileData);
 	fileData.erase(0, 14);
 	pos = readVector(fileData);
-	obj->setColor(pos.x, pos.y, pos.z);
+	obj->setColor((UCHAR)pos.x, (UCHAR)pos.y, (UCHAR)pos.z);
 
-	obj = new HOLE3D(h, br, bh, tr, th, prec);
+	obj = new HOLE3D(h, br, bh, tr, th, (UINT)prec);
 	Scene->AddObject(obj);
 }
 void clsTranslator::readMic(LPMICROPHONE3D obj, string& fileData, LPSCENE3D Scene) {
@@ -545,10 +553,10 @@ void clsTranslator::readMic(LPMICROPHONE3D obj, string& fileData, LPSCENE3D Scen
 	obj->setCoreRadius(tmp);
 	fileData.erase(0, 13);
 	tmp = readFloat(fileData);
-	obj->setPrecission(tmp);
+	obj->setPrecission((UINT)tmp);
 	fileData.erase(0, 14);
 	pos = readVector(fileData);
-	obj->setColor(pos.x, pos.y, pos.z);
+	obj->setColor((UCHAR)pos.x, (UCHAR)pos.y, (UCHAR)pos.z);
 
 	Scene->AddObject(obj);
 }
@@ -682,7 +690,7 @@ bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	bErrorFlag = WriteFile(hFile, new_line, 2, &dwBytesWritten, NULL);
 
 	CloseHandle(hFile);
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }
 
 bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
@@ -750,6 +758,7 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	}
 
 		// loading lighters
+
 	fileData.erase(0, 86);
 	objCount = (UINT)readFloat(fileData);
 	fileData.erase(0, 28);
@@ -767,7 +776,7 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		light->setPower(tmp);
 		fileData.erase(0, 14);
 		VECTOR3D v = readVector(fileData);
-		light->setColor(v.x, v.y, v.z);
+		light->setColor((UCHAR)v.x, (UCHAR)v.y, (UCHAR)v.z);
 
 		fileData.erase(0, 105);
 		Scene->AddObject(light);
@@ -802,5 +811,5 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		fileData.erase(0, 3);
 	}
 	
-	return bErrorFlag;
+	return ( bErrorFlag != 0 );
 }

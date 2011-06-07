@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Internal.h"
-#include "External.h"S
+#include "External.h"
 #include <string>
 
 class clsTranslator {
