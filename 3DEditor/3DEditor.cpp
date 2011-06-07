@@ -16,20 +16,18 @@ BUTTON				btMove, btRotate, btScale,
 					btObjects, btCams, btLights,
 					btPan, btCamSphere, btLookAround;
 
-LABEL				lbX, lbY, lbZ;
+LABEL				lbX, lbY, lbZ,
+					lbObjects;
 
 TEXTBOX				tbX, tbY, tbZ;
 
+LISTBOX				listObjects;
+
 LPWINBASE			testLpButton1;
 
-LPVIEWPORT_POOL		testPool;
+LPVIEWPORT_POOL		Pool;
 
-SCENE3D				testScene;
-
-TARGCAMERA3D		CameraTop, 
-					CameraFront, 
-					CameraRight, 
-					CameraPersp;
+SCENE3D				Scene;
 
 // Win API entry point:
 // ===================================
@@ -66,22 +64,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 	mainForm.setColor(FORM_BG_COLOR);
 
-	testScene.setAmbientColor(VIEWPORT_BG_COLOR);
-
-	// Scene assembly here:
-	testScene.AddObject(&CameraTop);
-	testScene.AddObject(&CameraFront);
-	testScene.AddObject(&CameraRight);
-	testScene.AddObject(&CameraPersp);
-	CameraTop.Translate(.0f, .0f, 200.f);
-	CameraTop.Roll(-(FLOAT)M_PI_2);
-	CameraFront.Translate(200.0f, .0f, .0f);
-	CameraRight.Translate(.0f, 200.0f, .0f);
-	CameraPersp.Translate(200.0f, 200.0f, 200.f);
+	Scene.setAmbientColor(VIEWPORT_BG_COLOR);
+	MICROPHONE3D testMic(80, 80, 200);
+	testMic.Fly(-120);
+	Scene.AddObject(&testMic);
 
 	// Viewports here:
-	testPool = new VIEWPORT_POOL(&mainForm, &testScene);
-	testPool->addViewport(
+	Pool = new VIEWPORT_POOL(&mainForm, &Scene);
+	Pool->addViewport(
 					10, 
 					BT_TOOL_H + 10,
 					VIEWPORT_AREA_W / 2 - 5,
@@ -89,7 +79,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_TOP,
 					RM_WIREFRAME
 				);
-	testPool->addViewport(
+	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
 					BT_TOOL_H + 10,
 					VIEWPORT_AREA_W / 2 - 5,
@@ -97,7 +87,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_FRONT,
 					RM_WIREFRAME
 				);
-	testPool->addViewport(
+	Pool->addViewport(
 					10, 
 					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
 					VIEWPORT_AREA_W / 2 - 5,
@@ -105,7 +95,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_LEFT,
 					RM_WIREFRAME
 				);
-	testPool->addViewport(
+	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
 					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
 					VIEWPORT_AREA_W / 2 - 5,
@@ -140,37 +130,37 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, N_LB_X, name, 256);
 	lbX.Create(	name,
 				&mainForm, 
-				VIEWPORT_AREA_W - LB_V_W * 3 - BT_TOOL_H * 2 - 40, 11,
+				VIEWPORT_AREA_W - LB_V_W * 3 - 122, 10,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_Y, name, 256);
 	lbY.Create(	name,
 				&mainForm, 
-				VIEWPORT_AREA_W - LB_V_W*2 - BT_TOOL_H - 40, 11,
+				VIEWPORT_AREA_W - LB_V_W*2 - 82, 10,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_Z, name, 256);
 	lbZ.Create(	name,
 				&mainForm, 
-				VIEWPORT_AREA_W - LB_V_W - 40, 11,
+				VIEWPORT_AREA_W - LB_V_W - 40, 10,
 				LB_V_H, LB_V_W);
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbX.Create(	TB_X,
 				name,
 				&mainForm, 
-				VIEWPORT_AREA_W - LB_V_W * 2 - BT_TOOL_H * 2 - 45, 5,
-				BT_TOOL_H, BT_TOOL_H);
+				VIEWPORT_AREA_W - LB_V_W * 2 - 127, 9,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbY.Create(	TB_Y,
 				name,
 				&mainForm, 
-				VIEWPORT_AREA_W - LB_V_W - BT_TOOL_H - 45, 5,
-				BT_TOOL_H, BT_TOOL_H);
+				VIEWPORT_AREA_W - LB_V_W - 86, 9,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbZ.Create(	TB_Z,
 				name,
 				&mainForm, 
-				VIEWPORT_AREA_W - 45, 5,
-				BT_TOOL_H, BT_TOOL_H);
-	tbX.setBgFillColor(TEXTBOX_BG_COLOR);
-	tbY.setBgFillColor(TEXTBOX_BG_COLOR);
-	tbZ.setBgFillColor(TEXTBOX_BG_COLOR);
+				VIEWPORT_AREA_W - 45, 9,
+				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tbX.setBgFillColor(TEXT_BG_COLOR);
+	tbY.setBgFillColor(TEXT_BG_COLOR);
+	tbZ.setBgFillColor(TEXT_BG_COLOR);
 
 		// right toolbarr
 	LoadString(hInstance, N_TAB_CREATE, name, 256);
@@ -210,6 +200,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					SUB_TAB_W, SUB_TAB_H,
 					FALSE);
 
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	listObjects.Create(LIST_OBJECTS,
+						name,
+						&mainForm,
+						ufWidth - SUB_TAB_W * 3 - 13,
+						VIEWPORT_AREA_H + 73 - LIST_OBJ_H,
+						LIST_OBJ_W, LIST_OBJ_H);
+	listObjects.setBgFillColor(TEXT_BG_COLOR);
+						
+
 		// camera toolbar buttons
 	LoadString(hInstance, N_BT_PAN, name, 256);
 	btPan.Create(BT_PAN,
@@ -231,7 +231,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	btLookAround.Create(BT_LOOK_AROUND,
 					name,
 					&mainForm,
-					VIEWPORT_AREA_W / 2 + BT_TOOL_H * 2 - 16, 
+					VIEWPORT_AREA_W / 2 + BT_TOOL_H * 2 - 16,
 					VIEWPORT_AREA_H + BT_TOOL_H + 10,
 					BT_TOOL_W, BT_TOOL_H,
 					FALSE);
@@ -243,7 +243,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
 	iResult = mainForm.DoMSGCycle(hAccelTable);
 
-	delete testPool; 
+	delete Pool; 
 	mainForm.Destroy();
 	return iResult;
 }
@@ -253,49 +253,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	((LPFORM)Sender)->Validate();
-	testPool->RenderWorld();
+	Pool->RenderWorld();
 	return 0L;
 }
 
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
-	FLOAT	strafeDir	= 3.0f,
-			flyDir		= 3.0f;
-	FLOAT	rotRad		= 0.1f;
-	switch ( wParam )
-	{
-		case VK_SPACE:
- 			if ( CameraRight.getProjectionType() == PT_PARALLEL ) {
-				CameraTop.setProjectionType(PT_CENTRAL);
-				CameraRight.setProjectionType(PT_CENTRAL);
-				CameraFront.setProjectionType(PT_CENTRAL);
-				CameraPersp.setProjectionType(PT_CENTRAL);
-			}
-			else {
-				CameraTop.setProjectionType(PT_PARALLEL);
-				CameraRight.setProjectionType(PT_PARALLEL);
-				CameraFront.setProjectionType(PT_PARALLEL);
-				CameraPersp.setProjectionType(PT_PARALLEL);
-			}
-			break;
-
-		case VK_LEFT:
-				CameraPersp.Strafe(-strafeDir);
-			break;
-
-		case VK_RIGHT:
-				CameraPersp.Strafe(strafeDir);
-			break;
-
-		case VK_DOWN:
-				CameraPersp.Follow(-flyDir);
-			break;
-
-		case VK_UP:
-				CameraPersp.Follow(flyDir);
-			break;
-	}
-	mainForm.Invalidate();
+	//switch ( wParam )
+	//{
+	//}
+	//mainForm.Invalidate();
 
 	return 0L;
 }
@@ -318,14 +285,14 @@ LRESULT mainForm_menuClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		case IDM_SAVE:
 			if ( SaveFileDialog((HWND)lParam, ofn) ) {
 				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::saveSceneScript(&testScene, fName) )
+				if ( !TRANSLATOR3D::saveSceneScript(&Scene, fName) )
 					MessageBox((HWND)lParam, _T("Неправильное имя файла"), _T("Ошибка записи"), MB_ICONERROR | MB_OK );
 			}
 			break;
 		case IDM_LOAD:
 			if ( OpenFileDialog((HWND)lParam, ofn) ) {
 				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::loadSceneScript(&testScene, fName) ) {
+				if ( !TRANSLATOR3D::loadSceneScript(&Scene, fName) ) {
 					MessageBox((HWND)lParam, _T("Невозможно открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
 					break;
 				}

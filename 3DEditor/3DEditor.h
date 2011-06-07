@@ -10,12 +10,15 @@
 
 #define MAX_LOADSTRING 100
 
-#define VIEWPORT_AREA_H  670
+#define VIEWPORT_AREA_H 670
 #define VIEWPORT_AREA_W 968
 
 #define FORM_BG_COLOR RGB(128, 125, 125)
 #define VIEWPORT_BG_COLOR 100, 100, 100
-#define TEXTBOX_BG_COLOR RGB(119, 119, 119)
+#define TEXT_BG_COLOR RGB(155, 155, 155)
+
+#define LIST_OBJ_H	200
+#define LIST_OBJ_W	266
 
 #define LB_V_H	10
 #define LB_V_W	20
@@ -26,6 +29,10 @@
 #define TAB_W 131
 #define SUB_TAB_H 20
 #define SUB_TAB_W 87
+
+enum MF_LISTBOX {
+	LIST_OBJECTS	= 10,
+};
 
 enum MF_TEXTBOX {
 	TB_X		= 110,
