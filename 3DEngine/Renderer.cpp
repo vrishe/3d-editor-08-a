@@ -31,14 +31,18 @@ clsViewport::clsViewport(
 
 clsViewport::~clsViewport() { }
 
+UINT clsViewport::getID() { return ID; } 
+
 DWORD clsViewport::SetUp(
-				LPFORM vpOwner,
-				INT	vpPosX,
-				INT vpPosY,
-				UINT vpWidth,
-				UINT vpHeight) 
+				UINT	vpID,
+				LPFORM	vpOwner,
+				INT		vpPosX,
+				INT		vpPosY,
+				UINT	vpWidth,
+				UINT	vpHeight) 
 {
 	if ( Scene == NULL ) return E_DOES_NOT_EXIST;
+	ID	= vpID;
 	return 	clsForm::Create(	
 				VIEWPORT_CLASS_NAME,
 				(FORM_TYPE)(CHILD_FORM 
@@ -146,7 +150,7 @@ BOOL clsViewport::Render() {
 	hBMPOld		= (HBITMAP)SelectObject(hMemDC, hBMP);
 
 	// Filling Viewport with scene ambient color
-	hBrCurrent	= CreateSolidBrush(Scene->getAmbientColorRef());
+	hBrCurrent	= CreateSolidBrush(Scene->getAmbientColor());
 	hBrOld		= (HBRUSH)SelectObject(hMemDC, hBrCurrent);
 	FillRect(hMemDC, &clientRect, hBrCurrent);
 	SelectObject(hMemDC, hBrOld);
@@ -411,7 +415,6 @@ BOOL clsViewport::Render() {
 		SRCCOPY
 	);
 
-
 	SelectObject(hMemDC, hBMPOld);
 	DeleteObject(hBMP);
 	DeleteDC(hMemDC);
@@ -432,22 +435,27 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 			break;
 
 		case VIEW_RIGHT:
+
 			defCamPos.y = -perspCoords;
 			break;
 
 		case VIEW_FRONT:
+
 			defCamPos.x = perspCoords;
 			break;	
 
 		case VIEW_BACK:
+
 			defCamPos.x = -perspCoords;
 			break;	
 
 		case VIEW_TOP:
 			defCamPos.z = perspCoords;
+			vp->camDefault.Roll((FLOAT)M_PI);
 			break;
 
 		case VIEW_BOTTOM:
+
 			defCamPos.z = -perspCoords;
 			break;
 
@@ -456,8 +464,10 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 			defCamPos.x = perspCoords;
 			defCamPos.y = perspCoords;
 			defCamPos.z = perspCoords;
+			vp->camDefault.setProjectionType(PT_CENTRAL);
 			break;
 	}
+
 	vp->camDefault.Translate(defCamPos);
 	vp->camDefault.LookAt(VECTOR3D(0, 0, 0));
 }
@@ -466,11 +476,19 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 // clsViewportPool Implementation
 DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 {
+	HDC			hDC;
+	HPEN		hPenCur,
+				hPenOld;
+	HBRUSH		hBrOld;
+	UINT		vpWidth,
+				vpHeight;
+
 	DWORD		dwWaitResult;
 	BOOL		bAlive;
 
 	LPTHREAD_DATA	vp			= (LPTHREAD_DATA)renderInfo;
-	
+	LPTSTR			vpName		= new TCHAR[MAX_OBJECT_NAME_LEN];
+
 	do {
 		dwWaitResult = WaitForMultipleObjects(
 						2,
@@ -479,11 +497,36 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 						INFINITE
 					);
 		bAlive = dwWaitResult != WAIT_OBJECT_0 + 1;
+
 		vp->Viewport->Render();
+
+		vp->Viewport->camDefault.getName(vpName, MAX_OBJECT_NAME_LEN);
+		vp->Viewport->getDC(&hDC);
+		if ( vp->isActive ) 
+		{
+			vp->Viewport->getSize(&vpWidth, &vpHeight);
+			hPenCur = CreatePen(
+						PS_INSIDEFRAME, 
+						3, 
+						FRAME_STROKE_COLORREF
+					);
+			hPenOld = (HPEN)SelectObject(hDC, hPenCur);
+			hBrOld	= (HBRUSH)SelectObject(hDC, GetStockObject(NULL_BRUSH));
+			Rectangle(hDC, 0, 0, vpWidth, vpHeight);
+			SelectObject(hDC, hPenOld);
+			SelectObject(hDC, hBrOld);
+			DeleteObject(hPenCur);			
+		}
+		SetBkMode(hDC, TRANSPARENT);
+		SetTextColor(hDC, RGB(0, 0, 0));
+		TextOut(hDC, 2, 2, vpName, _tcslen(vpName));
+		vp->Viewport->dropDC(&hDC);
+
 		ResetEvent(vp->threadControls.doRender);
 		SetEvent(vp->threadControls.jobDone);
 	} while ( bAlive );
 
+	delete[] vpName;
 	return SHUTDOWN_ON_DEMAND;
 }
 
@@ -492,7 +535,7 @@ UINT clsViewportPool::findViewport(DWORD vpID)
 	UINT vpCount = Viewports.size();
 	for ( UINT i = 0; i < vpCount; i++ )
 	{
-		if ( GetThreadId(Viewports[i]->Thread) == vpID ) return i;
+		if ( Viewports[i]->Viewport->getID() == vpID ) return i;
 	}
 	return MAX_VIEWPORT_COUNT;
 }
@@ -500,17 +543,17 @@ UINT clsViewportPool::findViewport(DWORD vpID)
 clsViewportPool::clsViewportPool(LPFORM lpOwner) 
 	: Owner(lpOwner), Scene(NULL) 
 {
-	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
+	renderEvent		= CreateEvent(0, TRUE, FALSE, NULL);
 }
 clsViewportPool::clsViewportPool(LPFORM lpOwner, LPSCENE3D lpScene) 
 	: Owner(lpOwner), Scene(NULL)
 {
-	renderEvent = CreateEvent(0, TRUE, FALSE, NULL);
+	renderEvent		= CreateEvent(0, TRUE, FALSE, NULL);
 	assignScene(lpScene);
 }
 clsViewportPool::~clsViewportPool() 
 { 
-	if ( renderEvent != NULL )	CloseHandle(renderEvent);
+	if ( renderEvent	!= NULL )	CloseHandle(renderEvent);
 }
 
 BOOL clsViewportPool::assignScene(LPSCENE3D lpScene)
@@ -528,30 +571,19 @@ DWORD clsViewportPool::addViewport(
 					VIEW_TYPE	vpVType,
 					RENDER_MODE vpRMode
 ) {
-	LPTHREAD_DATA	thData;
+	LPTHREAD_DATA	thData		= {NULL};
 	DWORD			vpID		= 0,
 					dwResult;				
-	BOOL			bResult;
 	
-	bResult 
-		= Scene												!= NULL
-		&& Owner											!= NULL
-		&& renderEvent										!= NULL
-		&& Viewports.size()									!= MAX_VIEWPORT_COUNT;
-	if ( bResult )
-	{
+	try {
+		if ( Scene == NULL || Owner == NULL )			throw E_FAILED;
+		if ( renderEvent == NULL )						throw E_EVENT_CREATION_FAILED;
+		if ( Viewports.size() == MAX_VIEWPORT_COUNT )	throw E_MAX_COUNT_REACHED; 
+
 		thData				= new THREAD_DATA;
 		thData->Viewport	= new VIEWPORT(Scene, DEFAULT_CAMERA_ID, vpRMode);
-		dwResult = thData->Viewport->SetUp(
-										Owner,
-										vpPosX,
-										vpPosY,
-										vpWidth,
-										vpHeight
-									);
-		if ( SUCCEEDED(dwResult) )
-		{
-			thData->Thread	= CreateThread(
+
+		thData->Thread	= CreateThread(
 									0,
 									0,
 									Render,
@@ -559,34 +591,40 @@ DWORD clsViewportPool::addViewport(
 									CREATE_SUSPENDED,
 									&vpID
 								);
-			bResult = thData->Thread != NULL;
-			if ( bResult )
-			{
-				thData->threadControls.doRender = renderEvent;
-				thData->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
-				thData->threadControls.jobDone	= CreateEvent(0, FALSE, FALSE, NULL);
-				bResult = thData->threadControls.shutDown != NULL
-						&& thData->threadControls.jobDone != NULL;
-				if ( bResult ) 
-				{
-					Viewports.push_back(thData);
-					vpStates.push_back(thData->threadControls.jobDone);
-					ResumeThread(thData->Thread);
-					thData->Viewport->Show();
-				}
-			}
-		}
-		if ( !bResult ) 
-		{
-			delete thData->Viewport;
-			delete thData;
-		}
-		else
-		{
-			SetViewportDefaultView(thData->Viewport, vpVType);
-		}
+		if ( thData->Thread == NULL ) throw E_THREAD_CREATION_FAILED;
+
+		dwResult = thData->Viewport->SetUp(
+									vpID,
+									Owner,
+									vpPosX,
+									vpPosY,
+									vpWidth,
+									vpHeight
+								);
+		if ( FAILED(dwResult) ) throw dwResult;
+
+		thData->threadControls.doRender = renderEvent;
+		thData->threadControls.shutDown	= CreateEvent(0, FALSE, FALSE, NULL);
+		thData->threadControls.jobDone	= CreateEvent(0, FALSE, FALSE, NULL);
+		if (
+			thData->threadControls.shutDown		== NULL
+			|| thData->threadControls.jobDone	== NULL
+		) throw E_EVENT_CREATION_FAILED;
+
+		thData->isActive = FALSE;
+		Viewports.push_back(thData);
+		vpStates.push_back(thData->threadControls.jobDone);
+		SetViewportDefaultView(thData->Viewport, vpVType);
+		ResumeThread(thData->Thread);
+		thData->Viewport->Show();
 	}
-	return vpID;
+	catch ( DWORD errCode )
+	{
+		if ( thData->Viewport != NULL )	delete thData->Viewport;
+		if ( thData != NULL )			delete thData;
+		return errCode;
+	}
+	return S_DONE;
 }
 
 BOOL clsViewportPool::delViewport(UINT vpIndex)
@@ -620,7 +658,38 @@ LPVIEWPORT clsViewportPool::getViewport(UINT vpIndex)
 
 LPVIEWPORT clsViewportPool::getViewport(DWORD vpID)
 {
-	return Viewports[findViewport(vpID)]->Viewport;
+	UINT vpIndex = findViewport(vpID);
+	if ( vpIndex < Viewports.size() ) return Viewports[vpIndex]->Viewport;
+	return NULL;
+}
+
+UINT clsViewportPool::getActiveViewportIndex()
+{
+	UINT vpCount = Viewports.size();
+
+	for(UINT i = 0; i < vpCount; i++)
+		if ( Viewports[i]->isActive == TRUE ) return i;
+
+	return vpCount;
+}
+
+UINT clsViewportPool::getViewportCount() { return Viewports.size(); }
+
+VOID clsViewportPool::setActiveViewport(UINT vpActiveIndex)
+{
+	UINT vpCount = Viewports.size();
+	BOOL bResult = vpActiveIndex < vpCount;
+
+	for(UINT i = 0; i < vpCount; i++)
+			Viewports[i]->isActive = FALSE;
+
+	if ( bResult ) 
+		Viewports[vpActiveIndex]->isActive = bResult;
+}
+
+VOID clsViewportPool::setActiveViewport(DWORD vpActiveID)
+{
+	setActiveViewport(findViewport(vpActiveID));
 }
 
 DWORD clsViewportPool::RenderWorld() 

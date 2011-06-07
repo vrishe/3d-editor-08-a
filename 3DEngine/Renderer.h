@@ -50,6 +50,7 @@ typedef vector < VECTOR3D > SCENEVERT;
 
 class clsViewport : public clsForm {
 private:
+	UINT			ID;
 	UINT			cameraObjectID;
 	RENDER_MODE		rMode;
 	LPSCENE3D		Scene;
@@ -64,13 +65,15 @@ public:
 		RENDER_MODE renderMode		= RM_WIREFRAME
 	);
 	virtual ~clsViewport();
+	UINT	getID();
 
 	DWORD SetUp(
-				LPFORM vpOwner,
-				INT	vpPosX,
-				INT vpPosY,
-				UINT vpWidth,
-				UINT vpHeight
+				UINT	vpID,
+				LPFORM	vpOwner,
+				INT		vpPosX,
+				INT		vpPosY,
+				UINT	vpWidth,
+				UINT	vpHeight
 			);
 
 	LPSCENE3D	getScene();	
@@ -97,8 +100,15 @@ enum VIEW_TYPE {
 };
 VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt);
 
+#ifndef FRAME_STROKE_COLORREF
+#define FRAME_STROKE_COLORREF RGB(0, 0, 0)
+#endif //FRAME_STROKE_COLORREF
+
+#define NO_ACTIVE_VIEWPORT UINT_MAX
+
 typedef struct tagTHREAD_DATA {
 	LPVIEWPORT		Viewport;
+	BOOL			isActive;
 
 	THREAD			Thread;
 	THREAD_CONTROLS threadControls;
@@ -122,22 +132,26 @@ public:
 	clsViewportPool(LPFORM Owner, LPSCENE3D lpScene);
 	~clsViewportPool();
 
-	BOOL assignScene(LPSCENE3D lpScene);
-	DWORD addViewport(
-				INT			vpPosX,
-				INT			vpPosY,
-				UINT		vpWidth,
-				UINT		vpHeight,
-				VIEW_TYPE	vpVType,
-				RENDER_MODE vpRMode
-			);
-	BOOL delViewport(UINT vpIndex);
-	BOOL delViewport(DWORD vpID);
+	BOOL		assignScene(LPSCENE3D lpScene);
+	DWORD		addViewport(
+					INT			vpPosX,
+					INT			vpPosY,
+					UINT		vpWidth,
+					UINT		vpHeight,
+					VIEW_TYPE	vpVType,
+					RENDER_MODE vpRMode
+				);
+	BOOL		delViewport(UINT vpIndex);
+	BOOL		delViewport(DWORD vpID);
 
-	LPVIEWPORT getViewport(UINT vpIndex);
-	LPVIEWPORT getViewport(DWORD vpID);
-	UINT getViewportCount();
+	LPVIEWPORT	getViewport(UINT vpIndex);
+	LPVIEWPORT	getViewport(DWORD vpID);
+	UINT		getActiveViewportIndex();
+	UINT		getViewportCount();
+	
+	VOID		setActiveViewport(UINT vpActiveIndex);
+	VOID		setActiveViewport(DWORD vpActiveID);
 
-	DWORD RenderWorld();
+	DWORD		RenderWorld();
 };
 typedef clsViewportPool VIEWPORT_POOL, *LPVIEWPORT_POOL;

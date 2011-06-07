@@ -198,8 +198,8 @@ typedef pair<CLASS_ID, OBJECTS_LIST> CONTENT_CLASS;
 // World class which represents real world wnumerations and sets the WCS
 class clsScene {
 private:
-	CONTENT objects;
-	COLOR3D	ambientColor;
+	CONTENT		objects;
+	COLORREF	ambientColor;
 
 public:
 	clsScene();
@@ -222,11 +222,9 @@ public:
 	LPOBJECT3D	getObject(size_t objID);
 	size_t		getPolygonsCount();
 	size_t		getVerticesCount();
-	COLOR3D		getAmbientColor();
-	DWORD		getAmbientColorRef();
+	COLORREF	getAmbientColor();
 
-	VOID		setAmbientColor(COLOR3D c);
-	VOID		setAmbientColor(BYTE red, BYTE green, BYTE blue);
+	VOID		setAmbientColor(COLORREF color);
 
 	size_t getObjectClassCount(CLASS_ID clsID);
 };

@@ -182,7 +182,7 @@ clsObject::clsObject(CLASS_ID clsID)
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
-	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
+	Name[0]	= '\0';
 
 	xScale	= 1.0f;
 	yScale	= 1.0f; 
@@ -202,10 +202,8 @@ clsObject::clsObject(
 			CLASS_ID clsID) 
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
-	TCHAR		countText[11];
-
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
-	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
+	Name[0]	= '\0';
 
 	pos		= pt;
 
@@ -228,10 +226,8 @@ clsObject::clsObject(
 		CLASS_ID clsID)
 	: ClassID(clsID), ID(Counter++), Name(NULL)
 {
-	TCHAR		countText[11];
-
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
-	ZeroMemory(Name, MAX_OBJECT_NAME_LEN * sizeof(TCHAR));
+	Name[0]	= '\0';
 
 	pos.x = pX;
 	pos.y = pY;
@@ -325,11 +321,11 @@ void clsObject::LookAt(VECTOR3D lookAt)
 	if ( Vector3DLength(&lookDir) > EPSILON )
 	{
 		Vector3DNormalize(&lookDir, &fWd);
-		Vector3DMultV(&uWd/*&VECTOR3D(.0f, .0f, 1.0f)*/, &fWd, &rWd);
+		Vector3DMultV(&uWd, &fWd, &rWd);
 		Vector3DNormalize(&rWd, &rWd);
 		if ( Vector3DLength(&rWd) < EPSILON )
 			rWd = VECTOR3D(0, 1, 0) 
-				* ((uWd.z >= 0) - (uWd.z < 0));
+				* (FLOAT)((uWd.z >= 0) - (uWd.z < 0));
 		Vector3DMultV(&fWd, &rWd, &uWd);
 	}
 }
@@ -386,14 +382,18 @@ void clsObject::getName(LPTSTR objName, size_t bufSize)
 	UINT bSize = bufSize > MAX_OBJECT_NAME_LEN 
 		? MAX_OBJECT_NAME_LEN : bufSize;
 
-	_tcsncpy_s(objName, bufSize, Name, bSize); 
+	bSize--;
+	_tcsncpy_s(objName, bufSize, Name, bSize);
+	objName[bSize] = '\0';
 }
 void clsObject::setName(LPTSTR objName, size_t srcSize)
 {
 	UINT bSize = srcSize > MAX_OBJECT_NAME_LEN 
 		? MAX_OBJECT_NAME_LEN : srcSize;
 
+	bSize--;
 	_tcsncpy_s(Name, MAX_OBJECT_NAME_LEN, objName, bSize);
+	objName[bSize] = '\0';
 }
 
 // ============================================================================
@@ -461,9 +461,7 @@ clsScene::clsScene()
 	clsObjLst.first = CLS_LIGHT;
 	objects.insert(clsObjLst);
 
-	ambientColor.Red	= 0;
-	ambientColor.Green	= 0;
-	ambientColor.Blue	= 0;
+	ambientColor = 0;
 }
 clsScene::~clsScene() { }
 
@@ -524,9 +522,7 @@ void clsScene::Clear() {
 	clsObjLst.first = CLS_LIGHT;
 	objects.insert(clsObjLst);
 
-	ambientColor.Red	= 0;
-	ambientColor.Green	= 0;
-	ambientColor.Blue	= 0;
+	ambientColor = 0;
 }
 
 LPOBJECT3D clsScene::getObject(CLASS_ID clsID, size_t objIndex)
@@ -565,25 +561,9 @@ size_t clsScene::getVerticesCount() {
 	return count;
 }
 
-COLOR3D clsScene::getAmbientColor() { return ambientColor; }
+COLORREF clsScene::getAmbientColor() { return ambientColor; }
 
-DWORD	clsScene::getAmbientColorRef()
-{ 
-	return RGB(
-			ambientColor.Red, 
-			ambientColor.Green,
-			ambientColor.Blue
-		);
-}
-
-VOID clsScene::setAmbientColor(COLOR3D c) { ambientColor = c; }
-
-VOID clsScene::setAmbientColor( BYTE red, BYTE green, BYTE blue )
-{
-	ambientColor.Red	= red;
-	ambientColor.Green	= green;
-	ambientColor.Blue	= blue;
-}
+VOID clsScene::setAmbientColor(COLORREF color) { ambientColor = color; }
 
 size_t clsScene::getObjectClassCount(CLASS_ID clsID)
 {

@@ -89,6 +89,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_TOP,
 					RM_WIREFRAME
 				);
+	Pool->getViewport(0U)->AssignEventHandler(
+									WM_LBUTTONDOWN,
+									viewport_lbMouseClick,
+									TRUE
+								);
+
 	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
 					BT_TOOL_H + 10,
@@ -97,6 +103,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_FRONT,
 					RM_WIREFRAME
 				);
+	Pool->getViewport(1U)->AssignEventHandler(
+									WM_LBUTTONDOWN,
+									viewport_lbMouseClick,
+									TRUE
+								);
+
 	Pool->addViewport(
 					10, 
 					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
@@ -105,6 +117,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_LEFT,
 					RM_WIREFRAME
 				);
+	Pool->getViewport(2U)->AssignEventHandler(
+									WM_LBUTTONDOWN,
+									viewport_lbMouseClick,
+									TRUE
+								);
+
 	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
 					BT_TOOL_H + 10 + VIEWPORT_AREA_H / 2,
@@ -113,6 +131,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_PERSPECTIVE,
 					RM_SHADEDWF
 				);
+	Pool->getViewport(3U)->AssignEventHandler(
+									WM_LBUTTONDOWN,
+									viewport_lbMouseClick,
+									TRUE
+								);
 
 	Draw_MainToolbars(hInstance);
 
@@ -911,4 +934,26 @@ BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn) {
 
 	// Display the Open dialog box.
 	return GetSaveFileName(&ofn);	 
+}
+
+// ============================================================================
+// Focus handling funcs:
+// ============================================================================
+
+LRESULT mainForm_onFocusLost(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	Pool->setActiveViewport(NO_ACTIVE_VIEWPORT);
+	return 0L;
+}
+
+// ============================================================================
+// Mouse handling funcs:
+// ============================================================================
+LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	LPVIEWPORT vp = (LPVIEWPORT)Sender;
+	Pool->setActiveViewport((DWORD)vp->getID());
+	mainForm.Invalidate();
+
+	return 0L;
 }
