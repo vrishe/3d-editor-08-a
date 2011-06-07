@@ -208,6 +208,7 @@ public:
 	bool DeleteObject(CLASS_ID clsID, size_t objIndex); 
 	bool DeleteObject(size_t objID);
 	bool DeleteObject(LPOBJECT3D lpObject);
+	void Clear();
 
 	bool findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex = NULL);
 	bool findObjectIndex(

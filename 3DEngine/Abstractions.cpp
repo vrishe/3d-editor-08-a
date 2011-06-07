@@ -504,6 +504,23 @@ bool clsScene::DeleteObject(LPOBJECT3D lpObject)
 			&& DeleteObject(lpObject->clsID(), objIndex);	
 }
 
+void clsScene::Clear() {
+	objects.clear();
+	
+	CONTENT_CLASS clsObjLst;
+
+	clsObjLst.first = CLS_CAMERA;
+	objects.insert(clsObjLst);
+	clsObjLst.first = CLS_MESH;
+	objects.insert(clsObjLst);
+	clsObjLst.first = CLS_LIGHT;
+	objects.insert(clsObjLst);
+
+	ambientColor.Red	= 0;
+	ambientColor.Green	= 0;
+	ambientColor.Blue	= 0;
+}
+
 LPOBJECT3D clsScene::getObject(CLASS_ID clsID, size_t objIndex)
 {
 	CONTENT::iterator finder = objects.find(clsID);
