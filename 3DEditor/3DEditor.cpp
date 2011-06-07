@@ -11,15 +11,23 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// имя класса главного окна
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
+TOOLS				activeTool;
+
 BUTTON				btMove, btRotate, btScale,
 					tabCreate, tabModify,
-					btObjects, btCams, btLights,
 					btPan, btCamSphere, btLookAround;
 
-LABEL				lbX, lbY, lbZ,
-					lbObjects;
+BUTTON				btObjects, btCams, btLights;
+BUTTON				btMicrophone;
+BUTTON				btQMake, btFMake;
 
-TEXTBOX				tbX, tbY, tbZ;
+LABEL				lbX, lbY, lbZ,
+					lbObjects,
+					lbQuick,
+					lbParams[MAX_PARAMS_NUM];
+
+TEXTBOX				tbX, tbY, tbZ,
+					tbParams[MAX_PARAMS_NUM];
 
 LISTBOX				listObjects;
 
@@ -57,7 +65,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR))
 			); 
 	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
-	mainForm.AssignEventHandler(WM_COMMAND, mainForm_menuClick, TRUE);
+	mainForm.AssignEventHandler(WM_COMMAND, mainForm_InterfClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
 	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
 	mainForm.AssignEventHandler(WM_GETDLGCODE, mainForm_ProcKeys, TRUE);
@@ -104,6 +112,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					RM_SHADEDWF
 				);
 
+	Draw_MainToolbars(hInstance);
+
+	mainForm.Show();
+
+	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
+	iResult = mainForm.DoMSGCycle(hAccelTable);
+
+	delete Pool; 
+	mainForm.Destroy();
+	return iResult;
+}
+
+// Draw interface functions
+ //============================================================================
+VOID Draw_MainToolbars (HINSTANCE hInstance) {
 	TCHAR *name = new TCHAR[256];
 		// object toolbar buttons	
 	LoadString(hInstance, N_BT_MOVE, name, 256);
@@ -178,28 +201,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					TAB_W, TAB_H,
 					FALSE);
 
-	LoadString(hInstance, N_BT_LIGHTS, name, 256);
-	btLights.Create(BT_LIGHTS,
-					name,
-					&mainForm,
-					ufWidth - SUB_TAB_W - 6, 15 + BT_TOOL_H / 2 + TAB_H,					
-					SUB_TAB_W, SUB_TAB_H,
-					FALSE);
-	LoadString(hInstance, N_BT_CAMS, name, 256);
-	btCams.Create(	BT_CAMS,
-					name,
-					&mainForm,
-					ufWidth - SUB_TAB_W * 2 - 9, 15 + BT_TOOL_H / 2 + TAB_H,
-					SUB_TAB_W, SUB_TAB_H,
-					FALSE);
-	LoadString(hInstance, N_BT_OBJECTS, name, 256);
-	btObjects.Create(BT_OBJECTS,
-					name,
-					&mainForm,
-					ufWidth - SUB_TAB_W * 3 - 13, 15 + BT_TOOL_H / 2 + TAB_H,
-					SUB_TAB_W, SUB_TAB_H,
-					FALSE);
-
 	LoadString(hInstance, N_LB_OBJECTS, name, 256);
 	lbObjects.Create(name,
 					&mainForm,
@@ -241,18 +242,261 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEWPORT_AREA_H + BT_TOOL_H + 10,
 					BT_TOOL_W, BT_TOOL_H,
 					FALSE);
-	
+	delete [] name;
+}
+
+VOID Draw_InitCreateToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_BT_LIGHTS, name, 256);
+	btLights.Create(BT_LIGHTS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W - 6, 15 + BT_TOOL_H / 2 + TAB_H,					
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
+	LoadString(hInstance, N_BT_CAMS, name, 256);
+	btCams.Create(	BT_CAMS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 2 - 9, 15 + BT_TOOL_H / 2 + TAB_H,
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
+	LoadString(hInstance, N_BT_OBJECTS, name, 256);
+	btObjects.Create(BT_OBJECTS,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 3 - 13, 15 + BT_TOOL_H / 2 + TAB_H,
+					SUB_TAB_W, SUB_TAB_H,
+					FALSE);
 
 	delete [] name;
-	mainForm.Show();
-
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
-	iResult = mainForm.DoMSGCycle(hAccelTable);
-
-	delete Pool; 
-	mainForm.Destroy();
-	return iResult;
 }
+VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {
+
+}
+VOID Draw_InitObjectsToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_BT_MIC, name, 256);
+	btMicrophone.Create(BT_MIC,
+					name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 12, 
+					20 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H,				
+					TAB_W, SUB_TAB_H,
+					FALSE);
+
+	delete [] name;
+}
+VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
+	TCHAR *name = new TCHAR[256];
+
+	LoadString(hInstance, N_LB_NAME, name, 256);
+	lbParams[0].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 11, 
+						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+						46, 16);
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[0].Create(	TB_HEIGHT,
+						name,
+						&mainForm,
+						ufWidth - TAB_W * 2 + 36, 
+						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+						LIST_OBJ_W - 44, BT_TOOL_H - 9);
+
+	LoadString(hInstance, N_LB_QUICK, name, 256);
+	lbQuick.Create(	name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 12, 
+					60 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+					100, 16);
+	LoadString(hInstance, N_LB_HEIGHT, name, 256);
+	lbParams[1].Create(name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+						46, 16);
+	LoadString(hInstance, N_LB_BDIAM, name, 256);
+	lbParams[2].Create(	name,
+						&mainForm,
+						ufWidth - 140, 
+						83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+						56, 16);
+
+	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tbParams[2].Create(	TB_HEIGHT,
+						name,
+						&mainForm,
+						ufWidth - 225, 
+						80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+						80, BT_TOOL_H - 9);
+	tbParams[3].Create(	TB_BDIAM,
+						name,
+						&mainForm,
+						ufWidth - 80, 
+						80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+						75, BT_TOOL_H - 9);
+	tbParams[4].Create(	TB_BDIAM,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						218,
+						75, BT_TOOL_H - 9);
+	tbParams[5].Create(	TB_BHEIGHT,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						242,
+						75, BT_TOOL_H - 9);
+	tbParams[6].Create(	TB_BWIDTH,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						268,
+						75, BT_TOOL_H - 9);
+	tbParams[7].Create(	TB_UDIAM,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						293,
+						75, BT_TOOL_H - 9);
+	tbParams[8].Create(	TB_UHEIGHT,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						318,
+						75, BT_TOOL_H - 9);
+	tbParams[9].Create(	TB_UGAP,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						343,
+						75, BT_TOOL_H - 9);
+	tbParams[10].Create(TB_HANDIND,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						368,
+						75, BT_TOOL_H - 9);
+	tbParams[11].Create(TB_HEADDIAM,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						393,
+						75, BT_TOOL_H - 9);
+	tbParams[12].Create(TB_HEADDEPTH,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						418,
+						75, BT_TOOL_H - 9);
+	tbParams[13].Create(TB_COREDIAM,
+						name,
+						&mainForm,
+						ufWidth - 165, 
+						443,
+						75, BT_TOOL_H - 9);
+	
+	LoadString(hInstance, N_TAB_CREATE, name, 256);
+	btQMake.Create(	BT_QMAKE,
+					name,
+					&mainForm,
+					ufWidth - 80, 
+					195,
+					BT_TOOL_W, BT_TOOL_H);
+	btFMake.Create(	BT_FMAKE,
+					name,
+					&mainForm,
+					ufWidth - 80, 
+					456,
+					BT_TOOL_W, BT_TOOL_H);
+
+	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
+	lbParams[3].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						220,				
+						120, 16);
+	LoadString(hInstance, N_LB_BDIAM, name, 256);
+	lbParams[4].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						245,				
+						120, 16);
+	LoadString(hInstance, N_LB_BWIDTH, name, 256);
+	lbParams[5].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						270,				
+						120, 16);
+	LoadString(hInstance, N_LB_UDIAM, name, 256);
+	lbParams[6].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						295,				
+						120, 16);
+	LoadString(hInstance, N_LB_UHEIGHT, name, 256);
+	lbParams[7].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						320,				
+						120, 16);
+	LoadString(hInstance, N_LB_UGAP, name, 256);
+	lbParams[8].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						345,				
+						120, 16);
+	LoadString(hInstance, N_LB_HANDIND, name, 256);
+	lbParams[9].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						370,				
+						120, 16);
+	LoadString(hInstance, N_LB_HEADDIAM, name, 256);
+	lbParams[10].Create(	name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						395,				
+						120, 16);
+	LoadString(hInstance, N_LB_HEADDEPTH, name, 256);
+	lbParams[11].Create(name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						420,				
+						120, 16);
+	LoadString(hInstance, N_LB_COREDIAM, name, 256);
+	lbParams[12].Create(name,
+						&mainForm,
+						ufWidth - TAB_W * 2 - 12, 
+						445,				
+						120, 16);
+
+	delete [] name;
+}
+
+VOID Draw_DestroyRightToolbar () {
+	btObjects.Destroy();
+	btCams.Destroy();
+	btLights.Destroy();
+
+	btMicrophone.Destroy();
+
+	lbQuick.Destroy();
+	btQMake.Destroy();
+	btFMake.Destroy();
+	for ( UINT i = 0; i < 15; i++ ) {
+		lbParams[i].Destroy();
+		tbParams[i].Destroy();
+	}
+}
+
+ //Controls functions
+ //============================================================================
+
+
 
  //Form event handler functions
  //============================================================================
@@ -265,46 +509,99 @@ LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
-	//switch ( wParam )
-	//{
-	//}
-	//mainForm.Invalidate();
+	switch ( activeTool ) {
+	case IS_MOVE:
+		switch ( wParam ) {
+		case VK_LEFT:
+			break;
+		case VK_RIGHT:
+			break;
+		case VR_UP:
+			break;
+		case VK_DOWN:
+			break;
+		}
+		break;
+	case IS_ROTATE:
+		break;
+	case IS_SCALE:
+		break;
+	case IS_PAN:
+		break;
+	case IS_CAMROTATE:
+		break;
+	case IS_LOOK:
+		break;
+	}
+	mainForm.Invalidate();
 
 	return 0L;
 }
 
-LRESULT mainForm_menuClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	OPENFILENAME ofn;
 	TCHAR *fName = new TCHAR[256];
 	switch (LOWORD(wParam))
 	{
-		case IDM_ABOUT:
-			((LPFORM)Sender)->DBShow(
-					MAKEINTRESOURCE(IDD_ABOUTBOX), 
-					About_DialogBox_Handler
-				);
-			break;
-		case IDM_EXIT:
-			((LPFORM)Sender)->Destroy();
-			break;
-		case IDM_SAVE:
-			if ( SaveFileDialog((HWND)lParam, ofn) ) {
-				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::saveSceneScript(&Scene, fName) )
-					MessageBox((HWND)lParam, _T("Неправильное имя файла"), _T("Ошибка записи"), MB_ICONERROR | MB_OK );
+	case BT_MOVE:
+		activeTool = IS_MOVE;
+		break;
+	case BT_ROTATE:
+		activeTool = IS_ROTATE;
+		break;
+	case BT_SCALE:
+		activeTool = IS_SCALE;
+		break;
+	case BT_PAN:
+		activeTool = IS_PAN;
+		break;
+	case BT_CAMSPHERE:
+		activeTool = IS_CAMROTATE;
+		break;
+	case BT_LOOK_AROUND:
+		activeTool = IS_LOOK;
+		break;
+	case TAB_CREATE:
+		Draw_DestroyRightToolbar();
+		Draw_InitCreateToolbar(GetModuleHandle(NULL));
+		break;
+	case TAB_CREATE:
+		Draw_DestroyRightToolbar();
+		Draw_InitModifyToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_OBJECTS:
+		Draw_InitObjectsToolbar(GetModuleHandle(NULL));
+		break;
+	case BT_MIC:
+		Draw_InitMicrophoneToolbar(GetModuleHandle(NULL));
+		break;
+	case IDM_SAVE:
+		if ( SaveFileDialog((HWND)lParam, ofn) ) {
+			CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
+			if ( !TRANSLATOR3D::saveSceneScript(&Scene, fName) )
+				MessageBox((HWND)lParam, _T("Неправильное имя файла"), _T("Ошибка записи"), MB_ICONERROR | MB_OK );
+		}
+		break;
+	case IDM_LOAD:
+		if ( OpenFileDialog((HWND)lParam, ofn) ) {
+			CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
+			if ( !TRANSLATOR3D::loadSceneScript(&Scene, fName) ) {
+				MessageBox((HWND)lParam, _T("Невозможно открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
+				break;
 			}
-			break;
-		case IDM_LOAD:
-			if ( OpenFileDialog((HWND)lParam, ofn) ) {
-				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::loadSceneScript(&Scene, fName) ) {
-					MessageBox((HWND)lParam, _T("Невозможно открыть данный файл"), _T("Ошибка чтения"), MB_ICONERROR | MB_OK );
-					break;
-				}
-				mainForm.Invalidate();
-			}
-			break;
+			mainForm.Invalidate();
+		}
+		break;
+	case IDM_ABOUT:
+		((LPFORM)Sender)->DBShow(
+				MAKEINTRESOURCE(IDD_ABOUTBOX), 
+				About_DialogBox_Handler
+			);
+		break;
+	case IDM_EXIT:
+		((LPFORM)Sender)->Destroy();
+		break;
 	}
 	return 0L;
 }
