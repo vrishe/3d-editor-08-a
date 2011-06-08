@@ -136,7 +136,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									viewport_lbMouseClick,
 									TRUE
 								);
-
+	Pool->setActiveViewport(3U);
 	Draw_MainToolbars(hInstance);
 	RefreshObjectsList();
 
@@ -1071,8 +1071,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 	UINT i = listObjects.getCurSel();
 	TCHAR *buf = new TCHAR[256];
-	LPOBJECT3D obj = new OBJECT3D;
-	listObjects.getItem(i, buf, 256, (LPVOID*)obj);
+	LPOBJECT3D obj = NULL;
+	listObjects.getItem(i, buf, 256, (LPVOID*)&obj);
 
 	UINT ind = Pool->getActiveViewportIndex();
 	switch ( activeTool ) {
@@ -1331,7 +1331,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 }
 
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam) 
-{	return DLGC_WANTARROWS;		}
+{ return DLGC_WANTALLKEYS; }
 
 LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
@@ -1416,6 +1416,7 @@ LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	LPVIEWPORT vp = (LPVIEWPORT)Sender;
 	Pool->setActiveViewport((DWORD)vp->getID());
+	mainForm.setFocus();
 	mainForm.Invalidate();
 
 	return 0L;
