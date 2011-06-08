@@ -175,6 +175,26 @@ bool tagColor::operator!=(const float &b) const {
 }
 
 // ===========================================================================
+// Implementation of tagCOORD_SPACE3D
+// ===========================================================================
+tagCOORD_SPACE3D::tagCOORD_SPACE3D() 
+{
+	X = VECTOR3D(1.0f, .0f, .0f);
+	Y = VECTOR3D(.0f, 1.0f, .0f);
+	Z = VECTOR3D(.0f, .0f, 1.0f);
+}
+
+tagCOORD_SPACE3D::tagCOORD_SPACE3D(
+							VECTOR3D aX,
+							VECTOR3D aY,
+							VECTOR3D aZ
+) {
+	X = aX;
+	Y = aY;
+	Z = aZ;
+}
+
+// ===========================================================================
 // Implementation of clsObject class:
 size_t clsObject::Counter = 1;
 
@@ -184,14 +204,16 @@ clsObject::clsObject(CLASS_ID clsID)
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 	Name[0]	= '\0';
 
-	xScale	= 1.0f;
-	yScale	= 1.0f; 
-	zScale	= 1.0f;
-
+	//UCS		= NULL;
 	pos		= VECTOR3D(.0f, .0f, .0f);
+
 	fWd		= VECTOR3D(1.0f, .0f, .0f);
 	rWd		= VECTOR3D(.0f, 1.0f, .0f);
 	uWd		= VECTOR3D(.0f, .0f, 1.0f);
+	world	= VECTOR3D();
+
+	worldScale	= VECTOR3D(1.0f, 1.0f, 1.0f);
+	localScale	= worldScale;
 }
 
 clsObject::clsObject(
@@ -205,11 +227,16 @@ clsObject::clsObject(
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 	Name[0]	= '\0';
 
+	//UCS		= NULL;
 	pos		= pt;
 
 	fWd		= VECTOR3D(1.0f, .0f, .0f);
 	rWd		= VECTOR3D(.0f, 1.0f, .0f);
 	uWd		= VECTOR3D(.0f, .0f, 1.0f);
+	world	= VECTOR3D();
+
+	worldScale	= VECTOR3D(1.0f, 1.0f, 1.0f);
+	localScale	= worldScale;
 
 	Pitch(p);
 	Yaw(y);
@@ -229,13 +256,16 @@ clsObject::clsObject(
 	Name	= new TCHAR[MAX_OBJECT_NAME_LEN];
 	Name[0]	= '\0';
 
-	pos.x = pX;
-	pos.y = pY;
-	pos.z = pZ;
+	//UCS		= NULL;
+	pos		= VECTOR3D(pX, pY, pZ);
 
 	fWd		= VECTOR3D(1.0f, .0f, .0f);
 	rWd		= VECTOR3D(.0f, 1.0f, .0f);
 	uWd		= VECTOR3D(.0f, .0f, 1.0f);
+	world	= VECTOR3D();
+
+	worldScale	= VECTOR3D(1.0f, 1.0f, 1.0f);
+	localScale	= worldScale;
 
 	Pitch(p);
 	Yaw(y);
@@ -253,19 +283,43 @@ size_t clsObject::objID()	{ return ID; }
 
 VECTOR3D clsObject::getPosition() { return pos; }
 
+void clsObject::Follow(float units)	{ pos += fWd * units; }
+void clsObject::Strafe(float units)	{ pos += rWd * units; }
+void clsObject::Fly(float units)	{ pos += uWd * units; }
+void clsObject::LocalTranslate(VECTOR3D tV)
+{
+	pos += fWd * tV.x;
+	pos += rWd * tV.y;
+	pos += uWd * tV.z;
+}
+void clsObject::LocalTranslate(float tX, float tY, float tZ)
+{
+	pos += fWd * tX;
+	pos += rWd * tY;
+	pos += uWd * tZ;
+}
 void clsObject::Translate(VECTOR3D tV) { pos = tV; }
 void clsObject::Translate(float tX, float tY, float tZ) 
 { 
 	pos = VECTOR3D(tX, tY, tZ); 
 }
 
-void clsObject::Follow(float units)	{ pos += fWd * units; }
-void clsObject::Strafe(float units)	{ pos += rWd * units; }
-void clsObject::Fly(float units)	{ pos += uWd * units; }
+void clsObject::ScaleAlong(float factor)	{ localScale.x *= factor; }
+void clsObject::ScaleHAcross(float factor)	{ localScale.y *= factor; }
+void clsObject::ScaleVAcross(float factor)	{ localScale.z *= factor; }
+void clsObject::LocalScale(float fX, float fY, float fZ)
+{
+	localScale.x *= fX;
+	localScale.x *= fY;
+	localScale.x *= fZ;
+}
+void clsObject::Scale(float fX, float fY, float fZ)
+{
+	worldScale.x *= fX;
+	worldScale.x *= fY;
+	worldScale.x *= fZ;
+}
 
-void clsObject::ScaleByX(float factor) { xScale += factor; }
-void clsObject::ScaleByY(float factor) { yScale += factor; }
-void clsObject::ScaleByZ(float factor) { zScale += factor; }
 
 void clsObject::Pitch(float angle) 
 {
@@ -278,6 +332,7 @@ void clsObject::Pitch(float angle)
 	Vector3DMultV(&fWd, &rWd, &uWd);
 	Vector3DNormalize(&uWd, &uWd);
 }
+
 void clsObject::Yaw(float angle) 
 {
 	MATRIX3D M;
@@ -289,6 +344,7 @@ void clsObject::Yaw(float angle)
 	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
 }
+
 void clsObject::Roll(float angle) 
 {
 	MATRIX3D M;
@@ -301,27 +357,85 @@ void clsObject::Roll(float angle)
 	Vector3DNormalize(&uWd, &uWd);
 }
 
-void clsObject::RotateAxis(const LPVECTOR3D axis, float angle) {
+void clsObject::LocalRotate(float pitch, float yaw, float roll)
+{
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(axis, angle, &M);
-
+	Matrix3DRotateAxis(&rWd, pitch, &M);
 	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
 	Vector3DNormalize(&fWd, &fWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+	Matrix3DRotateAxis(&uWd, yaw, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Vector3DNormalize(&fWd, &fWd);
+	Vector3DMultV(&uWd, &fWd, &rWd);
 	Vector3DNormalize(&rWd, &rWd);
+
+	Matrix3DRotateAxis(&fWd, roll, &M);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Vector3DNormalize(&fWd, &fWd);
+	Vector3DMultV(&fWd, &rWd, &uWd);
 	Vector3DNormalize(&uWd, &uWd);
 }
 
-void clsObject::LookAt(VECTOR3D lookAt)
+void clsObject::Rotate(float y, float z, float x)
 {
-	VECTOR3D lookDir = lookAt - pos;
+	MATRIX3D M;
+
+	world.x = x;
+	world.y = y;
+	world.z = z;
+
+	Matrix3DRotateAxis(&VECTOR3D(.0f, 1.0f, .0f), world.y, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Matrix3DTransformCoord(&M, &pos, &pos);
+
+	Matrix3DRotateAxis(&VECTOR3D(.0f, .0f, 1.0f), world.z, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Matrix3DTransformCoord(&M, &pos, &pos);
+
+	Matrix3DRotateAxis(&VECTOR3D(1.0f, .0f, .0f), world.x, &M);
+	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Matrix3DTransformNormal(&M, &uWd, &uWd);
+	Matrix3DTransformCoord(&M, &pos, &pos);
+
+	Vector3DNormalize(&fWd, &fWd);
+	Vector3DNormalize(&rWd, &rWd);
+	Vector3DNormalize(&uWd, &uWd);
+
+}
+
+//void clsObject::RotateAxis(const LPVECTOR3D axis, float angle) {
+//	MATRIX3D M;
+//
+//	Matrix3DRotateAxis(axis, angle, &M);
+//
+//	Matrix3DTransformNormal(&M, &fWd, &fWd);
+//	Matrix3DTransformNormal(&M, &rWd, &rWd);
+//	Matrix3DTransformNormal(&M, &uWd, &uWd);
+//	Matrix3DTransformCoord(&M, &pos, &pos);
+//	Vector3DNormalize(&fWd, &fWd);
+//	Vector3DNormalize(&rWd, &rWd);
+//	Vector3DNormalize(&uWd, &uWd);
+//}
+
+void clsObject::LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient)
+{
+	VECTOR3D lookDir	= lookAt - pos;
+	VECTOR3D vUp		= upOrient != NULL ? 
+						*upOrient * uWd.z : VECTOR3D(0, 0, 1);
 
 	if ( Vector3DLength(&lookDir) > EPSILON )
 	{
 		Vector3DNormalize(&lookDir, &fWd);
-		Vector3DMultV(&uWd, &fWd, &rWd);
+		Vector3DMultV(&vUp, &fWd, &rWd);
 		Vector3DNormalize(&rWd, &rWd);
 		if ( Vector3DLength(&rWd) < EPSILON )
 			rWd = VECTOR3D(0, 1, 0) 
@@ -329,9 +443,9 @@ void clsObject::LookAt(VECTOR3D lookAt)
 		Vector3DMultV(&fWd, &rWd, &uWd);
 	}
 }
+void clsObject::LookAt(clsObject *objToLookAt) { LookAt(objToLookAt->pos, &objToLookAt->uWd); }
+void clsObject::LookAt(float lX, float lY, float lZ) { LookAt(VECTOR3D(lX, lY, lZ), NULL); }
 
-void clsObject::LookAt(const clsObject *objToLookAt) { LookAt(objToLookAt->pos); }
-void clsObject::LookAt(float lX, float lY, float lZ) { LookAt(VECTOR3D(lX, lY, lZ)); }
 void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
 {
 	mOut->_41 = pos.x;
@@ -339,11 +453,18 @@ void clsObject::GetMoveMatrix(LPMATRIX3D mOut)
 	mOut->_43 = pos.z;
 }
 
+void clsObject::GetLocalScaleMatrix(LPMATRIX3D mOut)
+{
+	mOut->_11 = localScale.x;
+	mOut->_22 = localScale.y;
+	mOut->_33 = localScale.z;
+}
+
 void clsObject::GetScaleMatrix(LPMATRIX3D mOut) 
 {
-	mOut->_11 = xScale;
-	mOut->_22 = yScale;
-	mOut->_33 = zScale;
+	mOut->_11 = worldScale.x;
+	mOut->_22 = worldScale.y;
+	mOut->_33 = worldScale.z;
 }
 
 void clsObject::GetRotationMatrix(LPMATRIX3D mOut) 
@@ -731,40 +852,32 @@ void clsMesh::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps)
 void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 {
 	VECTOR3D	vertex;
-	MATRIX3D	mScalePos(true),
-				mPitchRot(true),
-				mYawRot(true),
-				mRollRot(true);
+	MATRIX3D	mTransScalePos(true),
+				mLocalScale(true),
+				mLocalRot(true);
 	size_t vertCount = getVerticesCount();
 	if ( v != NULL )
 	{
-		GetMoveMatrix(&mScalePos);
-		GetScaleMatrix(&mScalePos);
-		GetRotationMatrix(&mPitchRot);
-		//GetPitchRotationMatrix(&mPitchRot);
-		//GetYawRotationMatrix(&mYawRot);
-		//GetRollRotationMatrix(&mRollRot);
-
+		GetLocalScaleMatrix(&mLocalScale);
+		GetRotationMatrix(&mLocalRot);
+		GetMoveMatrix(&mTransScalePos);
+		GetScaleMatrix(&mTransScalePos);
+		
 		for ( size_t i = 0; i < vertCount; i++ )
 		{
 			vertex = vertices[i];
 			Matrix3DTransformNormal(
-					&mPitchRot,
+					&mLocalScale,
 					&vertex,
 					&vertex
-				);
-			/*Matrix3DTransformNormal(
-					&mYawRot,
-					&vertex,
-					&vertex
-				);
+				);		
 			Matrix3DTransformNormal(
-					&mRollRot,
+					&mLocalRot,
 					&vertex,
 					&vertex
-				);*/
+				);
 			Matrix3DTransformCoord(
-					&mScalePos,
+					&mTransScalePos,
 					&vertex,
 					&vertex
 				);

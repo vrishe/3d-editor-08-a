@@ -102,6 +102,19 @@ enum CONSTRAINTS {
 	C_ZY	= 3
 };
 
+typedef struct tagCOORD_SPACE3D {
+	VECTOR3D X;
+	VECTOR3D Y;
+	VECTOR3D Z;
+
+	tagCOORD_SPACE3D();
+	tagCOORD_SPACE3D(
+			VECTOR3D aX,
+			VECTOR3D aY,
+			VECTOR3D aZ
+	);
+} COORD_SPACE3D, *LPCOORD_SPACE3D;
+
 class clsObject {
 private: 	
 	CLASS_ID		ClassID;
@@ -112,15 +125,19 @@ public:
 protected:
 
 	LPTSTR			Name;
+	//LPCOORD_SPACE3D	UCS;
 
-	VECTOR3D		pos,
-					fWd,
-					rWd,
-					uWd;
+	// Position
+	VECTOR3D		pos;
+	// Orientation
+	VECTOR3D		fWd;
+	VECTOR3D		rWd;
+	VECTOR3D		uWd;
+	VECTOR3D		world;
 
-	float			xScale,
-					yScale,
-					zScale;
+	// Scaling
+	VECTOR3D		worldScale;
+	VECTOR3D		localScale;
 
 	CONSTRAINTS		moveConst;
 
@@ -150,31 +167,38 @@ public:
 
 	VECTOR3D getPosition();
 
-	// Absolute translation
-	void Translate(VECTOR3D tV);
-	void Translate(float tX, float tY, float tZ);	 
-
-	//Relative translation
+	// Positioning
 	void Follow(float units);	// Along local-x
 	void Strafe(float units);	// Along local-y
 	void Fly(float units);		// Along local-z
+	void LocalTranslate(VECTOR3D tV);
+	void LocalTranslate(float tX, float tY, float tZ);
+	void Translate(VECTOR3D tV);
+	void Translate(float tX, float tY, float tZ);	 
 
-	void ScaleByX(float factor);
-	void ScaleByY(float factor);
-	void ScaleByZ(float factor);
-
-	// Relative rortaion
+	// Scaling
+	void ScaleAlong(float factor);
+	void ScaleHAcross(float factor);
+	void ScaleVAcross(float factor);
+	void LocalScale(float fx, float fy, float fz);
+	void Scale(float fx, float fy, float fz);
+	
+	// Orientation
 	void Pitch(float angle);
 	void Yaw(float angle);
 	void Roll(float angle);
+	void LocalRotate(float pitch, float yaw, float roll);
+	void Rotate(float y, float z, float x);
 
-	void RotateAxis(const LPVECTOR3D axis, float angle);
+	//void RotateAxis(const LPVECTOR3D axis, float angle);
+
 	// Take a look at point or object
-	void LookAt(VECTOR3D lookAt);
-	void LookAt(const clsObject *objToLookAt);
+	void LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient);
+	void LookAt(clsObject *objToLookAt);
 	void LookAt(float lX, float lY, float lZ);
 
 	void GetMoveMatrix(LPMATRIX3D mOut);
+	void GetLocalScaleMatrix(LPMATRIX3D mOut);
 	void GetScaleMatrix(LPMATRIX3D mOut);
 	void GetRotationMatrix(LPMATRIX3D mOut);
 
