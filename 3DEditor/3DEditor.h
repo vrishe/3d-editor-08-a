@@ -86,7 +86,9 @@ enum MF_BUTTON {
 	BT_FMAKE		= 1013,
 	BT_LIGHT		= 1014,
 	BT_CAMERA		= 1015,
-	BT_SETMODIF		= 1016
+	BT_SETMODIF		= 1016,
+	BT_MAKELIGHT	= 1017,
+	BT_MAKECAM		= 1018
 };
 
 // Draw interface functions
@@ -105,9 +107,13 @@ VOID Draw_InitCameraToolbar (HINSTANCE hInstance);
 
 VOID Draw_DestroyRightToolbar ();
 
+VOID RefreshObjectsList ();
+
  //Controls functions
 BOOL CreateMicFast();
 UINT CreateMicFull();
+BOOL CreateLight(); 
+BOOL CreateCam();
 
  //Form event handler functions
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
