@@ -507,7 +507,7 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 			vp->Viewport->getSize(&vpWidth, &vpHeight);
 			hPenCur = CreatePen(
 						PS_INSIDEFRAME, 
-						3, 
+						FRAME_STROKE_WIDTH, 
 						FRAME_STROKE_COLORREF
 					);
 			hPenOld = (HPEN)SelectObject(hDC, hPenCur);
@@ -519,7 +519,13 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 		}
 		SetBkMode(hDC, TRANSPARENT);
 		SetTextColor(hDC, RGB(0, 0, 0));
-		TextOut(hDC, 2, 2, vpName, _tcslen(vpName));
+		TextOut(
+			hDC, 
+			FRAME_STROKE_WIDTH, 
+			FRAME_STROKE_WIDTH, 
+			vpName, 
+			_tcslen(vpName)
+		);
 		vp->Viewport->dropDC(&hDC);
 
 		ResetEvent(vp->threadControls.doRender);

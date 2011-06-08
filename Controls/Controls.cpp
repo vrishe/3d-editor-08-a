@@ -836,6 +836,8 @@ VOID clsWinBase::getDC(HDC *hDC)
 	if ( hDC != NULL ) *hDC = GetWindowDC(hWnd); 
 }
 
+HWND clsWinBase::getHwnd() { return hWnd; }
+
 BOOL clsWinBase::dropDC(HDC *hDC) 
 { 
 	BOOL bResult = hDC != NULL;
@@ -1245,7 +1247,7 @@ DWORD clsButton::Create(
 ) {
 	if ( btnParent == NULL ) return E_BAD_ARGUMENTS;
 	DWORD	dwResult = clsWinBase::Create(
-							_T("button"),
+							WC_BUTTON,
 							WS_CHILD | WS_TABSTOP
 							| (setDefault ? BS_DEFPUSHBUTTON 
 											: BS_PUSHBUTTON),
@@ -1322,7 +1324,7 @@ DWORD clsLabel::Create(
 ) {
 	if ( lParent == NULL ) return E_BAD_ARGUMENTS;
 	DWORD	dwResult = clsControl::Create(
-							_T("static"),
+							WC_STATIC,
 							WS_CHILD,
 							NULL,
 							lPosX,
@@ -1407,7 +1409,7 @@ DWORD clsTextBox::Create(
 			break;
 	}
 	DWORD	dwResult = clsControl::Create(
-							_T("edit"),
+							WC_EDIT,
 							tbStyle,
 							NULL,
 							tbPosX,
@@ -1488,7 +1490,7 @@ DWORD clsListBox::Create(
 					| LBS_USETABSTOPS;
 	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
 	DWORD	dwResult = clsControl::Create(
-							_T("listbox"),
+							WC_LISTBOX,
 							tbStyle,
 							NULL,
 							lbPosX,
@@ -1622,3 +1624,4 @@ BOOL clsListBox::isSelItem(INT ItemIndex) const
 {
 	return SendMessage(hWnd, LB_GETSEL, ItemIndex, 0) > 0; 
 }
+

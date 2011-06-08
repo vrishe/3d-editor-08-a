@@ -107,7 +107,7 @@ void clsCamera::GetPerspectiveMatrix(LPMATRIX3D mOut)
 
 clsTargCamera::clsTargCamera(float lX, float lY, float lZ) : clsCamera() {
 	target = VECTOR3D(lX, lY, lZ);
-	clsCamera::LookAt(target);
+	clsCamera::LookAt(target, NULL);
 }
 clsTargCamera::clsTargCamera(PROJECTION_TYPE projType, 
 							 float			 horizFov,
@@ -115,23 +115,23 @@ clsTargCamera::clsTargCamera(PROJECTION_TYPE projType,
 							 float lX, float lY, float lZ
 		) : clsCamera(projType, horizFov, vertFov) {
 	target = VECTOR3D(lX, lY, lZ);
-	clsCamera::LookAt(target);
+	clsCamera::LookAt(target, NULL);
 }
 
 VECTOR3D clsTargCamera::getTargetPoint() { return target; }
 void clsTargCamera::setTargetPoint(LPVECTOR3D point) { target = *point; }
 void clsTargCamera::setTargetPoint(float tX, float tY, float tZ) { target = VECTOR3D(tX, tY, tZ); }
 
-void clsTargCamera::Translate(const VECTOR3D tV) { pos = tV; clsCamera::LookAt(target); }
-void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); clsCamera::LookAt(target); }
+void clsTargCamera::Translate(const VECTOR3D tV) { pos = tV; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); clsCamera::LookAt(target, NULL); }
 
-void clsTargCamera::Follow(float units)	{ pos += fWd * units; clsCamera::LookAt(target); }
-void clsTargCamera::Strafe(float units)	{ pos += rWd * units; clsCamera::LookAt(target); }
-void clsTargCamera::Fly(float units)	{ pos += uWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::Follow(float units)	{ pos += fWd * units; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::Strafe(float units)	{ pos += rWd * units; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::Fly(float units)	{ pos += uWd * units; clsCamera::LookAt(target, NULL); }
 
-void clsTargCamera::TargetFollow(float units)	{ target += fWd * units; clsCamera::LookAt(target); }
-void clsTargCamera::TargetStrafe(float units)	{ target += rWd * units; clsCamera::LookAt(target); }
-void clsTargCamera::TargetFly(float units)		{ target += uWd * units; clsCamera::LookAt(target); }
+void clsTargCamera::TargetFollow(float units)	{ target += fWd * units; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::TargetStrafe(float units)	{ target += rWd * units; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::TargetFly(float units)		{ target += uWd * units; clsCamera::LookAt(target, NULL); }
 
 void clsTargCamera::Pitch(float angle) { /* doing nothing */ }
 void clsTargCamera::Yaw(float angle) { /* doing nothing */ }

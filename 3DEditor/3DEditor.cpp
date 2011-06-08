@@ -53,8 +53,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_MY3DEDITOR, szWindowClass, MAX_LOADSTRING);
 
 	// Get this stuff below out of here!
 	mainForm.Create(
@@ -66,6 +64,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 				NULL,
 				LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR))
 			); 
+	
+	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	mainForm.setText(szTitle);
 	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
 	mainForm.AssignEventHandler(WM_COMMAND, mainForm_InterfClick, TRUE);
 	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
@@ -89,6 +90,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_TOP,
 					RM_WIREFRAME
 				);
+	LoadString(
+			hInstance, 
+			IDS_VIEWPORT_NAME + VIEW_TOP, 
+			szTitle, 
+			MAX_LOADSTRING
+		); 
+	Pool->getViewport(0U)->camDefault.setName(szTitle, MAX_LOADSTRING);
 	Pool->getViewport(0U)->AssignEventHandler(
 									WM_LBUTTONDOWN,
 									viewport_lbMouseClick,
@@ -103,6 +111,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_FRONT,
 					RM_WIREFRAME
 				);
+	LoadString(
+			hInstance, 
+			IDS_VIEWPORT_NAME + VIEW_FRONT, 
+			szTitle, 
+			MAX_LOADSTRING
+		);
+	Pool->getViewport(1U)->camDefault.setName(szTitle, MAX_LOADSTRING);
 	Pool->getViewport(1U)->AssignEventHandler(
 									WM_LBUTTONDOWN,
 									viewport_lbMouseClick,
@@ -117,6 +132,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_LEFT,
 					RM_WIREFRAME
 				);
+	LoadString(
+			hInstance, 
+			IDS_VIEWPORT_NAME + VIEW_LEFT, 
+			szTitle,
+			MAX_LOADSTRING
+		);
+	Pool->getViewport(2U)->camDefault.setName(szTitle, MAX_LOADSTRING);
 	Pool->getViewport(2U)->AssignEventHandler(
 									WM_LBUTTONDOWN,
 									viewport_lbMouseClick,
@@ -131,6 +153,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 					VIEW_PERSPECTIVE,
 					RM_SHADEDWF
 				);
+	LoadString(
+			hInstance, 
+			IDS_VIEWPORT_NAME + VIEW_PERSPECTIVE, 
+			szTitle, 
+			MAX_LOADSTRING
+		);
+	Pool->getViewport(3U)->camDefault.setName(szTitle, MAX_LOADSTRING);
 	Pool->getViewport(3U)->AssignEventHandler(
 									WM_LBUTTONDOWN,
 									viewport_lbMouseClick,
@@ -1384,19 +1413,13 @@ BOOL ToPoint() {
 		obj->Translate(x, y, z);
 		break;
 	case IS_ROTATE:
-		//obj->Roll(x * M_PI / 180);
-		//obj->Pitch(y * M_PI / 180);
-		//obj->Yaw(z * M_PI / 180);
-		obj->RotateAxis(&VECTOR3D(1, 0, 0), x * M_PI / 180);
-		obj->RotateAxis(&VECTOR3D(0, 1, 0), y * M_PI / 180);
-		obj->RotateAxis(&VECTOR3D(0, 0, 1), z * M_PI / 180);
+		obj->Rotate(y * M_PI / 180, z * M_PI / 180, x * M_PI / 180);
 		break;
 	case IS_SCALE:
-		obj->ScaleByX(x);
-		obj->ScaleByY(y);
-		obj->ScaleByZ(z);
+		obj->Scale(x, y, z);
 		break;
 	}
+	return true;
 }
 
 
@@ -1412,8 +1435,8 @@ LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	FLOAT move = 3.f;
-	FLOAT rot  = 0.3f; 
-	FLOAT scale = 0.6f;
+	FLOAT rot  = 0.1f; 
+	FLOAT scale = 0.95f;
 
 	BOOL error = false;
 
@@ -1488,27 +1511,27 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		switch ( wParam ) {
 		case VK_LEFT:
 			if ( !error )
-				obj->ScaleByX(-scale);
+				obj->ScaleAlong(1.0f / scale);
 			break;
 		case VK_RIGHT:
 			if ( !error )
-				obj->ScaleByX(scale);
+				obj->ScaleAlong(scale);
 			break;
 		case VK_UP:
 			if ( !error )
-				obj->ScaleByZ(scale);
+				obj->ScaleVAcross(1.0f / scale);
 			break;
 		case VK_DOWN:
 			if ( !error )
-				obj->ScaleByZ(-scale);
+				obj->ScaleVAcross(scale);
 			break;
 		case VK_HOME:
 			if ( !error )
-				obj->ScaleByY(scale);
+				obj->ScaleHAcross(1.0f / scale);
 			break;
 		case VK_END:
 			if ( !error )
-				obj->ScaleByY(-scale);
+				obj->ScaleHAcross(scale);
 			break;
 		}
 		break;

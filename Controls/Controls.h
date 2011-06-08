@@ -9,6 +9,7 @@
 
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+#include <CommCtrl.h>
 #include <tchar.h>
 #include <map>
 #include <vector>
@@ -203,6 +204,7 @@ public:
 	INT			getWidthMnemonic()							const;
 	INT			getHeightMnemonic()							const;
 	VOID		getDC(HDC *hDC);
+	HWND		getHwnd();
 
 	BOOL		dropDC(HDC *hDC);
 // Checkers.
@@ -340,12 +342,15 @@ public:
 	BOOL		getBkColor(LPCOLORREF cRefOut)	const;
 	UINT		getID()							const;
 
+
 	static LRESULT defRedrawHandler(
 							LPOBJECT Sender, 
 							WPARAM wParam,
 							LPARAM lParam
 						);
 };
+typedef clsControl CONTROL, *LPCONTROL;
+typedef const clsControl *LPCCONTROL;
 
 // Necessary clsButton class structs/definitions/enums
 class clsButton : public clsControl {
@@ -503,6 +508,4 @@ public:
 };
 typedef clsListBox LISTBOX, *LPLISTBOX;
 typedef const clsListBox *LPCLISTBOX;
-
-
 
