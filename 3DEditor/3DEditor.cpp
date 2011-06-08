@@ -1750,6 +1750,11 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			mainForm.Invalidate();
 		}
 		break;
+	case IDM_NEW:
+			Scene.Clear();
+			RefreshObjectsList();
+			mainForm.Invalidate();
+		break;
 	case IDM_ABOUT:
 		((LPFORM)Sender)->DBShow(
 				MAKEINTRESOURCE(IDD_ABOUTBOX), 
