@@ -1,37 +1,37 @@
 #pragma once
 
-#include "Internal.h"
-#include "External.h"
+#include "3DEditor.h"
 #include <string>
 
 class clsTranslator {
 private:
 		// write to file
-	static bool pasteFloat(float, HANDLE hFile);
-	static bool pasteColor(COLOR3D, HANDLE hFile);
-	static bool pasteName(LPOBJECT3D, HANDLE hFile);
+	static void pasteColor(COLOR3D, FILE*);
+	static void pasteName(LPOBJECT3D, FILE*);
 
-	static bool pastePosition(LPOBJECT3D, HANDLE hFile);
-	static bool pasteRotation(LPOBJECT3D, HANDLE hFile);
+	static void pastePosition(LPOBJECT3D, FILE*);
+	static void pasteRotation(LPOBJECT3D, FILE*);
 
-	static bool pastePyramid(LPPYRAMID3D, HANDLE hFile);
-	static bool pasteCone(LPCONE3D, HANDLE hFile);
-	static bool pasteExCone(LPEXCONE3D, HANDLE hFile);
-	static bool pasteHole(LPHOLE3D, HANDLE hFile);
-	static bool pasteMic(LPMICROPHONE3D, HANDLE hFile);
+	static void pastePyramid(LPPYRAMID3D, FILE*);
+	static void pasteCone(LPCONE3D, FILE*);
+	static void pasteExCone(LPEXCONE3D, FILE*);
+	static void pasteHole(LPHOLE3D, FILE*);
+	static void pasteMic(LPMICROPHONE3D, FILE*);
+
+	static void pasteCam(LPCAMERA3D, FILE*);
+	static void pasteLight(LPDIFLIGHT3D, FILE*);
 
 		// read from file
-	static float readFloat(string&);
-	static VECTOR3D readVector(string&);
-	static void readPosition(LPOBJECT3D, string&);
-	static void readRotation(VECTOR3D& fwd, VECTOR3D& uwd, VECTOR3D& rwd, string&);
-	static MESH_ID readMeshID(string&);
+	static VECTOR3D readVector(FILE*);
+	static void readPosition(LPOBJECT3D, FILE*);
+	static void readRotation(VECTOR3D& fwd, VECTOR3D& uwd, VECTOR3D& rwd, FILE*);
+	static MESH_ID readMeshID(FILE*);
 
-	static void readPyramid(LPPYRAMID3D, string& dataFile, LPSCENE3D);
-	static void readCone(LPCONE3D, string& dataFile, LPSCENE3D Scene);
-	static void readExCone(LPEXCONE3D, string& dataFile, LPSCENE3D Scene);
-	static void readHole(LPHOLE3D, string& dataFile, LPSCENE3D Scene);
-	static void readMic(LPMICROPHONE3D, string& dataFile, LPSCENE3D);
+	//static void readPyramid(LPPYRAMID3D, FILE* dataFile, LPSCENE3D);
+	//static void readCone(LPCONE3D, FILE* dataFile, LPSCENE3D Scene);
+	//static void readExCone(LPEXCONE3D, FILE* dataFile, LPSCENE3D Scene);
+	//static void readHole(LPHOLE3D, FILE* dataFile, LPSCENE3D Scene);
+	static void readMic(FILE* dataFile, LPSCENE3D);
 public:
 	static bool saveSceneScript(LPSCENE3D, TCHAR *fileName);
 	static bool loadSceneScript(LPSCENE3D, TCHAR *fileName);

@@ -8,6 +8,7 @@
 #include <tchar.h>
 #include <iostream>
 #include <CommDlg.h>
+#include <stdio.h>
 
 //#include <stdlib.h>
 //#include <malloc.h>

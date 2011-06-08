@@ -243,7 +243,7 @@ void Cone::Triangulate() {
 /* ---------------------- constructors --------------------- */
 
 Cone::Cone(COLOR3D c, MESH_ID mID) 
-	: clsMesh(mID, c), h(0), bR(0), tR(0), precission(0) { }
+	: clsMesh(mID, c), h(0), bR(0), tR(0), precission(24) { }
 
 Cone::Cone(
 		float height, 
@@ -270,7 +270,7 @@ Cone::Cone(
 	h			= 0;
 	bR			= 0;
 	tR			= 0;
-	precission	= 0;
+	precission	= 24;
 }
 
 Cone::Cone(
@@ -766,7 +766,7 @@ Hole::Hole(
 	bRh			= 0;
 	tR			= 0;
 	tRh			= 0;
-	precission	= 0;
+	precission	= 24;
 }
 
 Hole::Hole(

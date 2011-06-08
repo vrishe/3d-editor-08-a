@@ -412,20 +412,6 @@ void clsObject::Rotate(float y, float z, float x)
 
 }
 
-//void clsObject::RotateAxis(const LPVECTOR3D axis, float angle) {
-//	MATRIX3D M;
-//
-//	Matrix3DRotateAxis(axis, angle, &M);
-//
-//	Matrix3DTransformNormal(&M, &fWd, &fWd);
-//	Matrix3DTransformNormal(&M, &rWd, &rWd);
-//	Matrix3DTransformNormal(&M, &uWd, &uWd);
-//	Matrix3DTransformCoord(&M, &pos, &pos);
-//	Vector3DNormalize(&fWd, &fWd);
-//	Vector3DNormalize(&rWd, &rWd);
-//	Vector3DNormalize(&uWd, &uWd);
-//}
-
 void clsObject::LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient)
 {
 	VECTOR3D lookDir	= lookAt - pos;
@@ -514,7 +500,7 @@ void clsObject::setName(LPTSTR objName, size_t srcSize)
 
 	bSize--;
 	_tcsncpy_s(Name, MAX_OBJECT_NAME_LEN, objName, bSize);
-	objName[bSize] = '\0';
+	Name[bSize] = '\0';
 }
 
 // ============================================================================
