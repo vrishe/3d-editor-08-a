@@ -1373,20 +1373,23 @@ BOOL ToPoint() {
 	listObjects.getItem(i, buf, 256, (LPVOID*)&obj);
 
 	tbX.getText(buf, 256 * sizeof(TCHAR));
-	UCHAR x = _wtoi(buf);
+	FLOAT x = _wtof(buf);
 	tbY.getText(buf, 256 * sizeof(TCHAR));
-	UCHAR y = _wtoi(buf);
+	FLOAT y = _wtof(buf);
 	tbZ.getText(buf, 256 * sizeof(TCHAR));
-	UCHAR z = _wtoi(buf);
+	FLOAT z = _wtof(buf);
 
 	switch ( activeTool ) {
 	case IS_MOVE:
 		obj->Translate(x, y, z);
 		break;
 	case IS_ROTATE:
-		obj->Roll(x * M_PI / 180);
-		obj->Pitch(y * M_PI / 180);
-		obj->Yaw(z * M_PI / 180);
+		//obj->Roll(x * M_PI / 180);
+		//obj->Pitch(y * M_PI / 180);
+		//obj->Yaw(z * M_PI / 180);
+		obj->RotateAxis(&VECTOR3D(1, 0, 0), x * M_PI / 180);
+		obj->RotateAxis(&VECTOR3D(0, 1, 0), y * M_PI / 180);
+		obj->RotateAxis(&VECTOR3D(0, 0, 1), z * M_PI / 180);
 		break;
 	case IS_SCALE:
 		obj->ScaleByX(x);
