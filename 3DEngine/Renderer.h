@@ -106,6 +106,16 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt);
 #ifndef FRAME_STROKE_WIDTH
 #define FRAME_STROKE_WIDTH		3
 #endif //FRAME_STROKE_WIDTH
+#ifndef FRAME_FONT_COLOR
+#define FRAME_FONT_COLOR		RGB(50, 50, 50)
+#endif //FRAME_FONT_COLOR
+#ifndef FRAME_FONT_SIZE
+#define FRAME_FONT_SIZE			14
+#endif //FRAME_FONT_SIZE
+#ifndef FRAME_FONT_FAMILY
+#define FRAME_FONT_FAMILY		_T("Arial narrow")
+#endif //FRAME_FONT_FAMILY
+
 
 #define NO_ACTIVE_VIEWPORT UINT_MAX
 
@@ -149,6 +159,7 @@ public:
 
 	LPVIEWPORT	getViewport(UINT vpIndex);
 	LPVIEWPORT	getViewport(DWORD vpID);
+	LPVIEWPORT	getActiveViewport();
 	UINT		getActiveViewportIndex();
 	UINT		getViewportCount();
 	

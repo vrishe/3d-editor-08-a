@@ -120,7 +120,6 @@ private:
 	CLASS_ID		ClassID;
 	size_t			ID;
 
-public:
 	static size_t	Counter;
 protected:
 

@@ -477,9 +477,6 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 {
 	HDC			hDC;
-	HPEN		hPenCur,
-				hPenOld;
-	HBRUSH		hBrOld;
 	UINT		vpWidth,
 				vpHeight;
 
@@ -489,6 +486,28 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 	LPTHREAD_DATA	vp			= (LPTHREAD_DATA)renderInfo;
 	LPTSTR			vpName		= new TCHAR[MAX_OBJECT_NAME_LEN];
 
+	HBRUSH			hBrOld;
+
+	HFONT			hFontOld,
+					hFontCur = CreateFont(
+									-FRAME_FONT_SIZE,
+									0, 0, 0,
+									FW_THIN,
+									0, 0, 0,
+									DEFAULT_CHARSET,
+									OUT_DEFAULT_PRECIS,
+									CLIP_DEFAULT_PRECIS,
+									CLEARTYPE_QUALITY,
+									VARIABLE_PITCH,
+									FRAME_FONT_FAMILY
+								);
+
+	HPEN			hPenOld,
+					hPenCur = CreatePen(
+									PS_INSIDEFRAME, 
+									FRAME_STROKE_WIDTH, 
+									FRAME_STROKE_COLORREF
+								);
 	do {
 		dwWaitResult = WaitForMultipleObjects(
 						2,
@@ -505,20 +524,15 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 		if ( vp->isActive ) 
 		{
 			vp->Viewport->getSize(&vpWidth, &vpHeight);
-			hPenCur = CreatePen(
-						PS_INSIDEFRAME, 
-						FRAME_STROKE_WIDTH, 
-						FRAME_STROKE_COLORREF
-					);
 			hPenOld = (HPEN)SelectObject(hDC, hPenCur);
 			hBrOld	= (HBRUSH)SelectObject(hDC, GetStockObject(NULL_BRUSH));
 			Rectangle(hDC, 0, 0, vpWidth, vpHeight);
 			SelectObject(hDC, hPenOld);
 			SelectObject(hDC, hBrOld);
-			DeleteObject(hPenCur);			
 		}
+		hFontOld = (HFONT)SelectObject(hDC, hFontCur); 
 		SetBkMode(hDC, TRANSPARENT);
-		SetTextColor(hDC, RGB(0, 0, 0));
+		SetTextColor(hDC, FRAME_FONT_COLOR);
 		TextOut(
 			hDC, 
 			FRAME_STROKE_WIDTH, 
@@ -526,12 +540,15 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 			vpName, 
 			_tcslen(vpName)
 		);
+		SelectObject(hDC, hFontOld);
 		vp->Viewport->dropDC(&hDC);
 
 		ResetEvent(vp->threadControls.doRender);
 		SetEvent(vp->threadControls.jobDone);
 	} while ( bAlive );
 
+	DeleteObject(hPenCur);	
+	DeleteObject(hFontCur);
 	delete[] vpName;
 	return SHUTDOWN_ON_DEMAND;
 }
@@ -669,12 +686,22 @@ LPVIEWPORT clsViewportPool::getViewport(DWORD vpID)
 	return NULL;
 }
 
+LPVIEWPORT clsViewportPool::getActiveViewport()
+{
+	UINT vpCount = Viewports.size();
+
+	for(UINT i = 0; i < vpCount; i++)
+		if ( Viewports[i]->isActive ) return Viewports[i]->Viewport;
+
+	return NULL;
+}
+
 UINT clsViewportPool::getActiveViewportIndex()
 {
 	UINT vpCount = Viewports.size();
 
 	for(UINT i = 0; i < vpCount; i++)
-		if ( Viewports[i]->isActive == TRUE ) return i;
+		if ( Viewports[i]->isActive ) return i;
 
 	return vpCount;
 }
