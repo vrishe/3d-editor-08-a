@@ -33,13 +33,20 @@
 #define SUB_TAB_W 87
 
 enum TOOLS {
+	IS_NONE			= 0,
 	IS_MOVE			= 1,
 	IS_ROTATE		= 2,
 	IS_SCALE		= 3,
 	IS_PAN			= 4,
 	IS_CAMROTATE	= 5,
-	IS_LOOK			= 6
+	IS_LOOK			= 6,
+	IS_ZOOM			= 7
 };
+
+#define PAN_ASPECT		3.0f
+#define ROTATION_ASPECT	.1f
+#define SCALE_ASPECT	.95f
+#define ZOOM_ASPECT		.01f
 
 enum MF_LISTBOX {
 	LIST_OBJECTS	= 10,
@@ -89,7 +96,8 @@ enum MF_BUTTON {
 	BT_SETMODIF		= 1016,
 	BT_MAKELIGHT	= 1017,
 	BT_MAKECAM		= 1018,
-	BT_MODIF		= 1019
+	BT_MODIF		= 1019,
+	BT_ZOOM			= 1020
 };
 
 // Draw interface functions
@@ -110,13 +118,13 @@ VOID Draw_DestroyRightToolbar ();
 
 VOID RefreshObjectsList ();
 
- //Controls functions
+// Controls functions
 BOOL CreateMicFast();
 UINT CreateMicFull();
 BOOL CreateLight(); 
 BOOL CreateCam();
 
- //Form event handler functions
+// Form event handler functions
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_onFocusLost(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
@@ -131,4 +139,7 @@ INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, 
 
 BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn);
 BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
+
+BOOL ToggleViewZoomTool(LPVIEWPORT vp);
+BOOL ToggleSelectionDependentControls();
 // TODO: define any new event handler prototype here
