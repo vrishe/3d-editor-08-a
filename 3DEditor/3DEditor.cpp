@@ -136,7 +136,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									viewport_lbMouseClick,
 									TRUE
 								);
-	Pool->setActiveViewport(3U);
+
 	Draw_MainToolbars(hInstance);
 	RefreshObjectsList();
 
@@ -830,14 +830,14 @@ VOID RefreshObjectsList () {
 	N = Scene.getObjectClassCount(CLS_CAMERA);
 	for ( UINT i = 0; i < N; i++ ) {
 		TCHAR *buf = new TCHAR[256];
-		LPCAMERA3D cam = (LPCAMERA3D)Scene.getObject(CLS_MESH, i);
+		LPCAMERA3D cam = (LPCAMERA3D)Scene.getObject(CLS_CAMERA, i);
 		cam->getName(buf, 256);
 		listObjects.addItem(buf, cam);
 	}
 	N = Scene.getObjectClassCount(CLS_LIGHT);
 	for ( UINT i = 0; i < N; i++ ) {
 		TCHAR *buf = new TCHAR[256];
-		LPDIFLIGHT3D light = (LPDIFLIGHT3D)Scene.getObject(CLS_MESH, i);
+		LPDIFLIGHT3D light = (LPDIFLIGHT3D)Scene.getObject(CLS_LIGHT, i);
 		light->getName(buf, 256);
 		listObjects.addItem(buf, light);
 	}
@@ -1071,8 +1071,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 	UINT i = listObjects.getCurSel();
 	TCHAR *buf = new TCHAR[256];
-	LPOBJECT3D obj = NULL;
-	listObjects.getItem(i, buf, 256, (LPVOID*)&obj);
+	LPOBJECT3D obj;
+	listObjects.getItem(i, buf, 256, (LPVOID*)obj);
 
 	UINT ind = Pool->getActiveViewportIndex();
 	switch ( activeTool ) {
@@ -1143,28 +1143,49 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case IS_PAN:
+		//switch ( wParam ) {
 		//case VK_LEFT:
-		//	cam->TargetStrafe(-move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetStrafe(-move);
 		//	break;
 		//case VK_RIGHT:
-		//	cam->TargetStrafe(move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetStrafe(move);
 		//	break;
 		//case VK_UP:
-		//	cam->TargetFly(move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetFly(move);
 		//	break;
 		//case VK_DOWN:
-		//	cam->TargetFly(-move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetFly(-move);
 		//	break;
 		//case VK_HOME:
-		//	cam->TargetFollow(move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetFollow(move);
 		//	break;
 		//case VK_END:
-		//	cam->TargetFollow(-move);
+		//	(Pool->getViewport(ind)->camDefault)->TargetFollow(-move);
 		//	break;
 		//}
 		break;
 	case IS_CAMROTATE:
-		break;
+		//switch ( wParam ) {
+		//case VK_LEFT:
+		//	(Pool->getViewport(ind)->camDefault)->Strafe(-move);
+		//	break;
+		//case VK_RIGHT:
+		//	(Pool->getViewport(ind)->camDefault)->Strafe(move);
+		//	break;
+		//case VK_UP:
+		//	(Pool->getViewport(ind)->camDefault)->Fly(move);
+		//	break;
+		//case VK_DOWN:
+		//	(Pool->getViewport(ind)->camDefault)->Fly(-move);
+		//	break;
+		//case VK_HOME:
+		//	(Pool->getViewport(ind)->camDefault)->Follow(move);
+		//	break;
+		//case VK_END:
+		//	(Pool->getViewport(ind)->camDefault)->Follow(-move);
+		//	break;
+		//}
+		//break;
 	case IS_LOOK:
 
 		break;
@@ -1331,7 +1352,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 }
 
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam) 
-{ return DLGC_WANTALLKEYS; }
+{	return DLGC_WANTARROWS;		}
 
 LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
@@ -1416,7 +1437,6 @@ LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	LPVIEWPORT vp = (LPVIEWPORT)Sender;
 	Pool->setActiveViewport((DWORD)vp->getID());
-	mainForm.setFocus();
 	mainForm.Invalidate();
 
 	return 0L;

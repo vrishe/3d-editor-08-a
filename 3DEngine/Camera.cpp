@@ -122,7 +122,7 @@ VECTOR3D clsTargCamera::getTargetPoint() { return target; }
 void clsTargCamera::setTargetPoint(LPVECTOR3D point) { target = *point; }
 void clsTargCamera::setTargetPoint(float tX, float tY, float tZ) { target = VECTOR3D(tX, tY, tZ); }
 
-void clsTargCamera::Translate(const LPVECTOR3D tV) { pos = *tV; clsCamera::LookAt(target); }
+void clsTargCamera::Translate(const VECTOR3D tV) { pos = tV; clsCamera::LookAt(target); }
 void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); clsCamera::LookAt(target); }
 
 void clsTargCamera::Follow(float units)	{ pos += fWd * units; clsCamera::LookAt(target); }

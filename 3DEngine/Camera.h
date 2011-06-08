@@ -73,7 +73,7 @@ public:
 	void setTargetPoint(LPVECTOR3D);
 	void setTargetPoint(float tX, float tY, float tZ);
 	// Absolute translation
-	void Translate(const LPVECTOR3D tV);
+	void Translate(const VECTOR3D tV);
 	void Translate(float tX, float tY, float tZ);	 
 
 	//Relative translation

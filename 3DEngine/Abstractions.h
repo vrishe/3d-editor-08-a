@@ -107,8 +107,9 @@ private:
 	CLASS_ID		ClassID;
 	size_t			ID;
 
-protected:
+public:
 	static size_t	Counter;
+protected:
 
 	LPTSTR			Name;
 

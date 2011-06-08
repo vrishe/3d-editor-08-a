@@ -56,7 +56,7 @@ private:
 	LPSCENE3D		Scene;
 
 public:
-	CAMERA3D		camDefault;
+	TARGCAMERA3D		camDefault;
 
 	clsViewport();
 	clsViewport(

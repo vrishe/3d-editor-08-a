@@ -33,12 +33,12 @@
 #define SUB_TAB_W 87
 
 enum TOOLS {
-	IS_MOVE			= 0,
-	IS_ROTATE		= 1,
-	IS_SCALE		= 2,
-	IS_PAN			= 3,
-	IS_CAMROTATE	= 4,
-	IS_LOOK			= 5
+	IS_MOVE			= 1,
+	IS_ROTATE		= 2,
+	IS_SCALE		= 3,
+	IS_PAN			= 4,
+	IS_CAMROTATE	= 5,
+	IS_LOOK			= 6
 };
 
 enum MF_LISTBOX {
@@ -88,7 +88,8 @@ enum MF_BUTTON {
 	BT_CAMERA		= 1015,
 	BT_SETMODIF		= 1016,
 	BT_MAKELIGHT	= 1017,
-	BT_MAKECAM		= 1018
+	BT_MAKECAM		= 1018,
+	BT_MODIF		= 1019
 };
 
 // Draw interface functions
