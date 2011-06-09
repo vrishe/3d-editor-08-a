@@ -139,4 +139,7 @@ INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, 
 
 BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn);
 BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
+
+VOID GetActiveViewport();
+VOID GetActiveObject();
 // TODO: define any new event handler prototype here

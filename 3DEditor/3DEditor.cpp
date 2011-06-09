@@ -59,7 +59,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// Get this stuff below out of here!
 	mainForm.Create(
 				_T("Main form class"),
-				(FORM_TYPE)(APP_FORM | WS_CLIPCHILDREN), 
+				(FORM_TYPE)(APP_FORM 
+							| WS_CLIPCHILDREN
+							| WS_CLIPSIBLINGS), 
 				WS_EX_APPWINDOW | WS_EX_CONTROLPARENT,
 				CW_USEDEFAULT, 0,
 				1270, 804,
@@ -168,20 +170,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									TRUE
 								);
 	Pool->setActiveViewport(3U);
-	activeViewport = Pool->getActiveViewport();
 
 	Draw_MainToolbars(hInstance);
 	RefreshObjectsList();
 	mainForm.Show();
 
-	tabModify.Disable();
-	btMove.Disable();
-	btRotate.Disable();
-	btScale.Disable();
-	tbX.Disable();
-	tbY.Disable();
-	tbZ.Disable();
-
+	GetActiveViewport();
+	GetActiveObject();
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
 	iResult = mainForm.DoMSGCycle(hAccelTable);
@@ -1766,36 +1761,9 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case LIST_OBJECTS:
-				if ( HIWORD(wParam) == LBN_KILLFOCUS )
+				if ( HIWORD(wParam) == LBN_SELCANCEL ) 
 				{
-					activeObject = NULL;
-					listObjects.getItem(
-								listObjects.getCurSel(), 
-								NULL, 
-								0, 
-								(LPVOID*)&activeObject
-							);
-					mainForm.Invalidate();
-					if ( activeObject != NULL ) 
-					{
-						tabModify.Enable();
-						btMove.Enable();
-						btRotate.Enable();
-						btScale.Enable();
-						tbX.Enable();
-						tbY.Enable();
-						tbZ.Enable();
-					}
-					else
-					{
-						tabModify.Disable();
-						btMove.Disable();
-						btRotate.Disable();
-						btScale.Disable();
-						tbX.Disable();
-						tbY.Disable();
-						tbZ.Disable();
-					}
+					GetActiveObject();
 				}
 			break;
 
@@ -1919,6 +1887,14 @@ BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn) {
 LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
 	Pool->setActiveViewport((DWORD)((LPVIEWPORT)Sender)->getID());
+	GetActiveViewport();
+	mainForm.setFocus();
+	mainForm.Invalidate();
+	return 0L;
+}
+
+VOID GetActiveViewport()
+{
 	activeViewport = NULL;
 	if ( (activeViewport = Pool->getActiveViewport()) != NULL )
 	{
@@ -1932,8 +1908,36 @@ LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			btZoomView.Enable();
 		}
 	}
-	mainForm.setFocus();
-	mainForm.Invalidate();
-	return 0L;
+}
+
+VOID GetActiveObject()
+{
+	activeObject = NULL;
+	listObjects.getItem(
+			listObjects.getCurSel(), 
+			NULL, 
+			0, 
+			(LPVOID*)&activeObject
+		);
+	if ( activeObject != NULL ) 
+	{
+		tabModify.Enable();
+		btMove.Enable();
+		btRotate.Enable();
+		btScale.Enable();
+		tbX.Enable();
+		tbY.Enable();
+		tbZ.Enable();
+	}
+	else
+	{
+		tabModify.Disable();
+		btMove.Disable();
+		btRotate.Disable();
+		btScale.Disable();
+		tbX.Disable();
+		tbY.Disable();
+		tbZ.Disable();
+	}
 }
 
