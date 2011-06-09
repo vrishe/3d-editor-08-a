@@ -351,8 +351,6 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	int r, g, j;
 	bErrorFlag = _ftscanf_s(file, _T("%d %d %d"), &r, &g, &j);
 
-	bErrorFlag = _ftscanf_s(file, _T("%77c"), buffer, 256);
-
 	obj = new MICROPHONE3D(r, g, j, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	obj->setName(name, 256);
 	obj->Translate(pos);

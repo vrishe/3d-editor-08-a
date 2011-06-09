@@ -88,7 +88,7 @@ public:
 };
 typedef clsViewport VIEWPORT, *LPVIEWPORT;
 
-#define VIEW_DISTANCE_DEFAULT	100
+#define VIEW_DISTANCE_DEFAULT	250
 enum VIEW_TYPE {
 		VIEW_LEFT			= 1,
 		VIEW_RIGHT			= 2,

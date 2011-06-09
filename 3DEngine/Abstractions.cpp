@@ -275,7 +275,7 @@ clsObject::clsObject(
 clsObject::~clsObject() 
 {
 	Counter--;
-	if ( Name != NULL ) delete[] Name;
+	if ( Name != NULL ) { delete[] Name; Name = NULL; }
 }
 
 CLASS_ID clsObject::clsID() { return ClassID; }
@@ -618,6 +618,14 @@ bool clsScene::DeleteObject(LPOBJECT3D lpObject)
 }
 
 void clsScene::Clear() {
+	/*for ( UINT j = 1; j < 4; j++ ) {
+		UINT N = objects.at((CLASS_ID)j).size();
+		for ( UINT i = 0; i < N; i++ ) {
+			LPOBJECT3D obj = objects[(CLASS_ID)j][i];
+			delete obj;
+		}
+	}*/
+
 	objects.clear();
 	
 	CONTENT_CLASS clsObjLst;

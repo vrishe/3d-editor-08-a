@@ -1582,24 +1582,22 @@ BOOL clsListBox::getItem(
 		ItemStringLength	= SendMessage(hWnd, LB_GETTEXTLEN, ItemIndex, 0);
 		if ( (bResult = ItemStringLength != LB_ERR) )
 		{
-			if ((bResult = ItemStringLength < buffSize))
-			{
-				if ( ItemString != NULL )
-					SendMessage(
-							hWnd, 
-							LB_GETTEXT,
-							ItemIndex, 
-							(LPARAM)ItemString
-						);
-
-				if ( ItemData != NULL )
-					*ItemData = (LPVOID)SendMessage(
-												hWnd, 
-												LB_GETITEMDATA, 
-												ItemIndex, 
-												0
-											);
-			}
+			if ( 
+				(bResult = ItemStringLength < buffSize) && 
+				ItemString != NULL 
+			)	SendMessage(
+						hWnd, 
+						LB_GETTEXT,
+						ItemIndex, 
+						(LPARAM)ItemString
+					);
+			if ( ItemData != NULL )
+				*ItemData = (LPVOID)SendMessage(
+											hWnd, 
+											LB_GETITEMDATA, 
+											ItemIndex, 
+											0
+										);
 		}
 	}
 	return bResult;

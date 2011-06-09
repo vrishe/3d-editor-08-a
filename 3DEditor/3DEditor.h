@@ -114,6 +114,8 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE);
 VOID Draw_InitLightToolbar (HINSTANCE);
 VOID Draw_InitCameraToolbar (HINSTANCE hInstance);
 
+BOOL Draw_RefreshModifyToolbar (HINSTANCE);
+
 VOID Draw_DestroyRightToolbar ();
 
 VOID RefreshObjectsList ();
