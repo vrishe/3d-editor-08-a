@@ -618,14 +618,6 @@ bool clsScene::DeleteObject(LPOBJECT3D lpObject)
 }
 
 void clsScene::Clear() {
-	/*for ( UINT j = 1; j < 4; j++ ) {
-		UINT N = objects.at((CLASS_ID)j).size();
-		for ( UINT i = 0; i < N; i++ ) {
-			LPOBJECT3D obj = objects[(CLASS_ID)j][i];
-			delete obj;
-		}
-	}*/
-
 	objects.clear();
 	
 	CONTENT_CLASS clsObjLst;
@@ -640,9 +632,32 @@ void clsScene::Clear() {
 	ambientColor = 0;
 }
 
-LPOBJECT3D clsScene::getObject(CLASS_ID clsID, size_t objIndex)
+bool clsScene::getFirstObject(CLASS_ID *objID)
 {
-	CONTENT::iterator finder = objects.find(clsID);
+	CONTENT::iterator i = objects.begin();
+	while ( i != objects.end() )
+	{
+		if ( i->second.size() > 0 ) 
+		{
+			if (objID != NULL) *objID = i->first;
+			return true;
+		}
+		i++;
+	}
+	return false;
+}
+
+LPOBJECT3D clsScene::getFirstObject()
+{
+	CLASS_ID idFound;
+	if ( getFirstObject(&idFound) )
+		return objects.at(idFound).at(0);
+	return NULL;
+}
+
+LPOBJECT3D clsScene::getObject(CLASS_ID objID, size_t objIndex)
+{
+	CONTENT::iterator finder = objects.find(objID);
 	LPOBJECT3D found = NULL;
 	if ( finder != objects.end() && objIndex < finder->second.size() ) 
 		found = finder->second[objIndex];
@@ -782,27 +797,29 @@ clsMesh::clsMesh(
 		unsigned char blue
 ) : clsObject(CLS_MESH), meshID(mID) { setColor( red, green, blue ); }
 
-clsMesh::clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps)
-	: clsObject(CLS_MESH), meshID(mID)
-{ 
-	//addListOfVertices(vs);
-	//addListOfPolygons(ps);
-	setColor(c);
-}
+clsMesh::~clsMesh() { }
 
-clsMesh::clsMesh(
-		MESH_ID mID,
-		unsigned char red, 
-		unsigned char green, 
-		unsigned char blue,
-		VERT_LIST vs, 
-		POLY_LIST ps
-) : clsObject(CLS_MESH), meshID(mID)
-{ 
-	//addListOfVertices(vs);
-	//addListOfPolygons(ps);
-	setColor( red, green, blue ); 
-}
+//clsMesh::clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps)
+//	: clsObject(CLS_MESH), meshID(mID)
+//{ 
+//	addListOfVertices(vs);
+//	addListOfPolygons(ps);
+//	setColor(c);
+//}
+
+//clsMesh::clsMesh(
+//		MESH_ID mID,
+//		unsigned char red, 
+//		unsigned char green, 
+//		unsigned char blue,
+//		VERT_LIST vs, 
+//		POLY_LIST ps
+//) : clsObject(CLS_MESH), meshID(mID)
+//{ 
+//	addListOfVertices(vs);
+//	addListOfPolygons(ps);
+//	setColor( red, green, blue ); 
+//}
 
 // DO NOT DELETE THIS:
 //void clsMesh::dropRedundant() 

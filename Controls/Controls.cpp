@@ -1487,6 +1487,7 @@ DWORD clsListBox::Create(
 					| WS_TABSTOP 
 					| WS_BORDER 
 					| WS_VSCROLL
+					| LBS_NOTIFY
 					| LBS_USETABSTOPS;
 	if ( lbParent == NULL ) return E_BAD_ARGUMENTS;
 	DWORD	dwResult = clsControl::Create(
@@ -1583,8 +1584,8 @@ BOOL clsListBox::getItem(
 		if ( (bResult = ItemStringLength != LB_ERR) )
 		{
 			if ( 
-				(bResult = ItemStringLength < buffSize) && 
 				ItemString != NULL 
+				&& (bResult = ItemStringLength < buffSize) 
 			)	SendMessage(
 						hWnd, 
 						LB_GETTEXT,

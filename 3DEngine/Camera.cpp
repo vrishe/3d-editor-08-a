@@ -42,10 +42,15 @@ void clsCamera::setProjectionType(PROJECTION_TYPE projType)
 
 void clsCamera::setHFov(float fieldOfViewHoriz) 
 { 
+	float aspect;
 	if ( 
 		fieldOfViewHoriz > .0F 
 		&& fieldOfViewHoriz < ((FLOAT)M_PI - fieldOfViewHoriz - EPSILON)
-	) hFOV = fieldOfViewHoriz; 
+	) {
+		aspect = vFOV / hFOV;
+		hFOV = fieldOfViewHoriz;
+		vFOV = hFOV * aspect;
+	}
 }
 
 void clsCamera::setVFov(float fieldOfViewVert) 

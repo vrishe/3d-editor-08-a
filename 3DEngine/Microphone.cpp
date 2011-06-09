@@ -143,9 +143,7 @@ void Microphone::Triangulate() {
 //	flipNormals(0, polygons.size());
 }
 
-Microphone::~Microphone() {
-	delete [] micParts;				
-}
+Microphone::~Microphone() { delete [] micParts;	}
 
 bool Microphone::getMeshPosition(MIC_PART part, int& vs, int& es, int& ps) {
 	vs = es = ps = -1;

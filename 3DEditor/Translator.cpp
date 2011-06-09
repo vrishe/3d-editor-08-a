@@ -536,3 +536,13 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	//return ( bErrorFlag != 0 );
 	return true;
 }
+
+void clsTranslator::cleanSceneUp(LPSCENE3D Scene)
+{
+	LPOBJECT3D objToDelete;
+	while ( (objToDelete = Scene->getFirstObject()) != NULL )
+	{
+		Scene->DeleteObject(objToDelete);
+		delete objToDelete;
+	}
+}

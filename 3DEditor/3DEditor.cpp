@@ -7,7 +7,8 @@
 TCHAR szTitle[MAX_LOADSTRING];					// “екст строки заголовка
 TCHAR szWindowClass[MAX_LOADSTRING];			// им€ класса главного окна
 
-// Remove this stuff:
+HINSTANCE			hInstance;
+
 FORM				mainForm;
 UINT				ufWidth, ufHeight;
 
@@ -16,7 +17,7 @@ BOOL				modifyMode;
 TOOLS				activeTool;
 
 BUTTON				btMove, btRotate, btScale,
-					tabCreate, tabModify,
+					tabCreate, tabModify, delObject,
 					btPan, btCamSphere, btLookAround, btZoomView;
 
 BUTTON				btObjects, btCams, btLights;
@@ -43,7 +44,7 @@ LPVIEWPORT			activeViewport;
 // Win API entry point:
 // ===================================
 
-int APIENTRY _tWinMain(HINSTANCE hInstance,
+int APIENTRY _tWinMain(HINSTANCE hInst,
                      HINSTANCE hPrevInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
@@ -54,8 +55,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	activeObject	= NULL;
-	activeViewport	= NULL;
+	hInstance = hInst;
 
 	// Get this stuff below out of here!
 	mainForm.Create(
@@ -168,7 +168,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									TRUE
 								);
 
-	Draw_MainToolbars(hInstance);
+	Draw_MainToolbars();
 	RefreshObjectsList();
 	mainForm.Show();
 
@@ -185,7 +185,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 // Draw interface functions
  //============================================================================
-VOID Draw_MainToolbars (HINSTANCE hInstance) {
+VOID Draw_MainToolbars() {
 	TCHAR *name = new TCHAR[256];
 		// object toolbar buttons	
 	LoadString(hInstance, N_BT_MOVE, name, 256);
@@ -265,7 +265,7 @@ VOID Draw_MainToolbars (HINSTANCE hInstance) {
 					&mainForm,
 					ufWidth - SUB_TAB_W * 3 - 13,
 					VIEWPORT_AREA_H + 52 - LIST_OBJ_H,
-					BT_TOOL_W, BT_TOOL_H);
+					BT_TOOL_W, BT_TOOL_H / 2);
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	listObjects.Create(LIST_OBJECTS,
 						name,
@@ -274,7 +274,14 @@ VOID Draw_MainToolbars (HINSTANCE hInstance) {
 						VIEWPORT_AREA_H + 73 - LIST_OBJ_H,
 						LIST_OBJ_W, LIST_OBJ_H);
 	listObjects.setBgFillColor(TEXT_BG_COLOR);
-						
+	LoadString(hInstance, N_BT_DELETE, name, 256);
+	delObject.Create(BT_DELETE,
+					name,
+					&mainForm,
+					ufWidth - SUB_TAB_W * 3 - 13 + LIST_OBJ_W - BT_TOOL_W,
+					VIEWPORT_AREA_H + 50 - LIST_OBJ_H,
+					BT_TOOL_W, BT_TOOL_H - 10
+				);
 
 		// camera toolbar buttons
 	LoadString(hInstance, N_BT_PAN, name, 256);
@@ -312,7 +319,7 @@ VOID Draw_MainToolbars (HINSTANCE hInstance) {
 	delete [] name;
 }
 
-VOID Draw_InitCreateToolbar (HINSTANCE hInstance) {
+VOID Draw_InitCreateToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_BT_LIGHTS, name, 256);
@@ -339,8 +346,8 @@ VOID Draw_InitCreateToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {}
-VOID Draw_InitObjectsToolbar (HINSTANCE hInstance) {
+//VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {}
+VOID Draw_InitObjectsToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_BT_MIC, name, 256);
@@ -354,7 +361,7 @@ VOID Draw_InitObjectsToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitLightsToolbar (HINSTANCE hInstance) {
+VOID Draw_InitLightsToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_BT_LIGHT, name, 256);
@@ -368,7 +375,7 @@ VOID Draw_InitLightsToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitCamsToolbar (HINSTANCE hInstance) {
+VOID Draw_InitCamsToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_BT_CAMERA, name, 256);
@@ -382,7 +389,7 @@ VOID Draw_InitCamsToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
+VOID Draw_InitMicrophoneToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
@@ -608,7 +615,7 @@ VOID Draw_InitMicrophoneToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitLightToolbar (HINSTANCE hInstance) {
+VOID Draw_InitLightToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
@@ -735,7 +742,7 @@ VOID Draw_InitLightToolbar (HINSTANCE hInstance) {
 
 	delete [] name;
 }
-VOID Draw_InitCameraToolbar (HINSTANCE hInstance) {
+VOID Draw_InitCameraToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
@@ -863,7 +870,7 @@ VOID Draw_InitCameraToolbar (HINSTANCE hInstance) {
 	delete [] name;
 }
 
-VOID Draw_ModifyMicrophoneToolbar (HINSTANCE hInstance) {
+VOID Draw_ModifyMicrophoneToolbar() {
 	TCHAR *name = new TCHAR[256];
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
@@ -1072,7 +1079,7 @@ VOID Draw_DestroyRightToolbar () {
 	}
 }
 
-VOID RefreshObjectsList () {
+VOID RefreshObjectsList() {
 	listObjects.clear();
 	UINT N = Scene.getObjectClassCount(CLS_MESH);
 	for ( UINT i = 0; i < N; i++ ) {
@@ -1239,12 +1246,10 @@ UINT CreateMicFull() {
 }
 
 UINT ModifMicFull() {
-	INT i = listObjects.getCurSel();
-	if ( i < 0 ) return 100;
+	if ( activeObject == NULL ) return 1;
 
 	TCHAR *buf = new TCHAR[256];
-
-	LPMICROPHONE3D mic = (LPMICROPHONE3D)Scene.getObject(CLS_MESH, i);
+	LPMICROPHONE3D mic = (LPMICROPHONE3D)activeObject;
 
 	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bH = (FLOAT)_wtof(buf);
@@ -1423,21 +1428,22 @@ BOOL ToPoint() {
 	return true;
 }
 
-BOOL Draw_RefreshModifyToolbar (HINSTANCE hInstance) {
-	if ( !modifyMode ) 
-		return false;
+BOOL Draw_RefreshModifyToolbar() {
+	if ( !modifyMode ) return false;
 	Draw_DestroyRightToolbar();
+	if ( activeObject == NULL ) return false;
 	switch ( activeObject->clsID() ) {
 	case CLS_MESH:
-		Draw_ModifyMicrophoneToolbar(hInstance);
+		Draw_ModifyMicrophoneToolbar();
 		break;
 	case CLS_LIGHT:
-		Draw_InitLightToolbar(hInstance);
+		Draw_InitLightToolbar();
 		break;
 	case CLS_CAMERA:
-		Draw_InitCameraToolbar(hInstance);
+		Draw_InitCameraToolbar();
 		break;
 	}
+	return true;
 }
 
  //Form event handler functions
@@ -1451,6 +1457,8 @@ LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	if ( wParam == VK_DELETE ) DeleteActiveObject();
+
 	if ( activeViewport == NULL ) return 1L;
 
 	switch ( activeTool ) {
@@ -1552,12 +1560,12 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 	case IS_ZOOM:
 		switch ( wParam ) {
 		case VK_HOME:
-			activeViewport->camDefault.setHFov(activeViewport->camDefault.getHFov() + ZOOM_ASPECT);
-			activeViewport->camDefault.setVFov(activeViewport->camDefault.getHFov());
+			activeViewport->camDefault.setHFov(
+				activeViewport->camDefault.getHFov() + ZOOM_ASPECT);
 			break;
 		case VK_END:
-			activeViewport->camDefault.setHFov(activeViewport->camDefault.getHFov() - ZOOM_ASPECT);
-			activeViewport->camDefault.setVFov(activeViewport->camDefault.getHFov());
+			activeViewport->camDefault.setHFov(
+				activeViewport->camDefault.getHFov() - ZOOM_ASPECT);
 			break;
 		}
 		break;
@@ -1606,14 +1614,16 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	}
+
 	mainForm.Invalidate();
 	return 0L;
 }
 
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	LPOBJECT3D		tempObject;
+	LPTSTR			fName		= new TCHAR[256];
 	OPENFILENAME	ofn;
-	TCHAR			*fName = new TCHAR[256];
 	UINT			error;
 
 	switch (LOWORD(wParam))
@@ -1658,47 +1668,53 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			activeTool = IS_ZOOM;
 			mainForm.setFocus();
 			break;
+		case BT_DELETE:
+			DeleteActiveObject();
+			break;
 		case TAB_CREATE:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
 			modifyMode = false;
 			break;
 		case TAB_MODIFY:
 			modifyMode = true;
-			Draw_RefreshModifyToolbar(GetModuleHandle(NULL));
+			Draw_RefreshModifyToolbar();
 			break;
 		case BT_OBJECTS:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitObjectsToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitObjectsToolbar();
 			break;
 		case BT_LIGHTS:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitLightsToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitLightsToolbar();
 			break;
 		case BT_MIC:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitObjectsToolbar(GetModuleHandle(NULL));
-			Draw_InitMicrophoneToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitObjectsToolbar();
+			Draw_InitMicrophoneToolbar();
+			tbParams[0].setFocus();
 			break;
 		case BT_LIGHT:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitLightsToolbar(GetModuleHandle(NULL));
-			Draw_InitLightToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitLightsToolbar();
+			Draw_InitLightToolbar();
+			tbParams[0].setFocus();
 			break;
 		case BT_CAMS:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitCamsToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitCamsToolbar();
 			break;
 		case BT_CAMERA:
 			Draw_DestroyRightToolbar();
-			Draw_InitCreateToolbar(GetModuleHandle(NULL));
-			Draw_InitCamsToolbar(GetModuleHandle(NULL));
-			Draw_InitCameraToolbar(GetModuleHandle(NULL));
+			Draw_InitCreateToolbar();
+			Draw_InitCamsToolbar();
+			Draw_InitCameraToolbar();
+			tbParams[0].setFocus();
 			break;
 		case BT_MAKELIGHT:
 			if ( !CreateLight() )
@@ -1715,6 +1731,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 		case BT_MODIF:
 			ModifMicFull();
+			RefreshObjectsList();
 			mainForm.Invalidate();
 			break;
 		case BT_QMAKE:
@@ -1766,22 +1783,22 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case LIST_OBJECTS:
-				if ( HIWORD(wParam) == LBN_KILLFOCUS ) 
+				tempObject = activeObject;
+				switch ( HIWORD(wParam) ) 
 				{
-					GetActiveObject();
-					activeViewport = NULL;
+					case LBN_SELCHANGE:
+						GetActiveObject();
+						if ( activeObject != tempObject )
+							Draw_RefreshModifyToolbar();
+						mainForm.setFocus();
+						break;
 				}
-				Pool->setActiveViewport(NO_ACTIVE_VIEWPORT);
-				mainForm.Invalidate();
-				Draw_RefreshModifyToolbar(GetModuleHandle(NULL));
 			break;
 
 		case IDM_NEW:
-			Scene.Clear();
-			Scene.setAmbientColor(VIEWPORT_BG_COLOR);
-			RefreshObjectsList();
-			mainForm.Invalidate();
+			SceneCleanUp();
 			break;
+
 		case IDM_SAVE:
 			if ( SaveFileDialog((HWND)lParam, ofn) ) 
 			{
@@ -1795,9 +1812,11 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					);
 			}
 			break;
+
 		case IDM_LOAD:
 			if ( OpenFileDialog((HWND)lParam, ofn) ) 
 			{
+				SceneCleanUp();
 				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
 				if ( !TRANSLATOR3D::loadSceneScript(&Scene, fName) ) 
 					MessageBox(
@@ -1812,14 +1831,17 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 				mainForm.Invalidate();
 			}
 			break;
+
 		case IDM_ABOUT:
-			((LPFORM)Sender)->DBShow(
+			mainForm.DBShow(
 					MAKEINTRESOURCE(IDD_ABOUTBOX), 
 					About_DialogBox_Handler
 				);
 			break;
+
 		case IDM_EXIT:
-			((LPFORM)Sender)->Destroy();
+			SceneCleanUp();
+			mainForm.Destroy();
 			break;
 
 		default: return 1L;
@@ -1938,6 +1960,7 @@ VOID GetActiveObject()
 		);
 	if ( activeObject != NULL ) 
 	{
+		delObject.Enable();
 		tabModify.Enable();
 		btMove.Enable();
 		btRotate.Enable();
@@ -1948,6 +1971,7 @@ VOID GetActiveObject()
 	}
 	else
 	{
+		delObject.Disable();
 		tabModify.Disable();
 		btMove.Disable();
 		btRotate.Disable();
@@ -1956,5 +1980,21 @@ VOID GetActiveObject()
 		tbY.Disable();
 		tbZ.Disable();
 	}
+}
+
+VOID DeleteActiveObject()
+{
+	Scene.DeleteObject(activeObject);
+	if (activeObject != NULL ) delete activeObject;
+	RefreshObjectsList();
+	mainForm.Invalidate();
+	GetActiveObject();
+	Draw_RefreshModifyToolbar();
+}
+
+VOID SceneCleanUp()
+{
+	while ( listObjects.getItem(0, NULL, 0, (LPVOID*)&activeObject) )
+		DeleteActiveObject();
 }
 

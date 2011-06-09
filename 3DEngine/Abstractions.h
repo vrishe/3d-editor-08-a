@@ -160,7 +160,7 @@ public:
 		float r, 
 		CLASS_ID clsID = CLS_OBJECT
 	);
-	~clsObject();
+	virtual ~clsObject();
 	CLASS_ID clsID();
 	size_t	 objID();
 
@@ -242,7 +242,9 @@ public:
 				size_t *objIndex	= NULL
 			);
 
-	LPOBJECT3D	getObject(CLASS_ID clsID, size_t objIndex);
+	bool		getFirstObject(CLASS_ID *objID);
+	LPOBJECT3D	getFirstObject();
+	LPOBJECT3D	getObject(CLASS_ID objID, size_t objIndex);
 	LPOBJECT3D	getObject(size_t objID);
 	size_t		getPolygonsCount();
 	size_t		getVerticesCount();
@@ -287,15 +289,16 @@ public:
 		unsigned char green, 
 		unsigned char blue
 	);
-	clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps);
-	clsMesh(
-		MESH_ID mID,
-		unsigned char red, 
-		unsigned char green, 
-		unsigned char blue, 
-		VERT_LIST vs, 
-		POLY_LIST ps
-	);
+	//clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps);
+	//clsMesh(
+	//	MESH_ID mID,
+	//	unsigned char red, 
+	//	unsigned char green, 
+	//	unsigned char blue, 
+	//	VERT_LIST vs, 
+	//	POLY_LIST ps
+	//);
+	~clsMesh();
 
 	MESH_ID MeshID();
 

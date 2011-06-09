@@ -9,7 +9,6 @@
 #include "Internal.h"
 
 #define MAX_LOADSTRING 100
-
 #define MAX_PARAMS_NUM 20
 
 #define VIEWPORT_AREA_H 670
@@ -97,28 +96,30 @@ enum MF_BUTTON {
 	BT_MAKELIGHT	= 1017,
 	BT_MAKECAM		= 1018,
 	BT_MODIF		= 1019,
-	BT_ZOOM			= 1020
+	BT_ZOOM			= 1020,
+	BT_DELETE		= 1021
 };
 
 // Draw interface functions
-VOID Draw_MainToolbars (HINSTANCE);
+VOID Draw_MainToolbars();
 
-VOID Draw_InitCreateToolbar (HINSTANCE);
-VOID Draw_InitModifyToolbar (HINSTANCE);
+VOID Draw_InitCreateToolbar();
+//VOID Draw_InitModifyToolbar();
 
-VOID Draw_InitObjectsToolbar (HINSTANCE);
-VOID Draw_InitLightsToolbar (HINSTANCE);
-VOID Draw_InitCamsToolbar (HINSTANCE hInstance);
+VOID Draw_InitObjectsToolbar();
+VOID Draw_InitLightsToolbar();
+VOID Draw_InitCamsToolbar();
 
-VOID Draw_InitMicrophoneToolbar (HINSTANCE);
-VOID Draw_InitLightToolbar (HINSTANCE);
-VOID Draw_InitCameraToolbar (HINSTANCE hInstance);
+VOID Draw_InitMicrophoneToolbar();
+VOID Draw_InitLightToolbar();
+VOID Draw_InitCameraToolbar();
 
-BOOL Draw_RefreshModifyToolbar (HINSTANCE);
+BOOL Draw_RefreshModifyToolbar();
+VOID Draw_DestroyRightToolbar();
 
-VOID Draw_DestroyRightToolbar ();
+VOID RefreshObjectsList();
 
-VOID RefreshObjectsList ();
+VOID RemoveSceneObject();
 
 // Controls functions
 BOOL CreateMicFast();
@@ -144,4 +145,6 @@ BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
 
 VOID GetActiveViewport();
 VOID GetActiveObject();
+VOID DeleteActiveObject();
+VOID SceneCleanUp();
 // TODO: define any new event handler prototype here

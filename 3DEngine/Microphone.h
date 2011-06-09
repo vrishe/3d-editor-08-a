@@ -78,7 +78,7 @@ public:
 		float cR,		
 		int prec = 24
 		);
-	~Microphone();
+	virtual ~Microphone();
 
 	// functionality
 	virtual void Triangulate(); // generate vertices, edges and polygons lists

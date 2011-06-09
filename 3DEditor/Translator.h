@@ -35,5 +35,6 @@ private:
 public:
 	static bool saveSceneScript(LPSCENE3D, TCHAR *fileName);
 	static bool loadSceneScript(LPSCENE3D, TCHAR *fileName);
+	static void	cleanSceneUp(LPSCENE3D Scene);
 };
 typedef clsTranslator TRANSLATOR3D, *LPTRANSLATOR3D;
