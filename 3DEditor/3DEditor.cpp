@@ -33,11 +33,10 @@ TEXTBOX				tbX, tbY, tbZ,
 
 LISTBOX				listObjects;
 
-LPWINBASE			testLpButton1;
-
-LPVIEWPORT_POOL		Pool;
-
 SCENE3D				Scene;
+LPVIEWPORT_POOL		Pool;
+LPOBJECT3D			activeObject;
+LPVIEWPORT			activeViewport;
 
 // Win API entry point:
 // ===================================
@@ -52,6 +51,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	activeObject	= NULL;
+	activeViewport	= NULL;
 
 
 	// Get this stuff below out of here!
@@ -166,13 +168,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									TRUE
 								);
 	Pool->setActiveViewport(3U);
+	activeViewport = Pool->getActiveViewport();
 
 	Draw_MainToolbars(hInstance);
 	RefreshObjectsList();
 	mainForm.Show();
 
-	ToggleViewZoomTool(Pool->getActiveViewport());
-	ToggleSelectionDependentControls();
+	tabModify.Disable();
+	btMove.Disable();
+	btRotate.Disable();
+	btScale.Disable();
+	tbX.Disable();
+	tbY.Disable();
+	tbZ.Disable();
+
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR));
 	iResult = mainForm.DoMSGCycle(hAccelTable);
@@ -1408,8 +1417,8 @@ BOOL ToPoint() {
 	FLOAT	m_pi_d_180	= (FLOAT)M_PI / 180.0f;
 
 	TCHAR *buf = new TCHAR[256];
-	LPOBJECT3D obj = NULL;
-	listObjects.getItem(i, buf, 256, (LPVOID*)&obj);
+	LPOBJECT3D activeObject = NULL;
+	listObjects.getItem(i, buf, 256, (LPVOID*)&activeObject);
 
 	tbX.getText(buf, 256 * sizeof(TCHAR));
 	FLOAT x = (FLOAT)_ttof(buf);
@@ -1420,13 +1429,13 @@ BOOL ToPoint() {
 
 	switch ( activeTool ) {
 	case IS_MOVE:
-		obj->Translate(x, y, z);
+		activeObject->Translate(x, y, z);
 		break;
 	case IS_ROTATE:
-		obj->Rotate(y * m_pi_d_180, z * m_pi_d_180, x * m_pi_d_180);
+		activeObject->Rotate(y * m_pi_d_180, z * m_pi_d_180, x * m_pi_d_180);
 		break;
 	case IS_SCALE:
-		obj->Scale(x, y, z);
+		activeObject->Scale(x, y, z);
 		break;
 	}
 	return true;
@@ -1444,170 +1453,162 @@ LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
-	INT i = listObjects.getCurSel();
-	if ( i < 0 ) return 1L;
-
-	TCHAR			*buf	= new TCHAR[256];
-	LPOBJECT3D		obj		= NULL;
-	listObjects.getItem(i, buf, 256, (LPVOID*)&obj);
-	LPVIEWPORT		vp		= Pool->getActiveViewport();
-	if ( vp == NULL ) return 1L;
+	if ( activeViewport == NULL ) return 1L;
 
 	switch ( activeTool ) {
 	case IS_MOVE:
 		switch ( wParam ) {
 		case VK_LEFT:
-				obj->Strafe(-PAN_ASPECT);
+				activeObject->Strafe(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
-				obj->Strafe(PAN_ASPECT);
+				activeObject->Strafe(PAN_ASPECT);
 			break;
 		case VK_UP:
-				obj->Fly(PAN_ASPECT);
+				activeObject->Fly(PAN_ASPECT);
 			break;
 		case VK_DOWN:
-				obj->Fly(-PAN_ASPECT);
+				activeObject->Fly(-PAN_ASPECT);
 			break;
 		case VK_HOME:
-				obj->Follow(PAN_ASPECT);
+				activeObject->Follow(PAN_ASPECT);
 			break;
 		case VK_END:
-				obj->Follow(-PAN_ASPECT);
+				activeObject->Follow(-PAN_ASPECT);
 			break;
 		}
 		break;
 	case IS_ROTATE:
 		switch ( wParam ) {
 		case VK_LEFT:
-				obj->Yaw(-ROTATION_ASPECT);
+				activeObject->Yaw(-ROTATION_ASPECT);
 			break;
 		case VK_RIGHT:
-				obj->Yaw(ROTATION_ASPECT);
+				activeObject->Yaw(ROTATION_ASPECT);
 			break;
 		case VK_UP:
-				obj->Pitch(ROTATION_ASPECT);
+				activeObject->Pitch(ROTATION_ASPECT);
 			break;
 		case VK_DOWN:
-				obj->Pitch(-ROTATION_ASPECT);
+				activeObject->Pitch(-ROTATION_ASPECT);
 			break;
 		case VK_HOME:
-				obj->Roll(ROTATION_ASPECT);
+				activeObject->Roll(ROTATION_ASPECT);
 			break;
 		case VK_END:
-				obj->Roll(-ROTATION_ASPECT);
+				activeObject->Roll(-ROTATION_ASPECT);
 			break;
 		}
 		break;
 	case IS_SCALE:
+		//if ( activeObject == NULL ) return 1L;
 		switch ( wParam ) {
 		case VK_LEFT:
-				obj->ScaleAlong(1.0f / SCALE_ASPECT);
+				activeObject->ScaleAlong(1.0f / SCALE_ASPECT);
 			break;
 		case VK_RIGHT:
-				obj->ScaleAlong(SCALE_ASPECT);
+				activeObject->ScaleAlong(SCALE_ASPECT);
 			break;
 		case VK_UP:
-				obj->ScaleVAcross(1.0f / SCALE_ASPECT);
+				activeObject->ScaleVAcross(1.0f / SCALE_ASPECT);
 			break;
 		case VK_DOWN:
-				obj->ScaleVAcross(SCALE_ASPECT);
+				activeObject->ScaleVAcross(SCALE_ASPECT);
 			break;
 		case VK_HOME:
-				obj->ScaleHAcross(1.0f / SCALE_ASPECT);
+				activeObject->ScaleHAcross(1.0f / SCALE_ASPECT);
 			break;
 		case VK_END:
-				obj->ScaleHAcross(SCALE_ASPECT);
+				activeObject->ScaleHAcross(SCALE_ASPECT);
 			break;
 		}
 		break;
 	case IS_PAN:
 		switch ( wParam ) {
 		case VK_LEFT:
-			vp->camDefault.Strafe(-PAN_ASPECT);
-			vp->camDefault.TargetStrafe(-PAN_ASPECT);
+			activeViewport->camDefault.Strafe(-PAN_ASPECT);
+			activeViewport->camDefault.TargetStrafe(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
-			vp->camDefault.Strafe(PAN_ASPECT);
-			vp->camDefault.TargetStrafe(PAN_ASPECT);
+			activeViewport->camDefault.Strafe(PAN_ASPECT);
+			activeViewport->camDefault.TargetStrafe(PAN_ASPECT);
 			break;
 		case VK_UP:
-			vp->camDefault.Fly(PAN_ASPECT);
-			vp->camDefault.TargetFly(PAN_ASPECT);
+			activeViewport->camDefault.Fly(PAN_ASPECT);
+			activeViewport->camDefault.TargetFly(PAN_ASPECT);
 			break;
 		case VK_DOWN:
-			vp->camDefault.Fly(-PAN_ASPECT);
-			vp->camDefault.TargetFly(-PAN_ASPECT);
+			activeViewport->camDefault.Fly(-PAN_ASPECT);
+			activeViewport->camDefault.TargetFly(-PAN_ASPECT);
 			break;
 		case VK_HOME:
-			vp->camDefault.Follow(PAN_ASPECT);
-			vp->camDefault.TargetFollow(PAN_ASPECT);
+			activeViewport->camDefault.Follow(PAN_ASPECT);
+			activeViewport->camDefault.TargetFollow(PAN_ASPECT);
 			break;
 		case VK_END:
-			vp->camDefault.Follow(-PAN_ASPECT);
-			vp->camDefault.TargetFollow(-PAN_ASPECT);
+			activeViewport->camDefault.Follow(-PAN_ASPECT);
+			activeViewport->camDefault.TargetFollow(-PAN_ASPECT);
 			break;
 		}
 		break;
 	case IS_ZOOM:
 		switch ( wParam ) {
 		case VK_HOME:
-			vp->camDefault.setHFov(vp->camDefault.getHFov() + ZOOM_ASPECT);
-			vp->camDefault.setVFov(vp->camDefault.getHFov());
+			activeViewport->camDefault.setHFov(activeViewport->camDefault.getHFov() + ZOOM_ASPECT);
+			activeViewport->camDefault.setVFov(activeViewport->camDefault.getHFov());
 			break;
 		case VK_END:
-			vp->camDefault.setHFov(vp->camDefault.getHFov() - ZOOM_ASPECT);
-			vp->camDefault.setVFov(vp->camDefault.getHFov());
+			activeViewport->camDefault.setHFov(activeViewport->camDefault.getHFov() - ZOOM_ASPECT);
+			activeViewport->camDefault.setVFov(activeViewport->camDefault.getHFov());
 			break;
 		}
 		break;
 	case IS_CAMROTATE:
 		switch ( wParam ) {
 		case VK_LEFT:
-			vp->camDefault.Strafe(-PAN_ASPECT);
+			activeViewport->camDefault.Strafe(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
-			vp->camDefault.Strafe(PAN_ASPECT);
+			activeViewport->camDefault.Strafe(PAN_ASPECT);
 			break;
 		case VK_UP:
-			vp->camDefault.Fly(PAN_ASPECT);
+			activeViewport->camDefault.Fly(PAN_ASPECT);
 			break;
 		case VK_DOWN:
-			vp->camDefault.Fly(-PAN_ASPECT);
+			activeViewport->camDefault.Fly(-PAN_ASPECT);
 			break;
 		case VK_HOME:
-			vp->camDefault.Follow(PAN_ASPECT);
+			activeViewport->camDefault.Follow(PAN_ASPECT);
 			break;
 		case VK_END:
-			vp->camDefault.Follow(-PAN_ASPECT);
+			activeViewport->camDefault.Follow(-PAN_ASPECT);
 			break;
 		}
 		break;
 	case IS_LOOK:
 		switch ( wParam ) {
 		case VK_LEFT:
-			vp->camDefault.TargetStrafe(-PAN_ASPECT);
+			activeViewport->camDefault.TargetStrafe(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
-			vp->camDefault.TargetStrafe(PAN_ASPECT);
+			activeViewport->camDefault.TargetStrafe(PAN_ASPECT);
 			break;
 		case VK_UP:
-			vp->camDefault.TargetFly(PAN_ASPECT);
+			activeViewport->camDefault.TargetFly(PAN_ASPECT);
 			break;
 		case VK_DOWN:
-			vp->camDefault.TargetFly(-PAN_ASPECT);
+			activeViewport->camDefault.TargetFly(-PAN_ASPECT);
 			break;
 		case VK_HOME:
-			vp->camDefault.TargetFollow(PAN_ASPECT);
+			activeViewport->camDefault.TargetFollow(PAN_ASPECT);
 			break;
 		case VK_END:
-			vp->camDefault.TargetFollow(-PAN_ASPECT);
+			activeViewport->camDefault.TargetFollow(-PAN_ASPECT);
 			break;
 		}
 		break;
 	}
 	mainForm.Invalidate();
-
-	delete [] buf;
 	return 0L;
 }
 
@@ -1616,13 +1617,6 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 	OPENFILENAME	ofn;
 	TCHAR			*fName = new TCHAR[256];
 	UINT			error;
-
-	switch ( HIWORD(wParam) )
-	{
-		case LBN_SELCHANGE:
-			ToggleSelectionDependentControls();
-			return 1L;
-	}
 
 	switch (LOWORD(wParam))
 	{
@@ -1770,6 +1764,41 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			RefreshObjectsList();
 			mainForm.Invalidate();
 			break;
+
+		case LIST_OBJECTS:
+				if ( HIWORD(wParam) == LBN_KILLFOCUS )
+				{
+					activeObject = NULL;
+					listObjects.getItem(
+								listObjects.getCurSel(), 
+								NULL, 
+								0, 
+								(LPVOID*)&activeObject
+							);
+					mainForm.Invalidate();
+					if ( activeObject != NULL ) 
+					{
+						tabModify.Enable();
+						btMove.Enable();
+						btRotate.Enable();
+						btScale.Enable();
+						tbX.Enable();
+						tbY.Enable();
+						tbZ.Enable();
+					}
+					else
+					{
+						tabModify.Disable();
+						btMove.Disable();
+						btRotate.Disable();
+						btScale.Disable();
+						tbX.Disable();
+						tbY.Disable();
+						tbZ.Disable();
+					}
+				}
+			break;
+
 		case IDM_SAVE:
 			if ( SaveFileDialog((HWND)lParam, ofn) ) 
 			{
@@ -1807,6 +1836,8 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			((LPFORM)Sender)->Destroy();
 			break;
+
+		default: return 1L;
 	}
 	return 0L;
 }
@@ -1883,36 +1914,15 @@ BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn) {
 }
 
 // ============================================================================
-// Focus handling funcs:
-// ============================================================================
-
-LRESULT mainForm_onFocusLost(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
-{
-	Pool->setActiveViewport(NO_ACTIVE_VIEWPORT);
-	return 0L;
-}
-
-// ============================================================================
 // Mouse handling funcs:
 // ============================================================================
 LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
-	LPVIEWPORT vp = (LPVIEWPORT)Sender;
-	Pool->setActiveViewport((DWORD)vp->getID());
-	mainForm.setFocus();
-	mainForm.Invalidate();
-	
-	ToggleViewZoomTool(vp);
-	return 0L;
-}
-
-BOOL ToggleViewZoomTool(LPVIEWPORT vp)
-{
-	BOOL bResult = vp != NULL;
-	if ( bResult )
+	Pool->setActiveViewport((DWORD)((LPVIEWPORT)Sender)->getID());
+	activeViewport = NULL;
+	if ( (activeViewport = Pool->getActiveViewport()) != NULL )
 	{
-		bResult = vp->camDefault.getProjectionType() == PT_CENTRAL;
-		if ( !bResult ) 
+		if ( activeViewport->camDefault.getProjectionType() != PT_CENTRAL ) 
 		{
 			if ( activeTool == IS_ZOOM ) activeTool = IS_NONE;
 			btZoomView.Disable();
@@ -1922,31 +1932,8 @@ BOOL ToggleViewZoomTool(LPVIEWPORT vp)
 			btZoomView.Enable();
 		}
 	}
-	return bResult;
+	mainForm.setFocus();
+	mainForm.Invalidate();
+	return 0L;
 }
 
-BOOL ToggleSelectionDependentControls()
-{
-	BOOL bResult = listObjects.getCurSel() >= 0;
-	if ( bResult ) 
-	{
-		tabModify.Enable();
-		btMove.Enable();
-		btRotate.Enable();
-		btScale.Enable();
-		tbX.Enable();
-		tbY.Enable();
-		tbZ.Enable();
-	}
-	else
-	{
-		tabModify.Disable();
-		btMove.Disable();
-		btRotate.Disable();
-		btScale.Disable();
-		tbX.Disable();
-		tbY.Disable();
-		tbZ.Disable();
-	}
-	return bResult;
-}

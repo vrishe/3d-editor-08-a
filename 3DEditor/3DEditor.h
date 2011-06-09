@@ -139,7 +139,4 @@ INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, 
 
 BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn);
 BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
-
-BOOL ToggleViewZoomTool(LPVIEWPORT vp);
-BOOL ToggleSelectionDependentControls();
 // TODO: define any new event handler prototype here
