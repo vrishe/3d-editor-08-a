@@ -469,7 +469,6 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 	}
 
 	vp->camDefault.Translate(defCamPos);
-	//vp->camDefault.LookAt(VECTOR3D(0, 0, 0));
 }
 
 // ============================================================================

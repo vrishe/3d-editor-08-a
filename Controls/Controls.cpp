@@ -1045,6 +1045,30 @@ INT_PTR clsForm::MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType) const
 	return MessageBox(hWnd, mbText, mbCaption, mbType);
 }
 
+BOOL clsForm::OFDShow(LPOPENFILENAME ofn)
+{
+	if ( ofn == NULL ) return FALSE;
+	ofn->lStructSize	= sizeof(OPENFILENAME);
+	ofn->hwndOwner		= hWnd;
+	ofn->Flags			= OFN_PATHMUSTEXIST 
+						| OFN_FILEMUSTEXIST;
+
+	// Display the Open dialog box.
+	return GetOpenFileName(ofn);
+}
+
+BOOL clsForm::SFDShow(LPOPENFILENAME ofn)
+{
+	if ( ofn == NULL ) return FALSE;
+	ofn->lStructSize	= sizeof(OPENFILENAME);
+	ofn->hwndOwner		= hWnd;
+	ofn->Flags			= OFN_PATHMUSTEXIST
+						| OFN_OVERWRITEPROMPT;
+
+	// Display the Open dialog box.
+	return GetSaveFileName(ofn);	
+}
+
 BOOL clsForm::setMenu(HMENU frmMenu)
 {
 	DWORD wndStyle;
@@ -1617,6 +1641,7 @@ INT clsListBox::getCurSel() const
 VOID clsListBox::setCurSel(INT ItemIndex) 
 {
 	SendMessage(hWnd, LB_SETCURSEL, ItemIndex, 0);
+	SendMessage(hWnd, LB_SETCARETINDEX, ItemIndex, 0);
 }
 
 BOOL clsListBox::isSelItem(INT ItemIndex) const

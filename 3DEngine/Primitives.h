@@ -71,7 +71,7 @@ protected:
 	float h;			// cone height
 	float bR;			// base radius
 	float tR;			// top radius
-	int precission;	// precission of circle approximation in polygons
+	int precision;	// precision of circle approximation in polygons
 
 public:
 	Cone(COLOR3D c, MESH_ID mID = MSH_CONE);
@@ -175,7 +175,7 @@ protected:
 	float bRh;			// base hole radius
 	float tR;			// top radius
 	float tRh;			// top hole radius
-	int precission;	// precission of circle approximation in polygons
+	int precision;	// precision of circle approximation in polygons
 
 public:
 	Hole(COLOR3D c);

@@ -10,6 +10,7 @@
 #define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
 #include <CommCtrl.h>
+#include <Commdlg.h>
 #include <tchar.h>
 #include <map>
 #include <vector>
@@ -295,6 +296,8 @@ public:
 	BOOL	Restore();
 	INT_PTR DBShow(LPCTSTR dbTemplate, DLGPROC dbProcedure)			const;
 	INT_PTR MBShow(LPCTSTR mbText, LPCTSTR mbCaption, UINT mbType)	const;
+	BOOL	OFDShow(LPOPENFILENAME ofn);
+	BOOL	SFDShow(LPOPENFILENAME ofn);
 
 // Setters.
 	BOOL	setMenu(HMENU frmMenu);

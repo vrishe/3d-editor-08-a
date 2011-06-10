@@ -134,19 +134,50 @@ void clsTargCamera::setTargetPoint(LPVECTOR3D point) { target = *point; }
 void clsTargCamera::setTargetPoint(float tX, float tY, float tZ) { target = VECTOR3D(tX, tY, tZ); }
 
 void clsTargCamera::Translate(const VECTOR3D tV) { pos = tV; clsCamera::LookAt(target, NULL); }
-void clsTargCamera::Translate(float tX, float tY, float tZ) { pos = VECTOR3D(tX, tY, tZ); clsCamera::LookAt(target, NULL); }
-
-void clsTargCamera::Follow(float units)	{ pos += fWd * units; clsCamera::LookAt(target, NULL); }
-void clsTargCamera::Strafe(float units)	{ pos += rWd * units; clsCamera::LookAt(target, NULL); }
-void clsTargCamera::Fly(float units)	{ pos += uWd * units; clsCamera::LookAt(target, NULL); }
+void clsTargCamera::Translate(float tX, float tY, float tZ) 
+{ 
+	pos = VECTOR3D(tX, tY, tZ); 
+	clsCamera::LookAt(target, NULL); 
+}
 
 void clsTargCamera::TargetFollow(float units)	{ target += fWd * units; clsCamera::LookAt(target, NULL); }
 void clsTargCamera::TargetStrafe(float units)	{ target += rWd * units; clsCamera::LookAt(target, NULL); }
 void clsTargCamera::TargetFly(float units)		{ target += uWd * units; clsCamera::LookAt(target, NULL); }
 
-void clsTargCamera::Pitch(float angle) { /* doing nothing */ }
-void clsTargCamera::Yaw(float angle) { /* doing nothing */ }
+void clsTargCamera::Follow(float units)	{ pos += fWd * units; target += fWd * units; }
+void clsTargCamera::Strafe(float units)	{ pos += rWd * units; target += rWd * units; }
+void clsTargCamera::Fly(float units)	{ pos += uWd * units; target += uWd * units; }
 
+void clsTargCamera::FollowLookAxis(float units) { pos += fWd * units; }
+
+void clsTargCamera::StrafeLongitude(float units) 
+{
+	MATRIX3D M(true);
+	float angle = Distance(target);
+	if ( angle > EPSILON )
+	{
+		angle = units / angle;
+		Matrix3DRotateAxis(&rWd, angle, &M);
+		Matrix3DTransformCoord(&M, &pos, &pos);
+		clsObject::LookAt(target, NULL);
+	}
+}
+
+void clsTargCamera::StrafeLatitude(float units) 
+{ 
+	MATRIX3D M(true);
+	float angle = Distance(target);
+	if ( angle > EPSILON )
+	{
+		angle = units / angle;
+		Matrix3DRotateAxis(&uWd, angle, &M);
+		Matrix3DTransformCoord(&M, &pos, &pos);
+		clsObject::LookAt(target, NULL);
+	}
+}
+
+void clsTargCamera::Pitch() {}
+void clsTargCamera::Yaw() {}
 void clsTargCamera::LookAt(VECTOR3D lookAt) { /* doing nothing */ }
 void clsTargCamera::LookAt(const clsObject *objToLookAt) { /* doing nothing */ }
 void clsTargCamera::LookAt(float lX, float lY, float lZ) { /* doing nothing */ }

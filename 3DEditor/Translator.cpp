@@ -55,7 +55,7 @@ void clsTranslator::pasteCone(LPCONE3D obj, FILE* file) {
 	bErrorFlag = _ftprintf_s(file, _T("Height: %.3f\n"), obj->getHeight() );
 	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precission: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteExCone(LPEXCONE3D obj, FILE* file) {
@@ -69,7 +69,7 @@ void clsTranslator::pasteExCone(LPEXCONE3D obj, FILE* file) {
 	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Secant: %.3f\n"), obj->getSecant() );
-	bErrorFlag = _ftprintf_s(file, _T("Precission: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteHole(LPHOLE3D obj, FILE* file) {
@@ -84,7 +84,7 @@ void clsTranslator::pasteHole(LPHOLE3D obj, FILE* file) {
 	bErrorFlag = _ftprintf_s(file, _T("Base hole radius: %.3f\n"), obj->getBHoleRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Top hole radius: %.3f\n"), obj->getTHoleRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precission: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteMic(LPMICROPHONE3D obj, FILE* file) {
@@ -94,18 +94,18 @@ void clsTranslator::pasteMic(LPMICROPHONE3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 
-	bErrorFlag = _ftprintf_s(file, _T("Total height: %.3f\n"), obj->getTotalHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBaseRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Base height: %.3f\n"), obj->getBaseHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Button width: %.3f\n"), obj->getButtonWidth() );
+	bErrorFlag = _ftprintf_s(file, _T("Total height:   %.3f\n"), obj->getTotalHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Base radius:    %.3f\n"), obj->getBaseRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Base height:    %.3f\n"), obj->getBaseHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Button width:   %.3f\n"), obj->getButtonWidth() );
 	bErrorFlag = _ftprintf_s(file, _T("Upright radius: %.3f\n"), obj->getUprightRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Upright height: %.3f\n"), obj->getUprightHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Upright gap: %.3f\n"), obj->getUprightGap() );
-	bErrorFlag = _ftprintf_s(file, _T("Handle indent: %.3f\n"), obj->getHandleIndent() );
-	bErrorFlag = _ftprintf_s(file, _T("Head radius: %.3f\n"), obj->getHeadRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Head deapth: %.3f\n"), obj->getHeadDepth() );
-	bErrorFlag = _ftprintf_s(file, _T("Core radius: %.3f\n"), obj->getCoreRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precission: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Upright gap:    %.3f\n"), obj->getUprightGap() );
+	bErrorFlag = _ftprintf_s(file, _T("Handle indent:  %.3f\n"), obj->getHandleIndent() );
+	bErrorFlag = _ftprintf_s(file, _T("Head radius:    %.3f\n"), obj->getHeadRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Head deapth:    %.3f\n"), obj->getHeadDepth() );
+	bErrorFlag = _ftprintf_s(file, _T("Core radius:    %.3f\n"), obj->getCoreRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecission() );
 	pasteColor(obj->getColor(), file);
 }
 
@@ -114,16 +114,16 @@ void clsTranslator::pasteCam(LPCAMERA3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 	errno_t bErrorFlag;
-	bErrorFlag = _ftprintf_s(file, _T("hFOV: %.3f\n"), obj->getHFov() );
-	bErrorFlag = _ftprintf_s(file, _T("vFOV: %.3f\n"), obj->getVFov() );
+	bErrorFlag = _ftprintf_s(file, _T("hFOV:      %.3f\n"), obj->getHFov() );
+	bErrorFlag = _ftprintf_s(file, _T("vFOV:      %.3f\n"), obj->getVFov() );
 	bErrorFlag = _ftprintf_s(file, _T("Near clip: %.3f\n"), obj->getNearCP() );
-	bErrorFlag = _ftprintf_s(file, _T("Far clip: %.3f\n"), obj->getFarCP() );
+	bErrorFlag = _ftprintf_s(file, _T("Far clip:  %.3f\n"), obj->getFarCP() );
 }
 void clsTranslator::pasteLight(LPDIFLIGHT3D obj, FILE* file) {
 	pasteName(obj, file);
 	pasteRotation(obj, file);
 	errno_t bErrorFlag;
-	bErrorFlag = _ftprintf_s(file, _T("Power: %.3f\n"), obj->getPower() );
+	bErrorFlag = _ftprintf_s(file, _T("Power:     %.3f\n"), obj->getPower() );
 	pasteColor(obj->getColor(), file);
 }
 
@@ -299,7 +299,7 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 				hR,			// head radius
 				hD,			// head depth
 				cR;			// core radius
-	int			precission;
+	int			precision;
 	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 	bErrorFlag = _ftscanf_s(file, _T("%f"), &tH);
@@ -345,7 +345,7 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	bErrorFlag = _ftscanf_s(file, _T("%f"), &cR);
 
 	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
-	bErrorFlag = _ftscanf_s(file, _T("%f"), &precission);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &precision);
 
 	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 	int r, g, j;
@@ -429,8 +429,6 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	bErrorFlag = _ftscanf_s(file, _T("%19c"), buffer);
 	if ( wcscmp(buffer, _T("3DEditor scene file")) )
 		return false;
-
-	Scene->Clear();
 
 		// loading cameras
 	bErrorFlag = _ftscanf_s(file, _T("%94c\0"), buffer);

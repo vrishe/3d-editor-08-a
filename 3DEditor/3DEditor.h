@@ -42,7 +42,7 @@ enum TOOLS {
 	IS_ZOOM			= 7
 };
 
-#define PAN_ASPECT		3.0f
+#define PAN_ASPECT		6.0f
 #define ROTATION_ASPECT	.1f
 #define SCALE_ASPECT	.95f
 #define ZOOM_ASPECT		.01f
@@ -139,9 +139,6 @@ LRESULT viewport_lbMouseClick(LPOBJECT, WPARAM, LPARAM);
 
 INT_PTR CALLBACK About_DialogBox_Handler(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-
-BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn);
-BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn);
 
 VOID GetActiveViewport();
 VOID GetActiveObject();

@@ -189,7 +189,8 @@ public:
 	void LocalRotate(float pitch, float yaw, float roll);
 	void Rotate(float y, float z, float x);
 
-	//void RotateAxis(const LPVECTOR3D axis, float angle);
+	float Distance(VECTOR3D vDst);
+	float Distance(const clsObject *objDst);
 
 	// Take a look at point or object
 	void LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient);

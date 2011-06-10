@@ -37,7 +37,7 @@ class Microphone : public clsMesh {
 				hR,			// head radius
 				hD,			// head depth
 				cR;			// core radius
-	int			precission;
+	int			precision;
 
 
 	bool getMeshPosition(

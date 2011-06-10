@@ -3,7 +3,7 @@
 // ============================================================================
 // Implementation of Microphone class:
 Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blue, float r, float h, int prec) : clsMesh( MSH_MIC, red, green, blue ) {
-	precission = prec;
+	precision = prec;
 
 	tH = h;
 
@@ -37,7 +37,7 @@ Microphone::Microphone(unsigned char red, unsigned char green, unsigned char blu
 						float cr,		
 						int prec
 						) : clsMesh( MSH_MIC, red, green, blue ) {
-	precission = prec;
+	precision = prec;
 
 	bR = br;
 	bH = bh;
@@ -63,24 +63,24 @@ void Microphone::Triangulate() {
 	edges.clear();
 	polygons.clear();
 
-	ExCone			base(bH, bR, bR, bR * 0.824f, precission);
+	ExCone			base(bH, bR, bR, bR * 0.824f, precision);
 	Pyramid			buttonL(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, -bW * 0.1375f),
 					buttonR(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, -bW * 0.1375f);
 	
-	Cone			shroudLow(uH * 0.21127f, uR, uR, precission),
-					bridge   (uH * 0.084537f, uR * 0.66667f, uR * 0.41667f, precission),
-					shroudHi (uH - uG - shroudLow.getHeight() - uH * .04f - bridge.getHeight(), uR, uR, precission),
-					upright	 (uH - bridge.getHeight(), uR * 0.66667f, uR * 0.66667f, precission);
+	Cone			shroudLow(uH * 0.21127f, uR, uR, precision),
+					bridge   (uH * 0.084537f, uR * 0.66667f, uR * 0.41667f, precision),
+					shroudHi (uH - uG - shroudLow.getHeight() - uH * .04f - bridge.getHeight(), uR, uR, precision),
+					upright	 (uH - bridge.getHeight(), uR * 0.66667f, uR * 0.66667f, precision);
 
 	Pyramid			handleBridgeUp	(uH * 0.09155f, uR * 0.653f, hI, uR * 0.653f, hI),
 					handleBridgeDown(uH * 0.077f,   uR * 0.653f, hI, uR * 0.653f, hI),
 					handle			(uH * 0.7598f,  uR * 0.792f, uR * 0.5418f, uR * 0.5418f, uR * 0.5418f, uR * 0.125f),
 					handleTop		(uH * 0.05647f, uR * 0.792f, uR * 0.5418f, uR * 0.792f,  uR * 0.5418f,-uR * 0.3542f);
 
-	Hole			head	 (hD,  hR,	 cR, hR, cR, precission),
-					headFront(hD / 10.f, hR * 1.075f, cR * 0.9f, hR * 1.075f, cR * 0.9f, precission),
-					headBack (hD / 10.f, hR * 1.075f, cR * 0.9f, hR * 1.075f, cR * 0.9f, precission);
-	Cone			core	 (hD * 1.43333f,  cR, cR, precission);
+	Hole			head	 (hD,  hR,	 cR, hR, cR, precision),
+					headFront(hD / 10.f, hR * 1.075f, cR * 0.9f, hR * 1.075f, cR * 0.9f, precision),
+					headBack (hD / 10.f, hR * 1.075f, cR * 0.9f, hR * 1.075f, cR * 0.9f, precision);
+	Cone			core	 (hD * 1.43333f,  cR, cR, precision);
 
 	base.Yaw(-(FLOAT)M_PI_2);
 
@@ -436,7 +436,7 @@ void Microphone::setCoreRadius (float r) {
 	setHeadDepth(hD);
 }
 void Microphone::setPrecission	(int prec) {
-	precission = prec;
+	precision = prec;
 
 	delete [] micParts;
 	micParts = new LPMESH3D[PARTS_NUM];
@@ -456,4 +456,4 @@ float Microphone::getHeadRadius		() { return hR; }
 float Microphone::getHeadDepth		() { return hD; }
 float Microphone::getCoreRadius		() { return cR; }
 float Microphone::getTotalHeight	() { return tH; }
-int Microphone::getPrecission		() { return precission; }
+int Microphone::getPrecission		() { return precision; }

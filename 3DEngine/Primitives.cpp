@@ -157,11 +157,11 @@ void Cone::Triangulate() {
 	edges.clear();
 	polygons.clear();
 
-	int step = 360 / precission;
+	int step = 360 / precision;
 		// setting vertices
 	vertices.push_back(VECTOR3D(0, 0, 0));
 	vertices.push_back(VECTOR3D(0, 0, h));
-	for (int i = 0; i < precission; i++) {
+	for (int i = 0; i < precision; i++) {
 		switch (step*i) {
 		case 0:
 			vertices.push_back(VECTOR3D(bR, 0, 0));
@@ -197,42 +197,42 @@ void Cone::Triangulate() {
 	}
 
 		// setting base edges
-	for (int i = 1; i < precission; i++) {
+	for (int i = 1; i < precision; i++) {
 		edges.push_back(EDGE3D(0, i*2));
 		edges.push_back(EDGE3D(i*2, i*2 + 2));
 	}
-	edges.push_back(EDGE3D(0, precission*2));
-	edges.push_back(EDGE3D(precission*2, 2));
+	edges.push_back(EDGE3D(0, precision*2));
+	edges.push_back(EDGE3D(precision*2, 2));
 		// setting top edges
-	for (int i = 1; i < precission; i++) {
+	for (int i = 1; i < precision; i++) {
 		edges.push_back(EDGE3D(1, i*2 + 1));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 3));
 	}
-	edges.push_back(EDGE3D(1, precission*2 + 1));
-	edges.push_back(EDGE3D(precission*2 + 1, 3));
+	edges.push_back(EDGE3D(1, precision*2 + 1));
+	edges.push_back(EDGE3D(precision*2 + 1, 3));
 		// setting side edges
-	for (int i = 1; i < precission; i++) {
+	for (int i = 1; i < precision; i++) {
 		edges.push_back(EDGE3D(i*2, i*2 + 1));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 2));
 	}
-	edges.push_back(EDGE3D(precission*2, precission*2 + 1));
-	edges.push_back(EDGE3D(precission*2 + 1, 2));
+	edges.push_back(EDGE3D(precision*2, precision*2 + 1));
+	edges.push_back(EDGE3D(precision*2 + 1, 2));
 
 		// setting base polygons
-	for (int i = 1; i < precission; i++)
+	for (int i = 1; i < precision; i++)
 		polygons.push_back(POLY3D(i*2, 0, i*2 + 2));
-	polygons.push_back(POLY3D(precission*2, 0, 2));
+	polygons.push_back(POLY3D(precision*2, 0, 2));
 		// setting top polygons
-	for (int i = 1; i < precission; i++)
+	for (int i = 1; i < precision; i++)
 		polygons.push_back(POLY3D(1, i*2 + 1, i*2 + 3));
-	polygons.push_back(POLY3D(1, precission*2 + 1, 3));
+	polygons.push_back(POLY3D(1, precision*2 + 1, 3));
 		// setting side polygons
-	for (int i = 1; i < precission; i++) {
+	for (int i = 1; i < precision; i++) {
 		polygons.push_back(POLY3D(i*2 + 1, i*2, i*2 + 2));
 		polygons.push_back(POLY3D(i*2 + 1, i*2 + 2, i*2 + 3));
 	}
-	polygons.push_back(POLY3D(precission*2 + 1, precission*2, 2));
-	polygons.push_back(POLY3D(precission*2 + 1, 2, 3));
+	polygons.push_back(POLY3D(precision*2 + 1, precision*2, 2));
+	polygons.push_back(POLY3D(precision*2 + 1, 2, 3));
 
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
@@ -243,7 +243,7 @@ void Cone::Triangulate() {
 /* ---------------------- constructors --------------------- */
 
 Cone::Cone(COLOR3D c, MESH_ID mID) 
-	: clsMesh(mID, c), h(0), bR(0), tR(0), precission(24) { }
+	: clsMesh(mID, c), h(0), bR(0), tR(0), precision(24) { }
 
 Cone::Cone(
 		float height, 
@@ -256,7 +256,7 @@ Cone::Cone(
 	h			= height;
 	bR			= bRadius;
 	tR			= tRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -270,7 +270,7 @@ Cone::Cone(
 	h			= 0;
 	bR			= 0;
 	tR			= 0;
-	precission	= 24;
+	precision	= 24;
 }
 
 Cone::Cone(
@@ -286,7 +286,7 @@ Cone::Cone(
 	h			= height;
 	bR			= bRadius;
 	tR			= tRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -295,7 +295,7 @@ Cone::Cone(
 float Cone::getHeight()		{ return h; }
 float Cone::getBRadius()	{ return bR; }
 float Cone::getTRadius()	{ return tR; }
-int Cone::getPrecission()	{ return precission; }
+int Cone::getPrecission()	{ return precision; }
 
 
 /* ------------------------ setters ------------------------ */
@@ -303,7 +303,7 @@ int Cone::getPrecission()	{ return precission; }
 void Cone::setHeight(float n)	{ h = n; } 
 void Cone::setBRadius(float n)	{ bR = n; }
 void Cone::setTRadius(float n)	{ tR = n; }
-void Cone::setPrecission(int n) { precission = n; }
+void Cone::setPrecission(int n) { precision = n; }
 
 
 #endif // CONE_CPP
@@ -318,7 +318,7 @@ void ExCone::Triangulate() {
 	edges.clear();
 	polygons.clear();
 
-	int step = 360 / precission; // шаг между точками в градусах
+	int step = 360 / precision; // шаг между точками в градусах
 		// setting vertices
 	if ( secant >= 0 ) {
 		vertices.push_back(VECTOR3D(0, 0, 0));
@@ -343,7 +343,7 @@ void ExCone::Triangulate() {
 		tV1 = VECTOR3D((float)sqrt(tR*tR - secant * secant), secant, h);
 		tV2 = VECTOR3D((float)-sqrt(tR*tR - secant * secant), secant, h);
 	}
-	for (int i = 0; i < precission; i++) { // нахождение вершин кривых основания и верхней плоскости конуса
+	for (int i = 0; i < precision; i++) { // нахождение вершин кривых основания и верхней плоскости конуса
 		switch (step*i) {
 		case 0:
 			if ( secant >= 0 ) {
@@ -498,7 +498,7 @@ void ExCone::Triangulate() {
 	edges.push_back(EDGE3D(N*2 + 1, 2));
 
 		// setting base polygons
-	N = (vertices.size() - 2) / 2; int index = ( N == precission / 2 + 1 ? 2 : 1 );
+	N = (vertices.size() - 2) / 2; int index = ( N == precision / 2 + 1 ? 2 : 1 );
 	for (int i = index; i < N; i++)
 		polygons.push_back(POLY3D(i*2, 0, i*2 + 2));
 	polygons.push_back(POLY3D(N*2, 0, 2));
@@ -538,7 +538,7 @@ ExCone::ExCone(
 	h			= height;
 	bR			= bRadius;
 	tR			= tRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -563,7 +563,7 @@ ExCone::ExCone(
 	h			= height;
 	bR			= bRadius;
 	tR			= tRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -590,9 +590,9 @@ void Hole::Triangulate() {
 	edges.clear();
 	polygons.clear();
 
-	int step = 360 / precission;
+	int step = 360 / precision;
 		// setting vertices
-	for (int i = 0; i < precission; i++) { // setting outter circle
+	for (int i = 0; i < precision; i++) { // setting outter circle
 		switch (step*i) {
 		case 0:
 			vertices.push_back(VECTOR3D(bR, 0, 0));
@@ -627,7 +627,7 @@ void Hole::Triangulate() {
 			vertices.push_back(VECTOR3D(x, y, h));
 		}
 	}
-	for (int i = 0; i < precission; i++) { // setting inner circle
+	for (int i = 0; i < precision; i++) { // setting inner circle
 		switch (step*i) {
 		case 0:
 			vertices.push_back(VECTOR3D(bRh, 0, 0));
@@ -663,68 +663,68 @@ void Hole::Triangulate() {
 	}
 
 		// setting base edges
-	for (int i = 0; i < precission - 1; i++) {
-		edges.push_back(EDGE3D(i*2, precission*2 + i*2));
-		edges.push_back(EDGE3D(i*2, precission*2 + i*2 + 2));
+	for (int i = 0; i < precision - 1; i++) {
+		edges.push_back(EDGE3D(i*2, precision*2 + i*2));
+		edges.push_back(EDGE3D(i*2, precision*2 + i*2 + 2));
 		edges.push_back(EDGE3D(i*2, i*2 + 2));
-		edges.push_back(EDGE3D(precission*2 + i*2, precission*2 + i*2 + 2));	
+		edges.push_back(EDGE3D(precision*2 + i*2, precision*2 + i*2 + 2));	
 	}
-	edges.push_back(EDGE3D(precission*2 - 2, precission*4 - 2));
-	edges.push_back(EDGE3D(precission*2 - 2, precission*2));
-	edges.push_back(EDGE3D(precission*2 - 2, 0));
-	edges.push_back(EDGE3D(precission*4 - 2, precission*2));
+	edges.push_back(EDGE3D(precision*2 - 2, precision*4 - 2));
+	edges.push_back(EDGE3D(precision*2 - 2, precision*2));
+	edges.push_back(EDGE3D(precision*2 - 2, 0));
+	edges.push_back(EDGE3D(precision*4 - 2, precision*2));
 		// setting top edges
-	for (int i = 0; i < precission - 1; i++) {
-		edges.push_back(EDGE3D(i*2 + 1, precission*2 + i*2 + 1));
-		edges.push_back(EDGE3D(i*2 + 1, precission*2 + i*2 + 3));
+	for (int i = 0; i < precision - 1; i++) {
+		edges.push_back(EDGE3D(i*2 + 1, precision*2 + i*2 + 1));
+		edges.push_back(EDGE3D(i*2 + 1, precision*2 + i*2 + 3));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 3));
-		edges.push_back(EDGE3D(precission*2 + i*2 + 1, precission*2 + i*2 + 3));
+		edges.push_back(EDGE3D(precision*2 + i*2 + 1, precision*2 + i*2 + 3));
 	}
-	edges.push_back(EDGE3D(precission*2 - 1, precission*4 - 1));
-	edges.push_back(EDGE3D(precission*2 - 1, precission*2 + 1));
-	edges.push_back(EDGE3D(precission*2 - 1, 1));
-	edges.push_back(EDGE3D(precission*4 - 1, precission*2 + 1));
+	edges.push_back(EDGE3D(precision*2 - 1, precision*4 - 1));
+	edges.push_back(EDGE3D(precision*2 - 1, precision*2 + 1));
+	edges.push_back(EDGE3D(precision*2 - 1, 1));
+	edges.push_back(EDGE3D(precision*4 - 1, precision*2 + 1));
 		// setting side edges
-	for (int i = 0; i < precission - 1; i++) { // outter circle
+	for (int i = 0; i < precision - 1; i++) { // outter circle
 		edges.push_back(EDGE3D(i*2, i*2 + 1));
 		edges.push_back(EDGE3D(i*2 + 1, i*2 + 2));
 	}
-	edges.push_back(EDGE3D(precission*2 - 2, precission*2 - 1));
-	edges.push_back(EDGE3D(precission*2 - 1, 0));
-	for (int i = 0; i < precission - 1; i++) { // inner circle
-		edges.push_back(EDGE3D(precission*2 + i*2, precission*2 + i*2 + 1));
-		edges.push_back(EDGE3D(precission*2 + i*2 + 1, precission*2 + i*2 + 2));
+	edges.push_back(EDGE3D(precision*2 - 2, precision*2 - 1));
+	edges.push_back(EDGE3D(precision*2 - 1, 0));
+	for (int i = 0; i < precision - 1; i++) { // inner circle
+		edges.push_back(EDGE3D(precision*2 + i*2, precision*2 + i*2 + 1));
+		edges.push_back(EDGE3D(precision*2 + i*2 + 1, precision*2 + i*2 + 2));
 	}
-	edges.push_back(EDGE3D(precission*4 - 2, precission*4 - 1));
-	edges.push_back(EDGE3D(precission*4 - 1, precission*2));
+	edges.push_back(EDGE3D(precision*4 - 2, precision*4 - 1));
+	edges.push_back(EDGE3D(precision*4 - 1, precision*2));
 
 		// setting base polygons
-	for (int i = 0, j = 0; i < precission - 1; i++, j += 2) {
-		polygons.push_back(POLY3D(i*2, precission*2 + i*2, precission*2 + i*2 + 2));
-		polygons.push_back(POLY3D(precission*2 + i*2 + 2, i*2 + 2, i*2));
+	for (int i = 0, j = 0; i < precision - 1; i++, j += 2) {
+		polygons.push_back(POLY3D(i*2, precision*2 + i*2, precision*2 + i*2 + 2));
+		polygons.push_back(POLY3D(precision*2 + i*2 + 2, i*2 + 2, i*2));
 	}
-	polygons.push_back(POLY3D(precission*2 - 2, precission*4 - 2, precission*2));
-	polygons.push_back(POLY3D(precission*2, 0, precission*2 - 2));
+	polygons.push_back(POLY3D(precision*2 - 2, precision*4 - 2, precision*2));
+	polygons.push_back(POLY3D(precision*2, 0, precision*2 - 2));
 		// setting top polygons
-	for (int i = 0, j = precission*2; i < precission - 1; i++, j += 2) {
-		polygons.push_back(POLY3D(precission*2 + i*2 + 1, i*2 + 1, precission*2 + i*2 + 3));
-		polygons.push_back(POLY3D(i*2 + 3, precission*2 + i*2 + 3, i*2 + 1));
+	for (int i = 0, j = precision*2; i < precision - 1; i++, j += 2) {
+		polygons.push_back(POLY3D(precision*2 + i*2 + 1, i*2 + 1, precision*2 + i*2 + 3));
+		polygons.push_back(POLY3D(i*2 + 3, precision*2 + i*2 + 3, i*2 + 1));
 	}
-	polygons.push_back(POLY3D(precission*4 - 1, precission*2 - 1, precission*2 + 1));
-	polygons.push_back(POLY3D(1, precission*2 + 1, precission*2 - 1));
+	polygons.push_back(POLY3D(precision*4 - 1, precision*2 - 1, precision*2 + 1));
+	polygons.push_back(POLY3D(1, precision*2 + 1, precision*2 - 1));
 		// setting side polygons
-	for (int i = 0, j = precission*4; i < precission - 1; i++, j+= 2) { // outter circle
+	for (int i = 0, j = precision*4; i < precision - 1; i++, j+= 2) { // outter circle
 		polygons.push_back(POLY3D(i*2 + 1, i*2, i*2 + 2));
 		polygons.push_back(POLY3D(i*2 + 3, i*2 + 1, i*2 + 2));
 	}
-	polygons.push_back(POLY3D(precission*2 - 1, precission*2 - 2, 0));
-	polygons.push_back(POLY3D(1, precission*2 - 1, 0));
-	for (int i = 0, j = precission*6; i < precission - 1; i++, j += 2) { // inner circle
-		polygons.push_back(POLY3D(precission*2 + i*2, precission*2 + i*2 + 1, precission*2 + i*2 + 2));
-		polygons.push_back(POLY3D(precission*2 + i*2 + 1, precission*2 + i*2 + 3, precission*2 + i*2 + 2));
+	polygons.push_back(POLY3D(precision*2 - 1, precision*2 - 2, 0));
+	polygons.push_back(POLY3D(1, precision*2 - 1, 0));
+	for (int i = 0, j = precision*6; i < precision - 1; i++, j += 2) { // inner circle
+		polygons.push_back(POLY3D(precision*2 + i*2, precision*2 + i*2 + 1, precision*2 + i*2 + 2));
+		polygons.push_back(POLY3D(precision*2 + i*2 + 1, precision*2 + i*2 + 3, precision*2 + i*2 + 2));
 	}
-	polygons.push_back(POLY3D(precission*4 - 2, precission*4 - 1, precission*2));
-	polygons.push_back(POLY3D(precission*4 - 1, precission*2 + 1, precission*2));
+	polygons.push_back(POLY3D(precision*4 - 2, precision*4 - 1, precision*2));
+	polygons.push_back(POLY3D(precision*4 - 1, precision*2 + 1, precision*2));
 
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
@@ -734,7 +734,7 @@ void Hole::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 Hole::Hole(COLOR3D c) 
-	: clsMesh(MSH_HOLE, c), h(0), bR(0), bRh(0), tR(0), tRh(0), precission(0) { }
+	: clsMesh(MSH_HOLE, c), h(0), bR(0), bRh(0), tR(0), tRh(0), precision(0) { }
 
 Hole::Hole(
 		float height, 
@@ -751,7 +751,7 @@ Hole::Hole(
 	bRh			= bHoleRadius;
 	tR			= tRadius;
 	tRh			= tHoleRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -766,7 +766,7 @@ Hole::Hole(
 	bRh			= 0;
 	tR			= 0;
 	tRh			= 0;
-	precission	= 24;
+	precision	= 24;
 }
 
 Hole::Hole(
@@ -786,7 +786,7 @@ Hole::Hole(
 	bRh			= bHoleRadius;
 	tR			= tRadius;
 	tRh			= tHoleRadius;
-	precission	= prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -798,7 +798,7 @@ float Hole::getBRadius() { return bR; }
 float Hole::getTRadius() { return tR; }
 float Hole::getBHoleRadius() { return bRh; }
 float Hole::getTHoleRadius() { return tRh; }
-int Hole::getPrecission() { return precission; }
+int Hole::getPrecission() { return precision; }
 
 
 /* ------------------------ setters ------------------------ */
@@ -808,6 +808,6 @@ void Hole::setBRadius(float n) { bR = n; }
 void Hole::setTRadius(float n) { tR = n; }
 void Hole::setBHoleRadius(float n) { bRh = n; }
 void Hole::setTHoleRadius(float n) { tRh = n; }
-void Hole::setPrecission(int n) { precission = n; }
+void Hole::setPrecission(int n) { precision = n; }
 
 #endif // HOLE_CPP

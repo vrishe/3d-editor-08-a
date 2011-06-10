@@ -412,14 +412,34 @@ void clsObject::Rotate(float y, float z, float x)
 
 }
 
+float clsObject::Distance(VECTOR3D vDst)
+{
+	VECTOR3D v = VECTOR3D(
+					pos.x - vDst.x,
+					pos.y - vDst.y,
+					pos.z - vDst.z
+				);
+	return Vector3DLength(&v);
+}
+
+float clsObject::Distance(const clsObject *objDst)
+{
+	return Distance(objDst->pos);
+}
+
 void clsObject::LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient)
 {
 	VECTOR3D lookDir	= lookAt - pos;
-	VECTOR3D vUp		= upOrient != NULL ? 
-						*upOrient * uWd.z : VECTOR3D(0, 0, 1);
+	VECTOR3D vUp		= uWd.z < EPSILON ? uWd : VECTOR3D(0, 0, 1) * uWd.z;
 
 	if ( Vector3DLength(&lookDir) > EPSILON )
 	{
+		if ( 
+			upOrient != NULL 
+			&& Vector3DLength(upOrient) > EPSILON 
+		)
+			Vector3DNormalize(upOrient, &vUp);
+
 		Vector3DNormalize(&lookDir, &fWd);
 		Vector3DMultV(&vUp, &fWd, &rWd);
 		Vector3DNormalize(&rWd, &rWd);

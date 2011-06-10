@@ -53,9 +53,8 @@ typedef clsCamera CAMERA3D, *LPCAMERA3D;
 class clsTargCamera : public clsCamera {
 	VECTOR3D target;
 
-		// Relative rortaion don't work in this camera
-	void Pitch(float angle);
-	void Yaw(float angle);
+	void Pitch();
+	void Yaw();
 
 	void LookAt(VECTOR3D lookAt);
 	void LookAt(const clsObject *objToLookAt);
@@ -74,7 +73,11 @@ public:
 	void setTargetPoint(float tX, float tY, float tZ);
 	// Absolute translation
 	void Translate(const VECTOR3D tV);
-	void Translate(float tX, float tY, float tZ);	 
+	void Translate(float tX, float tY, float tZ);	
+
+	void FollowLookAxis(float units);
+	void StrafeLatitude(float units);
+	void StrafeLongitude(float units);
 
 	//Relative translation
 	void Follow(float units);	// Along local-x

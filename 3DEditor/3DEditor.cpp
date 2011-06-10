@@ -1263,10 +1263,11 @@ UINT CreateMicFull() {
 		return 11;
 	}
 	
-	delete [] buf;
  	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	mic->setName(buf, 256);
 	Scene.AddObject(mic);
+
+	delete[] buf;
 	return 0;
 }
 
@@ -1341,26 +1342,30 @@ UINT ModifMicFull() {
 	}
 
 	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	//if ( wcslen(buf) == 0 )
-	//	return 11;
+	if ( wcslen(buf) == 0 )
+		return 11;
 
 	VECTOR3D pos = mic->getPosition();
 	VECTOR3D fwd = mic->getForwardLookDirection();
 	VECTOR3D uwd = mic->getUpLookDirection();
 	VECTOR3D rwd = mic->getRightLookDirection();
 
-	LPMICROPHONE3D newMic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
+	Scene.DeleteObject(mic);
+	delete mic;
+
+	mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	mic->Translate(pos);
 	mic->setForwardLookDirection(&fwd);
 	mic->setUpLookDirection(&uwd);
 	mic->setRightLookDirection(&rwd);
+	mic->setName(buf, 256);
+	Scene.AddObject(mic);
 
-	Scene.DeleteObject(activeObject);
-	Scene.AddObject(newMic);
+	INT curSel = listObjects.getCurSel();
 	RefreshObjectsList();
-	listObjects.setCurSel(listObjects.getItemCount() - 1);
+	listObjects.setCurSel(curSel);
 	
-	delete [] buf;
+	delete[] buf;
 	return 0;
 }
 
@@ -1569,27 +1574,21 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		switch ( wParam ) {
 		case VK_LEFT:
 			activeViewport->camDefault.Strafe(-PAN_ASPECT);
-			activeViewport->camDefault.TargetStrafe(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
 			activeViewport->camDefault.Strafe(PAN_ASPECT);
-			activeViewport->camDefault.TargetStrafe(PAN_ASPECT);
 			break;
 		case VK_UP:
 			activeViewport->camDefault.Fly(PAN_ASPECT);
-			activeViewport->camDefault.TargetFly(PAN_ASPECT);
 			break;
 		case VK_DOWN:
 			activeViewport->camDefault.Fly(-PAN_ASPECT);
-			activeViewport->camDefault.TargetFly(-PAN_ASPECT);
 			break;
 		case VK_HOME:
 			activeViewport->camDefault.Follow(PAN_ASPECT);
-			activeViewport->camDefault.TargetFollow(PAN_ASPECT);
 			break;
 		case VK_END:
 			activeViewport->camDefault.Follow(-PAN_ASPECT);
-			activeViewport->camDefault.TargetFollow(-PAN_ASPECT);
 			break;
 		}
 		break;
@@ -1608,22 +1607,22 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 	case IS_CAMROTATE:
 		switch ( wParam ) {
 		case VK_LEFT:
-			activeViewport->camDefault.Strafe(-PAN_ASPECT);
+			activeViewport->camDefault.StrafeLatitude(-PAN_ASPECT);
 			break;
 		case VK_RIGHT:
-			activeViewport->camDefault.Strafe(PAN_ASPECT);
+			activeViewport->camDefault.StrafeLatitude(PAN_ASPECT);
 			break;
 		case VK_UP:
-			activeViewport->camDefault.Fly(PAN_ASPECT);
+			activeViewport->camDefault.StrafeLongitude(-PAN_ASPECT);
 			break;
 		case VK_DOWN:
-			activeViewport->camDefault.Fly(-PAN_ASPECT);
+			activeViewport->camDefault.StrafeLongitude(PAN_ASPECT);
 			break;
 		case VK_HOME:
-			activeViewport->camDefault.Follow(PAN_ASPECT);
+			activeViewport->camDefault.FollowLookAxis(PAN_ASPECT);
 			break;
 		case VK_END:
-			activeViewport->camDefault.Follow(-PAN_ASPECT);
+			activeViewport->camDefault.FollowLookAxis(-PAN_ASPECT);
 			break;
 		}
 		break;
@@ -1657,9 +1656,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	OPENFILENAME	ofn			= { 0 };
 	LPOBJECT3D		tempObject;
-	LPTSTR			fName		= new TCHAR[256];
-	OPENFILENAME	ofn;
 	UINT			error;
 
 	switch (LOWORD(wParam))
@@ -1803,15 +1801,14 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 			}
-			RefreshObjectsList();
 			mainForm.Invalidate();
 			break;
-		case BT_QMAKE:
-			if ( !CreateMicFast() )
-				MessageBox(NULL, _T("To small parameter."), _T("Error"), MB_OK | MB_ICONERROR );
-			RefreshObjectsList();
-			mainForm.Invalidate();
-			break;
+		//case BT_QMAKE:
+		//	if ( !CreateMicFast() )
+		//		MessageBox(NULL, _T("To small parameter."), _T("Error"), MB_OK | MB_ICONERROR );
+		//	RefreshObjectsList();
+		//	mainForm.Invalidate();
+		//	break;
 		case BT_FMAKE:
 			error = CreateMicFull();
 			switch (error) 
@@ -1851,6 +1848,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					break;
 			}
 			RefreshObjectsList();
+
 			mainForm.Invalidate();
 			break;
 
@@ -1872,10 +1870,17 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDM_SAVE:
-			if ( SaveFileDialog((HWND)lParam, ofn) ) 
+			ofn.lpstrFile		= new TCHAR[256];
+			ofn.lpstrFile[0]	= '\0';
+			ofn.nMaxFile		= 256;
+			ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
+			ofn.nFilterIndex	= 1;
+			ofn.lpstrFileTitle	= NULL;
+			ofn.nMaxFileTitle	= 0;
+			ofn.lpstrInitialDir = NULL;
+			if ( mainForm.SFDShow(&ofn) ) 
 			{
-				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::saveSceneScript(&Scene, fName) )
+				if ( !TRANSLATOR3D::saveSceneScript(&Scene, ofn.lpstrFile) )
 					MessageBox(
 						(HWND)lParam, 
 						_T("Wrong file name"), 
@@ -1883,14 +1888,22 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 						MB_ICONERROR | MB_OK 
 					);
 			}
+			delete[] ofn.lpstrFile;
 			break;
 
 		case IDM_LOAD:
-			if ( OpenFileDialog((HWND)lParam, ofn) ) 
+			ofn.lpstrFile		= new TCHAR[256];
+			ofn.lpstrFile[0]	= '\0';
+			ofn.nMaxFile		= 256;
+			ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
+			ofn.nFilterIndex	= 1;
+			ofn.lpstrFileTitle	= NULL;
+			ofn.nMaxFileTitle	= 0;
+			ofn.lpstrInitialDir = NULL;
+			if ( mainForm.OFDShow(&ofn) ) 
 			{
 				SceneCleanUp();
-				CopyMemory(fName, ofn.lpstrFile, ofn.nMaxFile);
-				if ( !TRANSLATOR3D::loadSceneScript(&Scene, fName) ) 
+				if ( !TRANSLATOR3D::loadSceneScript(&Scene, ofn.lpstrFile) ) 
 					MessageBox(
 						(HWND)lParam,
 						_T("Can not open this file"), 
@@ -1902,6 +1915,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 				RefreshObjectsList();
 				mainForm.Invalidate();
 			}
+			delete[] ofn.lpstrFile;
 			break;
 
 		case IDM_ABOUT:
@@ -1918,6 +1932,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 		default: return 1L;
 	}
+	GetActiveObject();
 	return 0L;
 }
 
@@ -1948,48 +1963,6 @@ INT_PTR CALLBACK About_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam,
 		break;
 	}
 	return (INT_PTR)FALSE;
-}
-
-BOOL OpenFileDialog(HWND hWnd, OPENFILENAME& ofn) {	
-	TCHAR szFile[260] = {'\0'};  // buffer for file name
-
-	ZeroMemory(&ofn, sizeof(ofn));
-	ofn.lStructSize		= sizeof(ofn);
-	ofn.hwndOwner		= hWnd;
-	ofn.lpstrFile		= szFile;
-	ofn.lpstrFile[0]	= '\0';
-	ofn.nMaxFile		= sizeof(szFile);
-	ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
-	ofn.nFilterIndex	= 1;
-	ofn.lpstrFileTitle	= NULL;
-	ofn.nMaxFileTitle	= 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags			= OFN_PATHMUSTEXIST 
-						| OFN_FILEMUSTEXIST;
-
-	// Display the Open dialog box.
-	return GetOpenFileName(&ofn);
-}
-
-BOOL SaveFileDialog(HWND hWnd, OPENFILENAME& ofn) {	
-	TCHAR szFile[260];  // buffer for file name
-
-	ZeroMemory(&ofn, sizeof(ofn));
-	ofn.lStructSize		= sizeof(ofn);
-	ofn.hwndOwner		= hWnd;
-	ofn.lpstrFile		= szFile;
-	ofn.lpstrFile[0]	= '\0';
-	ofn.nMaxFile		= sizeof(szFile)/ sizeof(*szFile);
-	ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
-	ofn.nFilterIndex	= 1;
-	ofn.lpstrFileTitle	= NULL;
-	ofn.nMaxFileTitle	= 0;
-	ofn.lpstrInitialDir	= NULL;
-	ofn.Flags			= OFN_PATHMUSTEXIST
-						| OFN_OVERWRITEPROMPT;
-
-	// Display the Open dialog box.
-	return GetSaveFileName(&ofn);	 
 }
 
 // ============================================================================
@@ -2067,6 +2040,14 @@ VOID DeleteActiveObject()
 VOID SceneCleanUp()
 {
 	while ( listObjects.getItem(0, NULL, 0, (LPVOID*)&activeObject) )
-		DeleteActiveObject();
+	{
+		if ( Scene.DeleteObject(activeObject) ) 
+		{
+			delete activeObject;
+			activeObject = NULL;
+			listObjects.delItem(0);
+		}
+		
+	}
 }
 
