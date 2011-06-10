@@ -406,111 +406,111 @@ VOID Draw_InitMicrophoneToolbar() {
 						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
 						LIST_OBJ_W - 44, BT_TOOL_H - 9);
 
-	LoadString(hInstance, N_LB_QUICK, name, 256);
-	lbQuick.Create(	name,
-					&mainForm,
-					ufWidth - TAB_W * 2 - 12, 
-					60 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-					100, 16);
-	LoadString(hInstance, N_LB_HEIGHT, name, 256);
-	lbParams[1].Create(name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-						46, 16);
-	LoadString(hInstance, N_LB_BDIAM, name, 256);
-	lbParams[2].Create(	name,
-						&mainForm,
-						ufWidth - 140, 
-						83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-						56, 16);
+	//LoadString(hInstance, N_LB_QUICK, name, 256);
+	//lbQuick.Create(	name,
+	//				&mainForm,
+	//				ufWidth - TAB_W * 2 - 12, 
+	//				60 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+	//				100, 16);
+	//LoadString(hInstance, N_LB_HEIGHT, name, 256);
+	//lbParams[1].Create(name,
+	//					&mainForm,
+	//					ufWidth - TAB_W * 2 - 12, 
+	//					83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+	//					46, 16);
+	//LoadString(hInstance, N_LB_BDIAM, name, 256);
+	//lbParams[2].Create(	name,
+	//					&mainForm,
+	//					ufWidth - 140, 
+	//					83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
+	//					56, 16);
 
-	ZeroMemory(name, 256 * sizeof(TCHAR));
-	tbParams[2].Create(	TB_HEIGHT,
-						name,
-						&mainForm,
-						ufWidth - 225, 
-						80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-						80, BT_TOOL_H - 9);
-	tbParams[3].Create(	TB_BDIAM,
-						name,
-						&mainForm,
-						ufWidth - 80, 
-						80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-						75, BT_TOOL_H - 9);
+
+	//tbParams[2].Create(	TB_HEIGHT,
+	//					name,
+	//					&mainForm,
+	//					ufWidth - 225, 
+	//					80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+	//					80, BT_TOOL_H - 9);
+	//tbParams[3].Create(	TB_BDIAM,
+	//					name,
+	//					&mainForm,
+	//					ufWidth - 80, 
+	//					80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
+	//					75, BT_TOOL_H - 9);
 	tbParams[4].Create(	TB_BDIAM,
-						name,
+						_T("12"),
 						&mainForm,
 						ufWidth - 165, 
 						218,
 						75, BT_TOOL_H - 9);
 	tbParams[5].Create(	TB_BHEIGHT,
-						name,
+						_T("114"),
 						&mainForm,
 						ufWidth - 165, 
-						242,
+						243,
 						75, BT_TOOL_H - 9);
 	tbParams[6].Create(	TB_BWIDTH,
-						name,
+						_T("25"),
 						&mainForm,
 						ufWidth - 165, 
 						268,
 						75, BT_TOOL_H - 9);
 	tbParams[7].Create(	TB_UDIAM,
-						name,
+						_T("16"),
 						&mainForm,
 						ufWidth - 165, 
 						293,
 						75, BT_TOOL_H - 9);
 	tbParams[8].Create(	TB_UHEIGHT,
-						name,
+						_T("95"),
 						&mainForm,
 						ufWidth - 165, 
 						318,
 						75, BT_TOOL_H - 9);
 	tbParams[9].Create(	TB_UGAP,
-						name,
+						_T("3.5"),
 						&mainForm,
 						ufWidth - 165, 
 						343,
 						75, BT_TOOL_H - 9);
 	tbParams[10].Create(TB_HANDIND,
-						name,
+						_T("5"),
 						&mainForm,
 						ufWidth - 165, 
 						368,
 						75, BT_TOOL_H - 9);
 	tbParams[11].Create(TB_HEADDIAM,
-						name,
+						_T("55"),
 						&mainForm,
 						ufWidth - 165, 
 						393,
 						75, BT_TOOL_H - 9);
 	tbParams[12].Create(TB_HEADDEPTH,
-						name,
+						_T("21"),
 						&mainForm,
 						ufWidth - 165, 
 						418,
 						75, BT_TOOL_H - 9);
 	tbParams[13].Create(TB_COREDIAM,
-						name,
+						_T("42"),
 						&mainForm,
 						ufWidth - 165, 
 						443,
 						75, BT_TOOL_H - 9);
 	
 	LoadString(hInstance, N_TAB_CREATE, name, 256);
-	btQMake.Create(	BT_QMAKE,
-					name,
-					&mainForm,
-					ufWidth - 80, 
-					195,
-					BT_TOOL_W, BT_TOOL_H);
+	//btQMake.Create(	BT_QMAKE,
+	//				name,
+	//				&mainForm,
+	//				ufWidth - 80, 
+	//				195,
+	//				BT_TOOL_W, BT_TOOL_H);
 	btFMake.Create(	BT_FMAKE,
 					name,
 					&mainForm,
-					ufWidth - 80, 
-					495,
+					ufWidth - 157, 
+					470,
 					BT_TOOL_W, BT_TOOL_H);
 
 	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
@@ -518,99 +518,99 @@ VOID Draw_InitMicrophoneToolbar() {
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						220,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_BDIAM, name, 256);
 	lbParams[4].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						245,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_BWIDTH, name, 256);
 	lbParams[5].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						270,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_UDIAM, name, 256);
 	lbParams[6].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						295,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_UHEIGHT, name, 256);
 	lbParams[7].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						320,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_UGAP, name, 256);
 	lbParams[8].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						345,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_HANDIND, name, 256);
 	lbParams[9].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						370,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_HEADDIAM, name, 256);
 	lbParams[10].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						395,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_HEADDEPTH, name, 256);
 	lbParams[11].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						420,				
-						120, 16);
+						100, 16);
 	LoadString(hInstance, N_LB_COREDIAM, name, 256);
 	lbParams[12].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
 						445,				
-						120, 16);
+						100, 16);
 
 	LoadString(hInstance, N_LB_R, name, 256);
 	lbParams[14].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W * 3 - 122, 
-				470,
+				ufWidth - TAB_W * 2  + 20, 
+				147,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_G, name, 256);
 	lbParams[15].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W*2 - 82, 
-				470,
+				ufWidth - TAB_W * 2 + LB_V_W + 61, 
+				147,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_B, name, 256);
 	lbParams[16].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W - 40, 
-				470,
+				ufWidth - TAB_W * 2 + LB_V_W *2 + 102, 
+				147,
 				LB_V_H, LB_V_W);
 
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbParams[14].Create(	TB_R,
 				name,
 				&mainForm, 
-				ufWidth - LB_V_W * 2 - 127, 
-				468,
+				ufWidth - TAB_W * 2  + 36, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[15].Create(	TB_G,
 				name,
 				&mainForm, 
-				ufWidth - LB_V_W - 86, 
-				468,
+				ufWidth - TAB_W * 2 + LB_V_W + 77, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[16].Create(	TB_B,
 				name,
 				&mainForm, 
-				ufWidth - 45, 
-				468,
+				ufWidth - TAB_W * 2 + LB_V_W *2 + 118, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 
 	delete [] name;
@@ -879,7 +879,7 @@ VOID Draw_ModifyMicrophoneToolbar() {
 						ufWidth - TAB_W * 2 - 11, 
 						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
 						46, 16);
-	ZeroMemory(name, 256 * sizeof(TCHAR));
+	activeObject->getName(name, 256);
 	tbParams[0].Create(	TB_NAME,
 						name,
 						&mainForm,
@@ -887,65 +887,85 @@ VOID Draw_ModifyMicrophoneToolbar() {
 						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
 						LIST_OBJ_W - 44, BT_TOOL_H - 9);
 
-	tbParams[4].Create(	TB_BDIAM,
+	float tmp = ((LPMICROPHONE3D)activeObject)->getBaseHeight();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
+	tbParams[4].Create(	TB_BHEIGHT,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						170,
+						218,
 						75, BT_TOOL_H - 9);
-	tbParams[5].Create(	TB_BHEIGHT,
+	tmp = ((LPMICROPHONE3D)activeObject)->getBaseRadius() * 2;
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
+	tbParams[5].Create(	TB_BDIAM,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						194,
+						243,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getButtonWidth();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[6].Create(	TB_BWIDTH,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						220,
+						268,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getUprightRadius() * 2;
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[7].Create(	TB_UDIAM,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						245,
+						293,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getUprightHeight();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[8].Create(	TB_UHEIGHT,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						270,
+						318,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getUprightGap();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[9].Create(	TB_UGAP,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						295,
+						343,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getHandleIndent();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[10].Create(TB_HANDIND,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						320,
+						368,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getHeadRadius() * 2;
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[11].Create(TB_HEADDIAM,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						345,
+						393,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getHeadDepth();
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[12].Create(TB_HEADDEPTH,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						370,
+						418,
 						75, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getCoreRadius() * 2;
+	_stprintf_s(name, 256, _T("%.2f"), tmp);
 	tbParams[13].Create(TB_COREDIAM,
 						name,
 						&mainForm,
 						ufWidth - 165, 
-						395,
+						443,
 						75, BT_TOOL_H - 9);
 	
 	LoadString(hInstance, N_TAB_MODIFY, name, 256);
@@ -953,108 +973,113 @@ VOID Draw_ModifyMicrophoneToolbar() {
 	btFMake.Create(	BT_MODIF,
 					name,
 					&mainForm,
-					ufWidth - 80, 
-					495,
+					ufWidth - 157, 
+					470,
 					BT_TOOL_W, BT_TOOL_H);
 
 	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
 	lbParams[3].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						172,				
-						120, 16);
+						220,				
+						220, 16);
 	LoadString(hInstance, N_LB_BDIAM, name, 256);
 	lbParams[4].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						197,				
+						245,				
 						120, 16);
 	LoadString(hInstance, N_LB_BWIDTH, name, 256);
 	lbParams[5].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						222,				
+						270,				
 						120, 16);
 	LoadString(hInstance, N_LB_UDIAM, name, 256);
 	lbParams[6].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						247,				
+						295,				
 						120, 16);
 	LoadString(hInstance, N_LB_UHEIGHT, name, 256);
 	lbParams[7].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						272,				
+						320,				
 						120, 16);
 	LoadString(hInstance, N_LB_UGAP, name, 256);
 	lbParams[8].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						297,				
+						345,				
 						120, 16);
 	LoadString(hInstance, N_LB_HANDIND, name, 256);
 	lbParams[9].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						322,				
+						370,				
 						120, 16);
 	LoadString(hInstance, N_LB_HEADDIAM, name, 256);
 	lbParams[10].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						347,				
+						395,				
 						120, 16);
 	LoadString(hInstance, N_LB_HEADDEPTH, name, 256);
 	lbParams[11].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						372,				
+						420,				
 						120, 16);
 	LoadString(hInstance, N_LB_COREDIAM, name, 256);
 	lbParams[12].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						397,				
+						445,				
 						120, 16);
 
 	LoadString(hInstance, N_LB_R, name, 256);
 	lbParams[14].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W * 3 - 122, 
-				470,
+				ufWidth - TAB_W * 2  + 20, 
+				147,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_G, name, 256);
 	lbParams[15].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W*2 - 82, 
-				470,
+				ufWidth - TAB_W * 2 + LB_V_W + 61, 
+				147,
 				LB_V_H, LB_V_W);
 	LoadString(hInstance, N_LB_B, name, 256);
 	lbParams[16].Create(	name,
 				&mainForm, 
-				ufWidth - LB_V_W - 40, 
-				470,
+				ufWidth - TAB_W * 2 + LB_V_W *2 + 102, 
+				147,
 				LB_V_H, LB_V_W);
 
-	ZeroMemory(name, 256 * sizeof(TCHAR));
+	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Red;
+	_stprintf_s(name, 256, _T("%d"), tmp);
 	tbParams[14].Create(	TB_R,
 				name,
 				&mainForm, 
-				ufWidth - LB_V_W * 2 - 127, 
-				468,
+				ufWidth - TAB_W * 2  + 36, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Green;
+	_stprintf_s(name, 256, _T("%d"), tmp);
 	tbParams[15].Create(	TB_G,
 				name,
 				&mainForm, 
-				ufWidth - LB_V_W - 86, 
-				468,
+				ufWidth - TAB_W * 2 + LB_V_W + 77, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Blue;
+	_stprintf_s(name, 256, _T("%d"), tmp);
 	tbParams[16].Create(	TB_B,
 				name,
 				&mainForm, 
-				ufWidth - 45, 
-				468,
+				ufWidth - TAB_W * 2 + LB_V_W *2 + 118, 
+				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 
 	delete [] name;
@@ -1153,7 +1178,7 @@ UINT CreateMicFull() {
 	TCHAR *buf = new TCHAR[256];
 	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bH = (FLOAT)(FLOAT)_ttof(buf);
-	if ( bH < 10 ) {
+	if ( bH < 3 ) {
 		delete [] buf;
 		return 1;
 	}
@@ -1176,7 +1201,7 @@ UINT CreateMicFull() {
 	FLOAT hD = (FLOAT)(FLOAT)_ttof(buf);
 	if ( hD < 1 || hD > bR ) {
 		delete [] buf;
-		return 9;
+		return 8;
 	}
 
 	tbParams[7].getText(buf, 256 * sizeof(TCHAR));
@@ -1195,7 +1220,7 @@ UINT CreateMicFull() {
 
 	tbParams[9].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT uG = (FLOAT)(FLOAT)_ttof(buf);
-	if ( uG < 1) {
+	if ( uG < 1 || uG > uH * 0.7f) {
 		delete [] buf;
 		return 6;
 	}
@@ -1209,16 +1234,16 @@ UINT CreateMicFull() {
 
 	tbParams[11].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT hR = (FLOAT)(FLOAT)_ttof(buf) / 2;
-	if ( hR < 1) {
-		delete [] buf;
-		return 8;
-	}
 
 	tbParams[13].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT cR = (FLOAT)(FLOAT)_ttof(buf) / 2;
-	if ( cR < 1 || cR > hR ) {
+	if ( cR < 0.5 || cR > hR ) {
 		delete [] buf;
 		return 10;
+	}
+	if ( hR < 0.5 || hR < cR) {
+		delete [] buf;
+		return 9;
 	}
 
 	tbParams[14].getText(buf, 256 * sizeof(TCHAR));
@@ -1239,74 +1264,68 @@ UINT CreateMicFull() {
 	}
 	
 	delete [] buf;
-	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
+ 	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	mic->setName(buf, 256);
 	Scene.AddObject(mic);
 	return 0;
 }
 
 UINT ModifMicFull() {
-	if ( activeObject == NULL ) return 1;
+	if ( activeObject == NULL ) return 100;
 
 	TCHAR *buf = new TCHAR[256];
 	LPMICROPHONE3D mic = (LPMICROPHONE3D)activeObject;
 
 	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bH = (FLOAT)_wtof(buf);
-	if ( bH > 3 )
-		mic->setBaseHeight(bH);
+	if ( bH < 3 )
+		return 1;
 
 	tbParams[5].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bR = (FLOAT)_wtof(buf) / 2;
-	if ( bR > 1 )
-		mic->setBaseRadius(bR);
+	if ( bR < 1 )
+		return 2;
 	
 	tbParams[6].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bW = (FLOAT)_wtof(buf);
-	if ( bW > 1 && bW < 0.75f * mic->getBaseRadius() )
-		mic->setButtonWidth(bW);
+	if ( bW < 1 || bW > 0.7f * bR )
+		return 3;
 
 	tbParams[12].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT hD = (FLOAT)_wtof(buf);
-	if ( hD > 1 && hD < mic->getBaseRadius() ) {
-		mic->setHeadDepth(hD);
-	}
+	if ( hD < 1 || hD > bR )
+		return 8;	
 
 	tbParams[7].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT uR = (FLOAT)_wtof(buf) / 2;
-	if ( uR > 1 && uR < mic->getHeadDepth()) {
-		mic->setUprightRadius(uR);
-	}
+	if ( uR < 1 || uR > hD )
+		return 4;
 
 	tbParams[8].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT uH = (FLOAT)_wtof(buf);
-	if ( uH > 1) {
-		mic->setUprightHeight(uH);
-	}
+	if ( uH < 1 )
+		return 5;
 
 	tbParams[9].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT uG = (FLOAT)_wtof(buf);
-	if ( uG > 1) {
-		mic->setUprightGap(uG);
-	}
+	if ( uG < 1 || uG > .7f * uH )
+		return 6;
 
 	tbParams[10].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT hI = (FLOAT)_wtof(buf);
-	if ( hI > 1 && hI < mic->getUprightHeight() * 0.8f) {
-		mic->setHandleIndent(hI);
-	}
+	if ( hI < 1 || hI > uH * 0.8f )
+		return 7;
+	
 
 	tbParams[11].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT hR = (FLOAT)_wtof(buf) / 2;
-	if ( hR > 1) {
-		mic->setHeadRadius(hR);
-	}
+	if ( hR < 1 )
+		return 9;
 
 	tbParams[13].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT cR = (FLOAT)_wtof(buf) / 2;
-	if ( cR > 1 && cR < mic->getHeadRadius() ) {
-		mic->setCoreRadius(cR);
-	}
+	if ( cR < 1 || cR > hR )
+		return 10;
 
 	tbParams[14].getText(buf, 256 * sizeof(TCHAR));
 	int r = _wtoi(buf);
@@ -1315,14 +1334,31 @@ UINT ModifMicFull() {
 	tbParams[16].getText(buf, 256 * sizeof(TCHAR));
 	int b = _wtoi(buf);
 
-	if ( r != 0 || g != 0 || b != 0 ) {
-		mic->setColor(r, g, b);
+	if ( r == 0 && g == 0 && b == 0 ) {
+		r = mic->getColor().Red;
+		g = mic->getColor().Green;
+		b = mic->getColor().Blue;
 	}
 
 	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) != 0 ) {
-		mic->setName(buf, 256);
-	}
+	//if ( wcslen(buf) == 0 )
+	//	return 11;
+
+	VECTOR3D pos = mic->getPosition();
+	VECTOR3D fwd = mic->getForwardLookDirection();
+	VECTOR3D uwd = mic->getUpLookDirection();
+	VECTOR3D rwd = mic->getRightLookDirection();
+
+	LPMICROPHONE3D newMic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
+	mic->Translate(pos);
+	mic->setForwardLookDirection(&fwd);
+	mic->setUpLookDirection(&uwd);
+	mic->setRightLookDirection(&rwd);
+
+	Scene.DeleteObject(activeObject);
+	Scene.AddObject(newMic);
+	RefreshObjectsList();
+	listObjects.setCurSel(listObjects.getItemCount() - 1);
 	
 	delete [] buf;
 	return 0;
@@ -1730,7 +1766,43 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			mainForm.Invalidate();
 			break;
 		case BT_MODIF:
-			ModifMicFull();
+			error = ModifMicFull();
+			switch (error) 
+			{
+				case 1:
+					MessageBox(NULL, _T("To small height."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 2:
+					MessageBox(NULL, _T("To small radius."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 3:
+					MessageBox(NULL, _T("Wrong button size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 4:
+					MessageBox(NULL, _T("To small upright height."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 5:
+					MessageBox(NULL, _T("Wrong upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 6:
+					MessageBox(NULL, _T("Wrong upright gap size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 7:
+					MessageBox(NULL, _T("Wrong handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 8:
+					MessageBox(NULL, _T("Wrong head depth."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 9:
+					MessageBox(NULL, _T("Wrong head diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 10:
+					MessageBox(NULL, _T("Wrong core diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 11:
+					MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+			}
 			RefreshObjectsList();
 			mainForm.Invalidate();
 			break;
@@ -1754,7 +1826,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					MessageBox(NULL, _T("Wrong button size."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 4:
-					MessageBox(NULL, _T("To small upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
+					MessageBox(NULL, _T("Wrong upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 5:
 					MessageBox(NULL, _T("To small upright."), _T("Error"), MB_OK | MB_ICONERROR );
@@ -1763,13 +1835,13 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					MessageBox(NULL, _T("Wrong upright gap size."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 7:
-					MessageBox(NULL, _T("To small handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
+					MessageBox(NULL, _T("Wrong handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 8:
-					MessageBox(NULL, _T("Wrong head diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
+					MessageBox(NULL, _T("Wrong head depth."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 9:
-					MessageBox(NULL, _T("To small head depth."), _T("Error"), MB_OK | MB_ICONERROR );
+					MessageBox(NULL, _T("Wrong head diameter size"), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 10:
 					MessageBox(NULL, _T("Wrong core diameter size."), _T("Error"), MB_OK | MB_ICONERROR );

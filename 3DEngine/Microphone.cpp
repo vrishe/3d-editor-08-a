@@ -67,10 +67,10 @@ void Microphone::Triangulate() {
 	Pyramid			buttonL(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, -bW * 0.1375f),
 					buttonR(bH * 0.6f, bW * 0.575f, bW, bW * 0.3f, bW, -bW * 0.1375f);
 	
-	Cone			upright	 (uH * 0.21127f + 2 * uG, uR * 0.66667f, uR * 0.66667f, precission),
-					shroudLow(uH * 0.21127f, uR, uR, precission),
-					shroudHi (uH - upright.getHeight() - uH * 0.084537f, uR, uR, precission),
-					bridge   (uH * 0.084537f,uR * 0.66667f, uR * 0.41667f, precission);
+	Cone			shroudLow(uH * 0.21127f, uR, uR, precission),
+					bridge   (uH * 0.084537f, uR * 0.66667f, uR * 0.41667f, precission),
+					shroudHi (uH - uG - shroudLow.getHeight() - uH * .04f - bridge.getHeight(), uR, uR, precission),
+					upright	 (uH - bridge.getHeight(), uR * 0.66667f, uR * 0.66667f, precission);
 
 	Pyramid			handleBridgeUp	(uH * 0.09155f, uR * 0.653f, hI, uR * 0.653f, hI),
 					handleBridgeDown(uH * 0.077f,   uR * 0.653f, hI, uR * 0.653f, hI),
@@ -90,15 +90,15 @@ void Microphone::Triangulate() {
 	buttonR.Pitch((FLOAT)M_PI);
 
 	upright.Fly(bH);
-	shroudLow.Fly(tH * 0.0823f);
+	shroudLow.Fly(base.getHeight() + uH * .04f);
 	shroudHi.Fly(shroudLow.getPosition().z + shroudLow.getHeight() + uG);
 	bridge.Fly(shroudHi.getPosition().z + shroudHi.getHeight());
 
-	handleBridgeUp.Fly(tH * 0.46f);
+	handleBridgeUp.Fly(uH * 0.8f);
 	handleBridgeUp.Follow(uR + hI / 2);
-	handleBridgeDown.Fly(tH * 0.15f);
+	handleBridgeDown.Fly(bH + uH * 0.15f);
 	handleBridgeDown.Follow(handleBridgeUp.getPosition().x);
-	handle.Translate(bR * 0.306f, bR * 0.0059f, tH * 0.547f);
+	handle.Translate(uR * 1.5f + hI, bR * 0.0059f, uH * .95f);
 	handle.Pitch((FLOAT)M_PI);
 	handle.Yaw((FLOAT)M_PI_2);
 	handleTop.Translate(handle.getPosition().x, handle.getPosition().y, handle.getPosition().z);
@@ -213,6 +213,8 @@ void Microphone::recalcMeshVertices(MIC_PART part, MESH3D& m) {
 /* ---------------------------------- setters ---------------------------------- */
 
 void Microphone::setTotalHeight	(float h) {
+	tH = h;
+
 	bH = tH * 0.061f;
 
 	uH = tH * 0.58436f;
