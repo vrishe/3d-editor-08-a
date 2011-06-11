@@ -15,14 +15,14 @@ protected:
 	float shift;    // get your head out by OX
 
 public:
-	Pyramid(COLOR3D c);
+	Pyramid(COLORREF c);
 	Pyramid(
 		float height, 
 		float bLength, 
 		float bWidth, 
 		float tLength, 
 		float tWidth,
-		COLOR3D	c,
+		COLORREF	c,
 		float sh = 0
 	);
 	Pyramid(
@@ -74,13 +74,13 @@ protected:
 	int precision;	// precision of circle approximation in polygons
 
 public:
-	Cone(COLOR3D c, MESH_ID mID = MSH_CONE);
+	Cone(COLORREF c, MESH_ID mID = MSH_CONE);
 	Cone(
 		float height, 
 		float bRadius, 
 		float tRadius, 
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 	);
 	Cone(
 		unsigned char red	= 0xff,
@@ -127,14 +127,14 @@ class ExCone : public Cone {
 	float secant;
 
 public:
-	ExCone(COLOR3D c);
+	ExCone(COLORREF c);
 	ExCone(
 		float height, 
 		float bRadius, 
 		float tRadius,
 		float s,
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 	);
 	ExCone(
 		unsigned char red	= 0xff,
@@ -178,7 +178,7 @@ protected:
 	int precision;	// precision of circle approximation in polygons
 
 public:
-	Hole(COLOR3D c);
+	Hole(COLORREF c);
 	Hole(
 		float height, 
 		float bRadius, 
@@ -186,7 +186,7 @@ public:
 		float tRadius,
 		float tHoleRadius,
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 	);
 	Hole(
 		unsigned char red	= 0xff,

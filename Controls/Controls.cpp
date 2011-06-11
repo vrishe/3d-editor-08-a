@@ -1141,6 +1141,7 @@ VOID clsForm::getClientDC(HDC *hDC)
 	if ( hDC != NULL ) *hDC = GetDC(hWnd); 
 }
 
+VOID clsForm::captureMouse() const { SetCapture(hWnd); }
 
 BOOL clsForm::isMaximized() const { return IsZoomed(hWnd); }
 

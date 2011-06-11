@@ -70,6 +70,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)$(ProjectName).exe.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <ResourceCompile>
+      <NullTerminateStrings>true</NullTerminateStrings>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -94,6 +97,9 @@
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)$(ProjectName).exe.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <ResourceCompile>
+      <NullTerminateStrings>true</NullTerminateStrings>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="3DEditor.ico" />

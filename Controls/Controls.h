@@ -312,6 +312,7 @@ public:
 	VOID		getClientWidth(LPUINT fcWidth)					const;
 	VOID		getClientHeight(LPUINT fcHeight)				const;
 	VOID		getClientDC(HDC *hDC);
+	VOID		captureMouse()									const;
 
 // Checkers.
 	BOOL	isMaximized()	const;

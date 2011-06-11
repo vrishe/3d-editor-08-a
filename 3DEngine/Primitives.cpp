@@ -69,17 +69,17 @@ void Pyramid::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-Pyramid::Pyramid(COLOR3D c) 
+Pyramid::Pyramid(COLORREF c) 
 	: clsMesh(MSH_PYRAMID, c), h(0), bL(0), bW(0), tL(0), tW(0), shift(0) { }
 
 Pyramid::Pyramid(
-		float height, 
-		float bLength, 
-		float bWidth, 
-		float tLength, 
-		float tWidth,
-		COLOR3D	c,
-		float sh
+		float		height, 
+		float		bLength, 
+		float		bWidth, 
+		float		tLength, 
+		float		tWidth,
+		COLORREF	c,
+		float		sh
 ) : clsMesh(MSH_PYRAMID, c)
 { 
 	h  = height;
@@ -242,7 +242,7 @@ void Cone::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-Cone::Cone(COLOR3D c, MESH_ID mID) 
+Cone::Cone(COLORREF c, MESH_ID mID) 
 	: clsMesh(mID, c), h(0), bR(0), tR(0), precision(24) { }
 
 Cone::Cone(
@@ -250,7 +250,7 @@ Cone::Cone(
 		float bRadius, 
 		float tRadius, 
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 ) : clsMesh(MSH_CONE, c)
 { 
 	h			= height;
@@ -522,7 +522,7 @@ void ExCone::Triangulate() {
 
 /* ---------------------- constructors --------------------- */
 
-ExCone::ExCone(COLOR3D c) 
+ExCone::ExCone(COLORREF c) 
 	: Cone( c, MSH_EXCONE ) { secant = max(bR, tR); }
 
 ExCone::ExCone(
@@ -531,7 +531,7 @@ ExCone::ExCone(
 		float tRadius,
 		float s,
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 ) : Cone( c, MSH_EXCONE ) 
 { 
 	secant		= s;
@@ -733,7 +733,7 @@ void Hole::Triangulate() {
 
 
 /* ---------------------- constructors --------------------- */
-Hole::Hole(COLOR3D c) 
+Hole::Hole(COLORREF c) 
 	: clsMesh(MSH_HOLE, c), h(0), bR(0), bRh(0), tR(0), tRh(0), precision(0) { }
 
 Hole::Hole(
@@ -743,7 +743,7 @@ Hole::Hole(
 		float tRadius,
 		float tHoleRadius,
 		int	  prec,
-		COLOR3D	c
+		COLORREF	c
 ) : clsMesh(MSH_HOLE, c)
 { 
 	h			= height;

@@ -24,7 +24,7 @@ BUTTON				btObjects, btCams, btLights;
 BUTTON				btMicrophone;
 BUTTON				btLight;
 BUTTON				btCamera;
-BUTTON				btQMake, btFMake;
+BUTTON				btMake, btBind, btProjSet;
 
 LABEL				lbX, lbY, lbZ,
 					lbObjects,
@@ -39,8 +39,15 @@ LISTBOX				listObjects;
 SCENE3D				Scene;
 LPVIEWPORT_POOL		Pool;
 LPOBJECT3D			activeObject;
+COLORREF			activeObjectNSColor;
 LPVIEWPORT			activeViewport;
+POINTS				mouse;
 
+VECTOR3D			Crosshair[] = { 
+						VECTOR3D(-5.0f, .0f, .0f), VECTOR3D(5.0f, .0f, .0f),
+						VECTOR3D(.0f, -5.0f, .0f), VECTOR3D(.0f, 5.0f, .0f),
+						VECTOR3D(.0f, .0f, -5.0f), VECTOR3D(.0f, .0f, 5.0f)
+					};
 // Win API entry point:
 // ===================================
 
@@ -72,11 +79,12 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 	
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	mainForm.setText(szTitle);
-	mainForm.AssignEventHandler(WM_DESTROY, mainForm_OnDestroy, TRUE);
-	mainForm.AssignEventHandler(WM_COMMAND, mainForm_InterfClick, TRUE);
-	mainForm.AssignEventHandler(WM_PAINT, mainForm_OnPaint, TRUE);
-	mainForm.AssignEventHandler(WM_KEYDOWN, mainForm_keyPressed, TRUE);
-	mainForm.AssignEventHandler(WM_GETDLGCODE, mainForm_ProcKeys, TRUE);
+	mainForm.AssignEventHandler(WM_DESTROY,		mainForm_OnDestroy,		TRUE);
+	mainForm.AssignEventHandler(WM_COMMAND,		mainForm_InterfClick,	TRUE);
+	mainForm.AssignEventHandler(WM_MOUSEWHEEL,	viewport_whMouseRotate,	TRUE);
+	mainForm.AssignEventHandler(WM_PAINT,		mainForm_OnPaint,		TRUE);
+	mainForm.AssignEventHandler(WM_KEYDOWN,		mainForm_keyPressed,	TRUE);
+	mainForm.AssignEventHandler(WM_GETDLGCODE,	mainForm_ProcKeys,		TRUE);
 	mainForm.getClientSize(&ufWidth, &ufHeight);
 	mainForm.setColor(FORM_BG_COLOR);
 
@@ -98,12 +106,8 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 			szTitle, 
 			MAX_LOADSTRING
 		); 
-	Pool->getViewport(0U)->camDefault.setName(szTitle, MAX_LOADSTRING);
-	Pool->getViewport(0U)->AssignEventHandler(
-									WM_LBUTTONDOWN,
-									viewport_lbMouseClick,
-									TRUE
-								);
+	Pool->getViewport(0U)->getCamera()->Roll((FLOAT)M_PI);
+	Pool->getViewport(0U)->getCamera()->setName(szTitle, MAX_LOADSTRING);
 
 	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
@@ -119,12 +123,7 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 			szTitle, 
 			MAX_LOADSTRING
 		);
-	Pool->getViewport(1U)->camDefault.setName(szTitle, MAX_LOADSTRING);
-	Pool->getViewport(1U)->AssignEventHandler(
-									WM_LBUTTONDOWN,
-									viewport_lbMouseClick,
-									TRUE
-								);
+	Pool->getViewport(1U)->getCamera()->setName(szTitle, MAX_LOADSTRING);
 
 	Pool->addViewport(
 					10, 
@@ -140,12 +139,7 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 			szTitle,
 			MAX_LOADSTRING
 		);
-	Pool->getViewport(2U)->camDefault.setName(szTitle, MAX_LOADSTRING);
-	Pool->getViewport(2U)->AssignEventHandler(
-									WM_LBUTTONDOWN,
-									viewport_lbMouseClick,
-									TRUE
-								);
+	Pool->getViewport(2U)->getCamera()->setName(szTitle, MAX_LOADSTRING);
 
 	Pool->addViewport(
 					10 + VIEWPORT_AREA_W / 2, 
@@ -161,15 +155,35 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 			szTitle, 
 			MAX_LOADSTRING
 		);
-	Pool->getViewport(3U)->camDefault.setName(szTitle, MAX_LOADSTRING);
-	Pool->getViewport(3U)->AssignEventHandler(
-									WM_LBUTTONDOWN,
-									viewport_lbMouseClick,
-									TRUE
-								);
+	Pool->getViewport(3U)->getCamera()->setName(szTitle, MAX_LOADSTRING);
+
+	for ( UINT i = 0; i < Pool->getViewportCount(); i++ )
+	{
+		Pool->getViewport(i)->AssignEventHandler(
+										WM_LBUTTONDOWN,
+										viewport_lbMouseDown,
+										TRUE
+									);
+		Pool->getViewport(i)->AssignEventHandler(
+										WM_MOUSEMOVE,
+										viewport_mouseMove,
+										TRUE
+									);
+		Pool->getViewport(i)->AssignEventHandler(
+										WM_LBUTTONUP,
+										viewport_lbMouseUp,
+										TRUE
+									);
+		Pool->getViewport(i)->AssignEventHandler(
+										WM_MOUSEWHEEL,
+										viewport_whMouseRotate,
+										TRUE
+									);
+	}
 
 	Draw_MainToolbars();
 	RefreshObjectsList();
+	RefreshTextBoxes();
 	mainForm.Show();
 
 	GetActiveViewport();
@@ -226,17 +240,17 @@ VOID Draw_MainToolbars() {
 				LB_V_H, LB_V_W);
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbX.Create(	TB_X,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				VIEWPORT_AREA_W - LB_V_W * 2 - 127, 9,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbY.Create(	TB_Y,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				VIEWPORT_AREA_W - LB_V_W - 86, 9,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbZ.Create(	TB_Z,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				VIEWPORT_AREA_W - 45, 9,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
@@ -391,6 +405,7 @@ VOID Draw_InitCamsToolbar() {
 }
 VOID Draw_InitMicrophoneToolbar() {
 	TCHAR *name = new TCHAR[256];
+	name[0]		= '\0';
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
 	lbParams[0].Create(	name,
@@ -406,38 +421,6 @@ VOID Draw_InitMicrophoneToolbar() {
 						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
 						LIST_OBJ_W - 44, BT_TOOL_H - 9);
 
-	//LoadString(hInstance, N_LB_QUICK, name, 256);
-	//lbQuick.Create(	name,
-	//				&mainForm,
-	//				ufWidth - TAB_W * 2 - 12, 
-	//				60 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-	//				100, 16);
-	//LoadString(hInstance, N_LB_HEIGHT, name, 256);
-	//lbParams[1].Create(name,
-	//					&mainForm,
-	//					ufWidth - TAB_W * 2 - 12, 
-	//					83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-	//					46, 16);
-	//LoadString(hInstance, N_LB_BDIAM, name, 256);
-	//lbParams[2].Create(	name,
-	//					&mainForm,
-	//					ufWidth - 140, 
-	//					83 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-	//					56, 16);
-
-
-	//tbParams[2].Create(	TB_HEIGHT,
-	//					name,
-	//					&mainForm,
-	//					ufWidth - 225, 
-	//					80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-	//					80, BT_TOOL_H - 9);
-	//tbParams[3].Create(	TB_BDIAM,
-	//					name,
-	//					&mainForm,
-	//					ufWidth - 80, 
-	//					80 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-	//					75, BT_TOOL_H - 9);
 	tbParams[4].Create(	TB_BDIAM,
 						_T("12"),
 						&mainForm,
@@ -499,19 +482,21 @@ VOID Draw_InitMicrophoneToolbar() {
 						443,
 						75, BT_TOOL_H - 9);
 	
-	LoadString(hInstance, N_TAB_CREATE, name, 256);
-	//btQMake.Create(	BT_QMAKE,
-	//				name,
-	//				&mainForm,
-	//				ufWidth - 80, 
-	//				195,
-	//				BT_TOOL_W, BT_TOOL_H);
-	btFMake.Create(	BT_FMAKE,
-					name,
-					&mainForm,
-					ufWidth - 157, 
-					470,
-					BT_TOOL_W, BT_TOOL_H);
+	if ( !modifyMode )
+	{
+		LoadString(hInstance, N_TAB_CREATE, name, 256);
+	}
+	else
+	{
+		LoadString(hInstance, N_TAB_MODIFY, name, 256);
+	}
+
+	btMake.Create(	BT_MAKEMIC,
+				name,
+				&mainForm,
+				ufWidth - 157, 
+				470,
+				BT_TOOL_W, BT_TOOL_H);
 
 	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
 	lbParams[3].Create(	name,
@@ -600,12 +585,14 @@ VOID Draw_InitMicrophoneToolbar() {
 				ufWidth - TAB_W * 2  + 36, 
 				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
+
 	tbParams[15].Create(	TB_G,
 				name,
 				&mainForm, 
 				ufWidth - TAB_W * 2 + LB_V_W + 77, 
 				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
+
 	tbParams[16].Create(	TB_B,
 				name,
 				&mainForm, 
@@ -615,6 +602,7 @@ VOID Draw_InitMicrophoneToolbar() {
 
 	delete [] name;
 }
+
 VOID Draw_InitLightToolbar() {
 	TCHAR *name = new TCHAR[256];
 
@@ -677,71 +665,92 @@ VOID Draw_InitLightToolbar() {
 
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbParams[1].Create(	TB_R,
-				name,
+				_T("150"),
 				&mainForm, 
 				ufWidth - LB_V_W * 2 - 127, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[2].Create(	TB_G,
-				name,
+				_T("150"),
 				&mainForm, 
 				ufWidth - LB_V_W - 86, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[3].Create(	TB_B,
-				name,
+				_T("150"),
 				&mainForm, 
 				ufWidth - 45, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[4].Create(	TB_TX,
-				name,
+				_T("-1"),
 				&mainForm, 
 				ufWidth - LB_V_W * 2 - 127, 
 				173,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[5].Create(	TB_TY,
-				name,
+				_T("-1"),
 				&mainForm, 
 				ufWidth - LB_V_W - 86, 
 				173,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[6].Create(	TB_TZ,
-				name,
+				_T("-1"),
 				&mainForm, 
 				ufWidth - 45, 
 				173,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[7].Create(	TB_COREDIAM,
-				name,
+				_T("0.5"),
 				&mainForm, 
 				ufWidth - 45, 
 				198,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 
-	if ( modifyMode )  {
+	if ( modifyMode )
+	{
+		LPDIFLIGHT3D	light	= (LPDIFLIGHT3D)activeObject;
+		VECTOR3D		lPos	= light->getPosition();
+		COLORREF		lColor	= light->getColor();
+		
+		light->getName(name, 256);
+		tbParams[0].setText(name);
+
+		_stprintf_s(name, 256, _T("%d"), RED(lColor));
+		tbParams[1].setText(name);
+		_stprintf_s(name, 256, _T("%d"), GREEN(lColor));
+		tbParams[2].setText(name);
+		_stprintf_s(name, 256, _T("%d"), BLUE(lColor));
+		tbParams[3].setText(name);
+
+		_stprintf_s(name, 256, _T("%.3f"), lPos.x);
+		tbParams[4].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), lPos.y);
+		tbParams[5].setText(name);		
+		_stprintf_s(name, 256, _T("%.3f"), lPos.z);
+		tbParams[6].setText(name);
+
+		_stprintf_s(name, 256, _T("%.3f"), light->getPower());
+		tbParams[7].setText(name);
 		LoadString(hInstance, N_TAB_MODIFY, name, 256);
-		btFMake.Create(	BT_MODIF,
-						name,
-						&mainForm,
-						ufWidth - 80, 
-						225,
-						BT_TOOL_W, BT_TOOL_H);
 	}
 	else
 	{
 		LoadString(hInstance, N_TAB_CREATE, name, 256);
-		btFMake.Create(	BT_MAKELIGHT,
-						name,
-						&mainForm,
-						ufWidth - 80, 
-						225,
-						BT_TOOL_W, BT_TOOL_H);
 	}
+
+
+	btMake.Create(	BT_MAKELIGHT,
+				name,
+				&mainForm,
+				ufWidth - 80, 
+				225,
+				BT_TOOL_W, BT_TOOL_H);
 	
 
 	delete [] name;
 }
+
 VOID Draw_InitCameraToolbar() {
 	TCHAR *name = new TCHAR[256];
 
@@ -750,7 +759,7 @@ VOID Draw_InitCameraToolbar() {
 						&mainForm,
 						ufWidth - TAB_W * 2 - 11, 
 						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-						30, 16);
+						45, 16);
 	LoadString(hInstance, N_LB_TARGET, name, 256);
 	lbParams[10].Create(name,
 						&mainForm,
@@ -758,7 +767,7 @@ VOID Draw_InitCameraToolbar() {
 						152,				
 						71, 16);
 	LoadString(hInstance, N_LB_POSITION, name, 256);
-	lbParams[10].Create(name,
+	lbParams[11].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 11, 
 						175,				
@@ -811,276 +820,114 @@ VOID Draw_InitCameraToolbar() {
 
 	ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbParams[1].Create(	TB_TX,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - LB_V_W * 2 - 127, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[2].Create(	TB_TY,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - LB_V_W - 86, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[3].Create(	TB_TZ,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - 45, 
 				150,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 
 	tbParams[4].Create(	TB_R,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - LB_V_W * 2 - 127, 
 				177,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[5].Create(	TB_G,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - LB_V_W - 86, 
 				177,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 	tbParams[6].Create(	TB_B,
-				name,
+				_T("0.000"),
 				&mainForm, 
 				ufWidth - 45, 
 				177,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
 
-	if ( modifyMode ) {
-		LoadString(hInstance, N_TAB_MODIFY, name, 256);
-		btFMake.Create(	BT_MODIF,
-						name,
-						&mainForm,
-						ufWidth - 80, 
-						210,
-						BT_TOOL_W, BT_TOOL_H);
-	}
-	else {
-		LoadString(hInstance, N_TAB_CREATE, name, 256);
-		btFMake.Create(	BT_MAKECAM,
-						name,
-						&mainForm,
-						ufWidth - 80, 
-						210,
-						BT_TOOL_W, BT_TOOL_H);
-	}	
+	if ( modifyMode )
+	{
+		LPTARGCAMERA3D	cam		= (LPTARGCAMERA3D)activeObject;
+		VECTOR3D		vPos	= vPos = cam->getTargetPosition();
+		UINT			btID;
 
-	delete [] name;
-}
+		cam->getName(name, 256);
+		tbParams[0].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), vPos.x);
+		tbParams[1].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), vPos.y);
+		tbParams[2].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), vPos.z);
+		tbParams[3].setText(name);
+		vPos = cam->getPosition();
+		_stprintf_s(name, 256, _T("%.3f"), vPos.x);
+		tbParams[4].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), vPos.y);
+		tbParams[5].setText(name);
+		_stprintf_s(name, 256, _T("%.3f"), vPos.z);
+		tbParams[6].setText(name);
+		
+		if ( 
+			activeViewport != NULL
+			&& activeViewport->getCamera() == cam 
+		) {
+			LoadString(hInstance, N_BT_RELEASECAM, name, 256);
+			btID = BT_RELEASE;
+		}
+		else
+		{
+			LoadString(hInstance, N_BT_BINDCAM, name, 256);
+			btID = BT_BIND;
+		}
 
-VOID Draw_ModifyMicrophoneToolbar() {
-	TCHAR *name = new TCHAR[256];
-
-	LoadString(hInstance, N_LB_NAME, name, 256);
-	lbParams[0].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 11, 
-						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-						46, 16);
-	activeObject->getName(name, 256);
-	tbParams[0].Create(	TB_NAME,
-						name,
-						&mainForm,
-						ufWidth - TAB_W * 2 + 36, 
-						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-						LIST_OBJ_W - 44, BT_TOOL_H - 9);
-
-	float tmp = ((LPMICROPHONE3D)activeObject)->getBaseHeight();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[4].Create(	TB_BHEIGHT,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						218,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getBaseRadius() * 2;
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[5].Create(	TB_BDIAM,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						243,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getButtonWidth();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[6].Create(	TB_BWIDTH,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						268,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getUprightRadius() * 2;
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[7].Create(	TB_UDIAM,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						293,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getUprightHeight();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[8].Create(	TB_UHEIGHT,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						318,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getUprightGap();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[9].Create(	TB_UGAP,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						343,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getHandleIndent();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[10].Create(TB_HANDIND,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						368,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getHeadRadius() * 2;
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[11].Create(TB_HEADDIAM,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						393,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getHeadDepth();
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[12].Create(TB_HEADDEPTH,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						418,
-						75, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getCoreRadius() * 2;
-	_stprintf_s(name, 256, _T("%.2f"), tmp);
-	tbParams[13].Create(TB_COREDIAM,
-						name,
-						&mainForm,
-						ufWidth - 165, 
-						443,
-						75, BT_TOOL_H - 9);
-	
-	LoadString(hInstance, N_TAB_MODIFY, name, 256);
-	
-	btFMake.Create(	BT_MODIF,
+		btBind.Create(  btID,
 					name,
 					&mainForm,
-					ufWidth - 157, 
-					470,
-					BT_TOOL_W, BT_TOOL_H);
+					ufWidth - 85 - BT_TOOL_W,
+					210,
+					BT_TOOL_W, BT_TOOL_H
+				);	
+		if ( activeViewport == NULL ) btBind.Disable();
 
-	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
-	lbParams[3].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						220,				
-						220, 16);
-	LoadString(hInstance, N_LB_BDIAM, name, 256);
-	lbParams[4].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						245,				
-						120, 16);
-	LoadString(hInstance, N_LB_BWIDTH, name, 256);
-	lbParams[5].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						270,				
-						120, 16);
-	LoadString(hInstance, N_LB_UDIAM, name, 256);
-	lbParams[6].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						295,				
-						120, 16);
-	LoadString(hInstance, N_LB_UHEIGHT, name, 256);
-	lbParams[7].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						320,				
-						120, 16);
-	LoadString(hInstance, N_LB_UGAP, name, 256);
-	lbParams[8].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						345,				
-						120, 16);
-	LoadString(hInstance, N_LB_HANDIND, name, 256);
-	lbParams[9].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						370,				
-						120, 16);
-	LoadString(hInstance, N_LB_HEADDIAM, name, 256);
-	lbParams[10].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						395,				
-						120, 16);
-	LoadString(hInstance, N_LB_HEADDEPTH, name, 256);
-	lbParams[11].Create(name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						420,				
-						120, 16);
-	LoadString(hInstance, N_LB_COREDIAM, name, 256);
-	lbParams[12].Create(name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 12, 
-						445,				
-						120, 16);
+		LoadString(
+			hInstance, 
+			N_BT_PROJ_CENTRAL - cam->getProjectionType(),
+			name, 
+			256
+		);
+		btProjSet.Create( BT_PROJSET,
+					name,
+					&mainForm,
+					ufWidth - 90 - BT_TOOL_W * 2,
+					210,
+					BT_TOOL_W, BT_TOOL_H
+				);
 
-	LoadString(hInstance, N_LB_R, name, 256);
-	lbParams[14].Create(	name,
-				&mainForm, 
-				ufWidth - TAB_W * 2  + 20, 
-				147,
-				LB_V_H, LB_V_W);
-	LoadString(hInstance, N_LB_G, name, 256);
-	lbParams[15].Create(	name,
-				&mainForm, 
-				ufWidth - TAB_W * 2 + LB_V_W + 61, 
-				147,
-				LB_V_H, LB_V_W);
-	LoadString(hInstance, N_LB_B, name, 256);
-	lbParams[16].Create(	name,
-				&mainForm, 
-				ufWidth - TAB_W * 2 + LB_V_W *2 + 102, 
-				147,
-				LB_V_H, LB_V_W);
+		LoadString(hInstance, N_TAB_MODIFY, name, 256);	
+	}
+	else
+	{
+		LoadString(hInstance, N_TAB_CREATE, name, 256);
+	}
 
-	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Red;
-	_stprintf_s(name, 256, _T("%d"), tmp);
-	tbParams[14].Create(	TB_R,
-				name,
-				&mainForm, 
-				ufWidth - TAB_W * 2  + 36, 
-				145,
-				BT_TOOL_W - 19, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Green;
-	_stprintf_s(name, 256, _T("%d"), tmp);
-	tbParams[15].Create(	TB_G,
-				name,
-				&mainForm, 
-				ufWidth - TAB_W * 2 + LB_V_W + 77, 
-				145,
-				BT_TOOL_W - 19, BT_TOOL_H - 9);
-	tmp = ((LPMICROPHONE3D)activeObject)->getColor().Blue;
-	_stprintf_s(name, 256, _T("%d"), tmp);
-	tbParams[16].Create(	TB_B,
-				name,
-				&mainForm, 
-				ufWidth - TAB_W * 2 + LB_V_W *2 + 118, 
-				145,
-				BT_TOOL_W - 19, BT_TOOL_H - 9);
+	btMake.Create(	BT_MAKECAM,
+						name,
+						&mainForm,
+						ufWidth - 80, 
+						210,
+						BT_TOOL_W, BT_TOOL_H);
 
 	delete [] name;
 }
@@ -1094,10 +941,10 @@ VOID Draw_DestroyRightToolbar () {
 	btLight.Destroy();
 	btCamera.Destroy();
 
-	lbQuick.Destroy();
-	btQMake.Destroy();
-	btFMake.Destroy();
-	//btModif.
+	btMake.Destroy();
+	btBind.Destroy();
+	btProjSet.Destroy();
+
 	for ( UINT i = 0; i < MAX_PARAMS_NUM; i++ ) {
 		lbParams[i].Destroy();
 		tbParams[i].Destroy();
@@ -1131,50 +978,7 @@ VOID RefreshObjectsList() {
 
  //Controls functions
  //============================================================================
-BOOL CreateMicFast() {
-	TCHAR *buf = new TCHAR[256];
-
-	tbParams[2].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT h = (FLOAT)(FLOAT)_ttof(buf);
-	if ( h < 10 ) {
-		delete [] buf;
-		return false;
-	}
-
-	tbParams[3].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT bR = (FLOAT)(FLOAT)_ttof(buf) / 2;
-	if ( bR < 3 ) {
-		delete [] buf;
-		return false;
-	}
-	
-	tbParams[14].getText(buf, 256 * sizeof(TCHAR));
-	UCHAR r = _ttoi(buf);
-	tbParams[15].getText(buf, 256 * sizeof(TCHAR));
-	UCHAR g = _ttoi(buf);
-	tbParams[16].getText(buf, 256 * sizeof(TCHAR));
-	UCHAR b = _ttoi(buf);
-
-	if ( r == 0 && g == 0 && b == 0 ) {
-		r = 200; g = 200; b = 200;
-	}
-
-	
-	LPMICROPHONE3D mic = new MICROPHONE3D(r, g, b, bR, h);
-	
-	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) == 0 ) {
-		delete [] buf;
-		return false;
-	}
-	mic->setName(buf, 256);
-
-	Scene.AddObject(mic);
-	delete [] buf;
-	return true;
-}
-
-UINT CreateMicFull() {
+UINT CreateMic() {
 	TCHAR *buf = new TCHAR[256];
 	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
 	FLOAT bH = (FLOAT)(FLOAT)_ttof(buf);
@@ -1258,7 +1062,7 @@ UINT CreateMicFull() {
 	}
 
 	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) == 0 ) {
+	if ( _tcslen(buf) == 0 ) {
 		delete [] buf;
 		return 11;
 	}
@@ -1267,11 +1071,14 @@ UINT CreateMicFull() {
 	mic->setName(buf, 256);
 	Scene.AddObject(mic);
 
+	RefreshObjectsList();
+	GetActiveObject();
+
 	delete[] buf;
 	return 0;
 }
 
-UINT ModifMicFull() {
+UINT ModifMic() {
 	if ( activeObject == NULL ) return 100;
 
 	TCHAR *buf = new TCHAR[256];
@@ -1336,13 +1143,13 @@ UINT ModifMicFull() {
 	int b = _wtoi(buf);
 
 	if ( r == 0 && g == 0 && b == 0 ) {
-		r = mic->getColor().Red;
-		g = mic->getColor().Green;
-		b = mic->getColor().Blue;
+		r = RED(mic->getColor());
+		g = GREEN(mic->getColor());
+		b = BLUE(mic->getColor());
 	}
 
 	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) == 0 )
+	if ( _tcslen(buf) == 0 )
 		return 11;
 
 	VECTOR3D pos = mic->getPosition();
@@ -1355,15 +1162,16 @@ UINT ModifMicFull() {
 
 	mic = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	mic->Translate(pos);
-	mic->setForwardLookDirection(&fwd);
-	mic->setUpLookDirection(&uwd);
-	mic->setRightLookDirection(&rwd);
+	mic->setForwardLookDirection(fwd);
+	mic->setUpLookDirection(uwd);
+	mic->setRightLookDirection(rwd);
 	mic->setName(buf, 256);
 	Scene.AddObject(mic);
 
 	INT curSel = listObjects.getCurSel();
 	RefreshObjectsList();
 	listObjects.setCurSel(curSel);
+	GetActiveObject();
 	
 	delete[] buf;
 	return 0;
@@ -1372,69 +1180,153 @@ UINT ModifMicFull() {
 BOOL CreateLight() {
 	TCHAR *buf = new TCHAR[256];
 
-	tbParams[1].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[1].getText(buf, 256);
 	UCHAR r = _ttoi(buf);
-	tbParams[2].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[2].getText(buf, 256);
 	UCHAR g = _ttoi(buf);
-	tbParams[3].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[3].getText(buf, 256);
 	UCHAR b = _ttoi(buf);
 
-	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT x = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[5].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT y = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[6].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT z = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[4].getText(buf, 256);
+	FLOAT x = (FLOAT)_ttof(buf);
+	tbParams[5].getText(buf, 256);
+	FLOAT y = (FLOAT)_ttof(buf);
+	tbParams[6].getText(buf, 256);
+	FLOAT z = (FLOAT)_ttof(buf);
 
-	tbParams[7].getText(buf, 256 * sizeof(TCHAR));
-	FLOAT p = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[7].getText(buf, 256);
+	FLOAT p = (FLOAT)_ttof(buf);
 	
-	LPDIFLIGHT3D light = new DIFLIGHT3D(r, g, b);
-	
-	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) == 0 ) {
-		delete [] buf;
+	tbParams[0].getText(buf, 256);
+	if ( _tcslen(buf) == 0 ) {
+		delete[] buf;
 		return false;
 	}
+	LPDIFLIGHT3D light = new DIFLIGHT3D(r, g, b);
 	light->setName(buf, 256);
 	light->LookAt(x, y, z);
 	light->setPower(p);
-
 	Scene.AddObject(light);
-	delete [] buf;
+
+	RefreshObjectsList();
+	GetActiveObject();
+
+	delete[] buf;
+	return true;
+}
+
+BOOL ModifLight() {
+	TCHAR *buf = new TCHAR[256];
+
+	tbParams[1].getText(buf, 256);
+	UCHAR r = _ttoi(buf);
+	tbParams[2].getText(buf, 256);
+	UCHAR g = _ttoi(buf);
+	tbParams[3].getText(buf, 256);
+	UCHAR b = _ttoi(buf);
+
+	tbParams[4].getText(buf, 256);
+	FLOAT x = (FLOAT)_ttof(buf);
+	tbParams[5].getText(buf, 256);
+	FLOAT y = (FLOAT)_ttof(buf);
+	tbParams[6].getText(buf, 256);
+	FLOAT z = (FLOAT)_ttof(buf);
+
+	tbParams[7].getText(buf, 256);
+	FLOAT p = (FLOAT)_ttof(buf);
+	
+	tbParams[0].getText(buf, 256);
+	if ( _tcslen(buf) == 0 ) {
+		delete[] buf;
+		return false;
+	}
+	LPDIFLIGHT3D light = (LPDIFLIGHT3D)activeObject;
+	light->setName(buf, 256);
+	light->LookAt(x, y, z);
+	light->setColor(r, g, b);
+	light->setPower(p);
+
+	INT curSel = listObjects.getCurSel();
+	RefreshObjectsList();
+	listObjects.setCurSel(curSel);
+	GetActiveObject();
+
+	delete[] buf;
 	return true;
 }
 
 BOOL CreateCam() {
 	TCHAR *buf = new TCHAR[256];
 
-	tbParams[1].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[1].getText(buf, 256);
 	FLOAT tx = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[2].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[2].getText(buf, 256);
 	FLOAT ty = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[3].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[3].getText(buf, 256);
 	FLOAT tz = (FLOAT)(FLOAT)_ttof(buf);
 
-	tbParams[4].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[4].getText(buf, 256);
 	FLOAT x = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[5].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[5].getText(buf, 256);
 	FLOAT y = (FLOAT)(FLOAT)_ttof(buf);
-	tbParams[6].getText(buf, 256 * sizeof(TCHAR));
+	tbParams[6].getText(buf, 256);
 	FLOAT z = (FLOAT)(FLOAT)_ttof(buf);
 	
-	LPTARGCAMERA3D cam = new TARGCAMERA3D;
-	
-	tbParams[0].getText(buf, 256 * sizeof(TCHAR));
-	if ( wcslen(buf) == 0 ) {
-		delete [] buf;
+	tbParams[0].getText(buf, 256);
+	if ( _tcslen(buf) == 0 ) {
+		delete[] buf;
 		return false;
 	}
+	LPTARGCAMERA3D cam = new TARGCAMERA3D();
 	cam->setName(buf, 256);
 	cam->Translate(x, y, z);
-	cam->setTargetPoint(tx, ty, tz);
-
+	cam->TargetTranslate(tx, ty, tz);
 	Scene.AddObject(cam);
-	delete [] buf;
+
+	if ( activeViewport != NULL ) 
+		activeViewport->setCamera(cam);
+
+	RefreshObjectsList();
+	GetActiveObject();
+
+	delete[] buf;
+	return true;
+}
+
+BOOL ModifCam()
+{
+	TCHAR *buf = new TCHAR[256];
+
+	tbParams[1].getText(buf, 256);
+	FLOAT tx = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[2].getText(buf, 256);
+	FLOAT ty = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[3].getText(buf, 256);
+	FLOAT tz = (FLOAT)(FLOAT)_ttof(buf);
+
+	tbParams[4].getText(buf, 256);
+	FLOAT x = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[5].getText(buf, 256);
+	FLOAT y = (FLOAT)(FLOAT)_ttof(buf);
+	tbParams[6].getText(buf, 256);
+	FLOAT z = (FLOAT)(FLOAT)_ttof(buf);
+	
+	tbParams[0].getText(buf, 256);
+	if ( _tcslen(buf) == 0 ) {
+		delete[] buf;
+		return false;
+	}
+	LPTARGCAMERA3D cam = (LPTARGCAMERA3D)activeObject;
+	cam->setName(buf, 256);
+	cam->Translate(x, y, z);
+	cam->TargetTranslate(tx, ty, tz);
+
+	INT curSel = listObjects.getCurSel();
+	RefreshObjectsList();
+	listObjects.setCurSel(curSel);
+	GetActiveObject();
+
+	delete[] buf;
 	return true;
 }
 
@@ -1475,7 +1367,7 @@ BOOL Draw_RefreshModifyToolbar() {
 	if ( activeObject == NULL ) return false;
 	switch ( activeObject->clsID() ) {
 	case CLS_MESH:
-		Draw_ModifyMicrophoneToolbar();
+		Draw_InitMicrophoneToolbar();
 		break;
 	case CLS_LIGHT:
 		Draw_InitLightToolbar();
@@ -1498,155 +1390,126 @@ LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	FLOAT	dirH	= .0f,
+			dirV	= .0f,
+			dirD	= .0f;
+	BYTE	keyBrd[256];
 	if ( wParam == VK_DELETE ) DeleteActiveObject();
 
-	if ( activeViewport == NULL ) return 1L;
+	if ( activeViewport == NULL 
+		|| 	!GetKeyboardState(keyBrd) ) return 1L;
+	if ( wParam == VK_SPACE )
+	{
+		if ( activeViewport->getRenderMode() < RM_SHADEDWF )
+			activeViewport->setRenderMode(
+					(RENDER_MODE)(activeViewport->getRenderMode() + 1)
+				);
+		else
+			activeViewport->setRenderMode(RM_WIREFRAME);
+	}
 
+	LPTARGCAMERA3D cam = activeViewport->getCamera();
 	switch ( activeTool ) {
 	case IS_MOVE:
-		switch ( wParam ) {
-		case VK_LEFT:
-				activeObject->Strafe(-PAN_ASPECT);
-			break;
-		case VK_RIGHT:
-				activeObject->Strafe(PAN_ASPECT);
-			break;
-		case VK_UP:
-				activeObject->Fly(PAN_ASPECT);
-			break;
-		case VK_DOWN:
-				activeObject->Fly(-PAN_ASPECT);
-			break;
-		case VK_HOME:
-				activeObject->Follow(PAN_ASPECT);
-			break;
-		case VK_END:
-				activeObject->Follow(-PAN_ASPECT);
-			break;
-		}
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
+		activeObject->Strafe(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
+		activeObject->Fly(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
+		activeObject->Follow(dirD);
+
+		RefreshTextBoxes();
 		break;
+
 	case IS_ROTATE:
-		switch ( wParam ) {
-		case VK_LEFT:
-				activeObject->Yaw(-ROTATION_ASPECT);
-			break;
-		case VK_RIGHT:
-				activeObject->Yaw(ROTATION_ASPECT);
-			break;
-		case VK_UP:
-				activeObject->Pitch(ROTATION_ASPECT);
-			break;
-		case VK_DOWN:
-				activeObject->Pitch(-ROTATION_ASPECT);
-			break;
-		case VK_HOME:
-				activeObject->Roll(ROTATION_ASPECT);
-			break;
-		case VK_END:
-				activeObject->Roll(-ROTATION_ASPECT);
-			break;
-		}
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= ROTATION_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += ROTATION_ASPECT;
+		activeObject->Yaw(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV += ROTATION_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= ROTATION_ASPECT;
+		activeObject->Pitch(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD += ROTATION_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD -= ROTATION_ASPECT;
+		activeObject->Roll(dirD);
+
+		RefreshTextBoxes();
 		break;
+
 	case IS_SCALE:
-		//if ( activeObject == NULL ) return 1L;
-		switch ( wParam ) {
-		case VK_LEFT:
-				activeObject->ScaleAlong(1.0f / SCALE_ASPECT);
-			break;
-		case VK_RIGHT:
-				activeObject->ScaleAlong(SCALE_ASPECT);
-			break;
-		case VK_UP:
-				activeObject->ScaleVAcross(1.0f / SCALE_ASPECT);
-			break;
-		case VK_DOWN:
-				activeObject->ScaleVAcross(SCALE_ASPECT);
-			break;
-		case VK_HOME:
-				activeObject->ScaleHAcross(1.0f / SCALE_ASPECT);
-			break;
-		case VK_END:
-				activeObject->ScaleHAcross(SCALE_ASPECT);
-			break;
-		}
+		dirH = dirV = dirD = 1.0f;
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH /= SCALE_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH *= SCALE_ASPECT;
+		activeObject->ScaleAlong(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV /= SCALE_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV *= SCALE_ASPECT;
+		activeObject->ScaleVAcross(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD /= SCALE_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD *= SCALE_ASPECT;
+		activeObject->ScaleHAcross(dirD);
 		break;
+
 	case IS_PAN:
-		switch ( wParam ) {
-		case VK_LEFT:
-			activeViewport->camDefault.Strafe(-PAN_ASPECT);
-			break;
-		case VK_RIGHT:
-			activeViewport->camDefault.Strafe(PAN_ASPECT);
-			break;
-		case VK_UP:
-			activeViewport->camDefault.Fly(PAN_ASPECT);
-			break;
-		case VK_DOWN:
-			activeViewport->camDefault.Fly(-PAN_ASPECT);
-			break;
-		case VK_HOME:
-			activeViewport->camDefault.Follow(PAN_ASPECT);
-			break;
-		case VK_END:
-			activeViewport->camDefault.Follow(-PAN_ASPECT);
-			break;
-		}
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
+		cam->Strafe(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
+		cam->Fly(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
+		cam->Follow(dirD);
 		break;
+
 	case IS_ZOOM:
-		switch ( wParam ) {
-		case VK_HOME:
-			activeViewport->camDefault.setHFov(
-				activeViewport->camDefault.getHFov() + ZOOM_ASPECT);
-			break;
-		case VK_END:
-			activeViewport->camDefault.setHFov(
-				activeViewport->camDefault.getHFov() - ZOOM_ASPECT);
-			break;
-		}
+		dirH = cam->getHFov();
+		dirV = cam->getVFov();
+
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirV -= ZOOM_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirV += ZOOM_ASPECT;
+		cam->setVFov(dirV);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirH += ZOOM_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirH -= ZOOM_ASPECT;
+		cam->setHFov(dirH);
 		break;
+
 	case IS_CAMROTATE:
-		switch ( wParam ) {
-		case VK_LEFT:
-			activeViewport->camDefault.StrafeLatitude(-PAN_ASPECT);
-			break;
-		case VK_RIGHT:
-			activeViewport->camDefault.StrafeLatitude(PAN_ASPECT);
-			break;
-		case VK_UP:
-			activeViewport->camDefault.StrafeLongitude(-PAN_ASPECT);
-			break;
-		case VK_DOWN:
-			activeViewport->camDefault.StrafeLongitude(PAN_ASPECT);
-			break;
-		case VK_HOME:
-			activeViewport->camDefault.FollowLookAxis(PAN_ASPECT);
-			break;
-		case VK_END:
-			activeViewport->camDefault.FollowLookAxis(-PAN_ASPECT);
-			break;
-		}
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
+		cam->StrafeLatitude(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
+		cam->StrafeLongitude(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
+		cam->FollowLookAxis(dirD);
 		break;
+
 	case IS_LOOK:
-		switch ( wParam ) {
-		case VK_LEFT:
-			activeViewport->camDefault.TargetStrafe(-PAN_ASPECT);
-			break;
-		case VK_RIGHT:
-			activeViewport->camDefault.TargetStrafe(PAN_ASPECT);
-			break;
-		case VK_UP:
-			activeViewport->camDefault.TargetFly(PAN_ASPECT);
-			break;
-		case VK_DOWN:
-			activeViewport->camDefault.TargetFly(-PAN_ASPECT);
-			break;
-		case VK_HOME:
-			activeViewport->camDefault.TargetFollow(PAN_ASPECT);
-			break;
-		case VK_END:
-			activeViewport->camDefault.TargetFollow(-PAN_ASPECT);
-			break;
-		}
+		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
+		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
+		cam->TargetStrafe(dirH);
+
+		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
+		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
+		cam->TargetFly(dirV);
+
+		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
+		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
+		cam->TargetFollow(dirD);
 		break;
 	}
 
@@ -1659,6 +1522,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 	OPENFILENAME	ofn			= { 0 };
 	LPOBJECT3D		tempObject;
 	UINT			error;
+	BOOL			bResult;
 
 	switch (LOWORD(wParam))
 	{
@@ -1667,63 +1531,78 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 				activeTool = IS_MOVE;
 			else
 				ToPoint();
+			RefreshTextBoxes();
 			mainForm.Invalidate();
 			mainForm.setFocus();
 			break;
+
 		case BT_ROTATE:
 			if ( activeTool != IS_ROTATE )
 				activeTool = IS_ROTATE;
 			else
 				ToPoint();
+			RefreshTextBoxes();
 			mainForm.Invalidate();
 			mainForm.setFocus();
 			break;
+
 		case BT_SCALE:
 			if ( activeTool != IS_SCALE )
 				activeTool = IS_SCALE;
 			else
 				ToPoint();
+			RefreshTextBoxes();
 			mainForm.Invalidate();
 			mainForm.setFocus();
 			break;
+
 		case BT_PAN:
 			activeTool = IS_PAN;
 			mainForm.setFocus();
 			break;
+
 		case BT_CAMSPHERE:
 			activeTool = IS_CAMROTATE;
 			mainForm.setFocus();
 			break;
+
 		case BT_LOOK_AROUND:
 			activeTool = IS_LOOK;
 			mainForm.setFocus();
 			break;
+
 		case BT_ZOOM:
 			activeTool = IS_ZOOM;
 			mainForm.setFocus();
 			break;
+
 		case BT_DELETE:
 			DeleteActiveObject();
 			break;
+
 		case TAB_CREATE:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
 			modifyMode = false;
 			break;
+
 		case TAB_MODIFY:
 			modifyMode = true;
 			Draw_RefreshModifyToolbar();
 			break;
+
 		case BT_OBJECTS:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
 			Draw_InitObjectsToolbar();
 			break;
+
 		case BT_LIGHTS:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
 			Draw_InitLightsToolbar();
 			break;
+
 		case BT_MIC:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
@@ -1731,6 +1610,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			Draw_InitMicrophoneToolbar();
 			tbParams[0].setFocus();
 			break;
+
 		case BT_LIGHT:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
@@ -1738,11 +1618,13 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			Draw_InitLightToolbar();
 			tbParams[0].setFocus();
 			break;
+
 		case BT_CAMS:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
 			Draw_InitCamsToolbar();
 			break;
+
 		case BT_CAMERA:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
@@ -1750,67 +1632,66 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			Draw_InitCameraToolbar();
 			tbParams[0].setFocus();
 			break;
+
 		case BT_MAKELIGHT:
-			if ( !CreateLight() )
+			if ( modifyMode )
+				bResult = ModifLight();
+			else
+				bResult = CreateLight();
+
+			if ( !bResult )
 				MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
 
-			RefreshObjectsList();
 			mainForm.Invalidate();
 			break;
+
 		case BT_MAKECAM:
-			if ( !CreateCam() )
+			if ( modifyMode )
+				bResult = ModifCam();
+			else
+				bResult = CreateCam();
+
+			if ( !bResult )
 				MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
-			RefreshObjectsList();
+
 			mainForm.Invalidate();
 			break;
-		case BT_MODIF:
-			error = ModifMicFull();
-			switch (error) 
+
+		case BT_BIND:
+			if ( activeViewport != NULL )
 			{
-				case 1:
-					MessageBox(NULL, _T("To small height."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 2:
-					MessageBox(NULL, _T("To small radius."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 3:
-					MessageBox(NULL, _T("Wrong button size."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 4:
-					MessageBox(NULL, _T("To small upright height."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 5:
-					MessageBox(NULL, _T("Wrong upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 6:
-					MessageBox(NULL, _T("Wrong upright gap size."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 7:
-					MessageBox(NULL, _T("Wrong handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 8:
-					MessageBox(NULL, _T("Wrong head depth."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 9:
-					MessageBox(NULL, _T("Wrong head diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 10:
-					MessageBox(NULL, _T("Wrong core diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
-				case 11:
-					MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
-					break;
+				activeViewport->setCamera((LPTARGCAMERA3D)activeObject);
+				Draw_RefreshModifyToolbar();
+				mainForm.Invalidate();
 			}
+			break;
+
+		case BT_RELEASE:
+			if ( activeViewport != NULL )
+			{
+				activeViewport->setCameraByObjectID(DEFAULT_CAMERA_ID);
+				Draw_RefreshModifyToolbar();
+				mainForm.Invalidate();
+			}
+			break;
+
+		case BT_PROJSET:
+			if ( ((LPTARGCAMERA3D)activeObject)->getProjectionType() < PT_CENTRAL )
+				((LPTARGCAMERA3D)activeObject)->setProjectionType(
+					(PROJECTION_TYPE)(((LPTARGCAMERA3D)activeObject)->getProjectionType() + 1)
+				);
+			else
+				((LPTARGCAMERA3D)activeObject)->setProjectionType(PT_PARALLEL);
+			Draw_RefreshModifyToolbar();
 			mainForm.Invalidate();
 			break;
-		//case BT_QMAKE:
-		//	if ( !CreateMicFast() )
-		//		MessageBox(NULL, _T("To small parameter."), _T("Error"), MB_OK | MB_ICONERROR );
-		//	RefreshObjectsList();
-		//	mainForm.Invalidate();
-		//	break;
-		case BT_FMAKE:
-			error = CreateMicFull();
+
+		case BT_MAKEMIC:
+			if ( modifyMode )
+				error = ModifMic();
+			else
+				error = CreateMic();
+
 			switch (error) 
 			{
 				case 1:
@@ -1847,16 +1728,15 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 			}
-			RefreshObjectsList();
 
 			mainForm.Invalidate();
 			break;
 
 		case LIST_OBJECTS:
-				tempObject = activeObject;
 				switch ( HIWORD(wParam) ) 
 				{
 					case LBN_SELCHANGE:
+						tempObject = activeObject;
 						GetActiveObject();
 						if ( activeObject != tempObject )
 							Draw_RefreshModifyToolbar();
@@ -1932,7 +1812,6 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 		default: return 1L;
 	}
-	GetActiveObject();
 	return 0L;
 }
 
@@ -1968,34 +1847,147 @@ INT_PTR CALLBACK About_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam,
 // ============================================================================
 // Mouse handling funcs:
 // ============================================================================
-LRESULT viewport_lbMouseClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+LRESULT viewport_lbMouseDown(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	mouse		= MAKEPOINTS(lParam);
 	Pool->setActiveViewport((DWORD)((LPVIEWPORT)Sender)->getID());
 	GetActiveViewport();
+	mainForm.Invalidate();
+	((LPFORM)Sender)->captureMouse();
+
+	return 0L;
+}
+
+LRESULT viewport_lbMouseUp(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	ReleaseCapture();
+
+	Draw_RefreshModifyToolbar();
 	mainForm.setFocus();
+
+	return 0L;
+}
+
+LRESULT viewport_mouseMove(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	if ( wParam != MK_LBUTTON
+		|| activeViewport == NULL ) return 1L;
+
+	POINTS	cur = MAKEPOINTS(lParam);
+	SHORT	aspectH = cur.x - mouse.x,
+			aspectV = cur.y - mouse.y;
+
+	FLOAT	dirH	= 0,
+			dirV	= 0;
+
+	dirH -= (FLOAT)aspectH;
+	dirV += (FLOAT)aspectV;
+
+	LPTARGCAMERA3D cam = activeViewport->getCamera();
+	switch(activeTool)
+	{
+		case IS_PAN:
+			cam->Strafe(dirH);
+			cam->Fly(dirV);
+			break;
+
+		case IS_CAMROTATE:
+			cam->StrafeLatitude(dirH);
+			cam->StrafeLongitude(-dirV);
+			break;
+
+		case IS_LOOK:
+			cam->TargetStrafe(dirH);
+			cam->TargetFly(dirV);
+			break;
+	}
+
+	mainForm.Invalidate();
+	mouse = cur;
+	return 0L;
+}
+
+LRESULT viewport_whMouseRotate(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+{
+	if ( LOWORD(wParam) != MK_CONTROL
+		|| activeViewport == NULL ) return 1L;
+
+	FLOAT	dirD; 
+	FLOAT	sign = WHEEL_SENS 
+					* GET_WHEEL_DELTA_WPARAM(wParam) 
+					/ WHEEL_DELTA;
+
+	LPTARGCAMERA3D cam = activeViewport->getCamera();
+	switch(activeTool)
+	{
+		case IS_PAN:
+			dirD = PAN_ASPECT * sign;
+			cam->Follow(dirD);
+			break;
+
+		case IS_ZOOM:
+			dirD = ZOOM_ASPECT * sign;
+			cam->Zoom(dirD);
+			break;
+
+		case IS_CAMROTATE:
+			dirD = PAN_ASPECT * sign;
+			cam->FollowLookAxis(dirD);
+			break;
+
+		case IS_LOOK:
+			dirD = PAN_ASPECT * sign;
+			cam->TargetFollow(dirD);
+			break;
+	}
+
 	mainForm.Invalidate();
 	return 0L;
+}
+
+VOID RefreshTextBoxes()
+{
+	VECTOR3D	vData;
+	TCHAR		bufX[10] = _T("\0"),
+				bufY[10] = _T("\0"),
+				bufZ[10] = _T("\0");
+
+	if ( activeObject != NULL )
+	{
+		switch( activeTool )
+		{
+			case IS_MOVE:
+				vData = activeObject->getPosition();
+				break;
+			case IS_ROTATE:
+				vData = activeObject->getRotation();
+				vData *= 180.0f / (FLOAT)M_PI;
+				break;
+			case IS_SCALE:
+				vData = activeObject->getScale();
+				break;
+		};
+		_stprintf_s(bufX, _T("%.3f"), vData.x);
+		_stprintf_s(bufY, _T("%.3f"), vData.y);
+		_stprintf_s(bufZ, _T("%.3f"), vData.z);
+	}
+	tbX.setText(bufX);
+	tbY.setText(bufY);
+	tbZ.setText(bufZ);
 }
 
 VOID GetActiveViewport()
 {
 	activeViewport = NULL;
-	if ( (activeViewport = Pool->getActiveViewport()) != NULL )
-	{
-		if ( activeViewport->camDefault.getProjectionType() != PT_CENTRAL ) 
-		{
-			if ( activeTool == IS_ZOOM ) activeTool = IS_NONE;
-			btZoomView.Disable();
-		}
-		else
-		{
-			btZoomView.Enable();
-		}
-	}
+	activeViewport = Pool->getActiveViewport();
+	if ( activeViewport == NULL ) activeTool = IS_NONE;
+
 }
 
 VOID GetActiveObject()
 {
+	ActiveObjectColorReset();
+
 	activeObject = NULL;
 	listObjects.getItem(
 			listObjects.getCurSel(), 
@@ -2005,6 +1997,8 @@ VOID GetActiveObject()
 		);
 	if ( activeObject != NULL ) 
 	{
+		ActiveObjectHighlight();
+
 		delObject.Enable();
 		tabModify.Enable();
 		btMove.Enable();
@@ -2013,6 +2007,7 @@ VOID GetActiveObject()
 		tbX.Enable();
 		tbY.Enable();
 		tbZ.Enable();
+		RefreshTextBoxes();
 	}
 	else
 	{
@@ -2027,10 +2022,41 @@ VOID GetActiveObject()
 	}
 }
 
+VOID ActiveObjectHighlight()
+{
+	if (
+		activeObject != NULL
+		&& activeObject->clsID() == CLS_MESH
+	) {
+		activeObjectNSColor = ((LPMESH3D)activeObject)->getColor();
+		((LPMESH3D)activeObject)->setColor(0x00FFFFFF);
+	}
+	mainForm.Invalidate();
+}
+
+VOID ActiveObjectColorReset()
+{
+	if ( 
+		activeObject != NULL
+		&& activeObject->clsID() == CLS_MESH
+	) ((LPMESH3D)activeObject)->setColor(activeObjectNSColor);
+}
+
 VOID DeleteActiveObject()
 {
 	Scene.DeleteObject(activeObject);
-	if (activeObject != NULL ) delete activeObject;
+	if (activeObject != NULL ) 
+	{
+		if ( activeObject->clsID() == CLS_CAMERA )
+		{
+			for ( UINT i = 0; i < Pool->getViewportCount(); i++ )
+			{
+				if ( Pool->getViewport(i)->getCamera() == activeObject )
+					Pool->getViewport(i)->setCameraByObjectID(DEFAULT_CAMERA_ID);
+			}
+		}
+		delete activeObject;
+	}
 	RefreshObjectsList();
 	mainForm.Invalidate();
 	GetActiveObject();

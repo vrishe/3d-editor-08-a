@@ -6,7 +6,7 @@
 class clsTranslator {
 private:
 		// write to file
-	static void pasteColor(COLOR3D, FILE*);
+	static void pasteColor(COLORREF, FILE*);
 	static void pasteName(LPOBJECT3D, FILE*);
 
 	static void pastePosition(LPOBJECT3D, FILE*);

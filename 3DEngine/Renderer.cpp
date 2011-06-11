@@ -5,27 +5,26 @@
 // clsViewport implementation
 LRESULT BkGndSaver(LPVOID Sender, WPARAM wParam, LPARAM lParam) { return 1L; }
 
-clsViewport::clsViewport(){
-	cameraObjectID	= DEFAULT_CAMERA_ID;
+clsViewport::clsViewport() {
 	rMode			= RM_WIREFRAME;
 	Scene			= NULL;
 
+	camOutput		= &camDefault;
 	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
 }
 
 clsViewport::clsViewport(
 	LPSCENE3D lpSceneHost, 
 	UINT uCameraObjectID, 
-	RENDER_MODE renderMode) 
-{
-	cameraObjectID	= DEFAULT_CAMERA_ID;
+	RENDER_MODE renderMode
+) {
 	rMode			= RM_WIREFRAME;
 	Scene			= NULL;
 
+	camOutput		= &camDefault;
 	AssignEventHandler(WM_ERASEBKGND, BkGndSaver, TRUE);
 	
 	setScene(lpSceneHost);
-	setCameraObjectID(uCameraObjectID);
 	setRenderMode(renderMode);
 }
 
@@ -58,7 +57,17 @@ DWORD clsViewport::SetUp(
 }
 
 LPSCENE3D clsViewport::getScene()			{ return Scene; }
-UINT clsViewport::getCameraObjectID()		{ return cameraObjectID; }
+UINT clsViewport::getCameraObjectID()
+{
+	if ( 
+		Scene != NULL 
+		&& camOutput != NULL 
+	) return camOutput == &camDefault ? 
+			DEFAULT_CAMERA_ID : camOutput->objID();
+
+	return camDefault.objID();
+}
+LPTARGCAMERA3D clsViewport::getCamera() { return camOutput; }
 RENDER_MODE clsViewport::getRenderMode()	{ return rMode; }
 
 BOOL clsViewport::setScene(LPSCENE3D lpSceneHost) {
@@ -67,15 +76,31 @@ BOOL clsViewport::setScene(LPSCENE3D lpSceneHost) {
 	return bResult;
 }
 
-BOOL clsViewport::setCameraObjectID(UINT uCameraObjectID) {	
+BOOL clsViewport::setCameraByObjectID(UINT uCameraObjectID) 
+{
+	LPOBJECT3D	scObj;
+	BOOL bResult = Scene != NULL;
+
+	if ( bResult )
+	{
+		camOutput = &camDefault;
+		if ( uCameraObjectID != DEFAULT_CAMERA_ID )
+		{
+			scObj = Scene->getObject(uCameraObjectID);
+			bResult = scObj->clsID() == CLS_CAMERA;
+			if ( bResult ) camOutput = (LPTARGCAMERA3D)scObj;		
+		}
+	}
+	return bResult;
+}
+
+BOOL clsViewport::setCamera(const LPTARGCAMERA3D cam)
+{
 	BOOL bResult = TRUE;
 
-	cameraObjectID = DEFAULT_CAMERA_ID;
-	if ( uCameraObjectID != DEFAULT_CAMERA_ID )
+	if ( bResult ) 
 	{
-			bResult = Scene != NULL
-				&& Scene->getObject(uCameraObjectID)->clsID() == CLS_CAMERA;
-			if ( bResult ) cameraObjectID = uCameraObjectID;		
+		camOutput = cam;
 	}
 	return bResult;
 }
@@ -91,7 +116,8 @@ bool ZBufSort(pair <DIRECTPOLY3D, UINT> a, pair <DIRECTPOLY3D, UINT> b) {
 }
 
 BOOL clsViewport::Render() {
-	BOOL				bResult			= Scene != NULL;
+	BOOL				bResult			= Scene != NULL 
+										&& camOutput != NULL;
 	HANDLE				procHeap		= GetProcessHeap();
 
 	HDC					hVpDC,
@@ -113,33 +139,22 @@ BOOL clsViewport::Render() {
 						objEdgeCount,
 						objPolyCount;
 
-	FLOAT				centerX,
-						centerY,
-						divisor,
-						nearClip,
-						farClip;
-	VECTOR3D			camPos;
-
-	LPCAMERA3D			camToRender;
 	LPDIFLIGHT3D		lightToRender;
 	LPMESH3D			objToRender;
 	LPVECTOR3D			objVertBuffer;
 	LPEDGE3D			objEdgeBuffer;
 	LPPOLY3D			objPolyBuffer;
-	COLOR3D				objColor;
 
 	MATRIX3D			cameraMatrix,
 						projectionMatrix,
 						viewportMatrix;
 	
 	SCENEPOLY			scenePolyBuffer;
-	LPCOLOR3D			scenePolyColorBuffer;
+	LPCOLORREF			scenePolyColorBuffer;
 	POINT				vert2DDrawBuffer[3];
 
 	// Approaching viewport canvas for drawing
 	GetClientRect(hWnd, &clientRect);
-	centerX		= ceil((FLOAT)(clientRect.right));
-	centerY		= ceil((FLOAT)(clientRect.bottom));
 	hVpDC		= GetDC(hWnd);
 	hMemDC		= CreateCompatibleDC(hVpDC);
 	hBMP		= CreateCompatibleBitmap(
@@ -163,33 +178,22 @@ BOOL clsViewport::Render() {
 		if ( rMode != RM_WIREFRAME ) {
 			scenePolyCount			= Scene->getPolygonsCount();
 			sceneLightCount			= Scene->getObjectClassCount(CLS_LIGHT);
-			scenePolyColorBuffer	= new COLOR3D[scenePolyCount];
+			scenePolyColorBuffer	= new COLORREF[scenePolyCount];
 			sceneLightedPolyCount	= 0;
 		}
 
-		// prepearing camera
-		camToRender		= cameraObjectID == DEFAULT_CAMERA_ID ? 
-							&camDefault
-							: (LPCAMERA3D)Scene->getObject(cameraObjectID);
-		nearClip		= camToRender->getNearCP();
-		farClip			= camToRender->getFarCP();
-		
-		camToRender->GetViewMatrix(&cameraMatrix);
+		camOutput->GetViewMatrix(cameraMatrix);
+		camOutput->GetProjectionMatrix(projectionMatrix);
 
 		viewportMatrix.SetIdentity();
 		viewportMatrix._22 = -1.0f;
 		viewportMatrix._41 = (FLOAT)clientRect.right / 2;
 		viewportMatrix._42 = (FLOAT)clientRect.bottom / 2;
 
-		if ( camToRender->getProjectionType() == PT_CENTRAL )
-			camToRender->GetPerspectiveMatrix(&projectionMatrix);
-		else 
-			camToRender->GetParallelMatrix(&projectionMatrix);
-
+		// Drawing objects
 		for ( UINT i = 0; i < sceneObjCount; i++ ) 
 		{
 			objToRender				= (LPMESH3D)Scene->getObject(CLS_MESH, i);	
-			objColor				= objToRender->getColor();
 			objVertCount			= objToRender->getVerticesCount();
 			objVertBuffer			= (LPVECTOR3D)HeapAlloc(
 											procHeap, 
@@ -207,21 +211,21 @@ BOOL clsViewport::Render() {
 
 				for (UINT j = sceneLightedPolyCount; j < lightTo; j++) {
 					VECTOR3D normal(objPolyBuffer[j - sceneLightedPolyCount].Normal(objVertBuffer, 2));
-					Vector3DNormalize(&normal, &normal);
+					Vector3DNormalize(normal, normal);
 					if ( !sceneLightCount ) {
 						scenePolyColorBuffer[j] = objToRender->getColor();
 						continue;
 					}
 					else
-						scenePolyColorBuffer[j] = COLOR3D(0,0,0);
+						scenePolyColorBuffer[j] = 0;
 
 					for (UINT k = 0; k < sceneLightCount; k++) 	{
 						lightToRender = (LPDIFLIGHT3D)Scene->getObject(CLS_LIGHT, k);
 						FLOAT power = lightToRender->getPower();
-						COLOR3D lightColor	= lightToRender->getColor();
+						COLORREF lightColor	= lightToRender->getColor();
 						if ( power == 0 || lightColor == BLACK)
 							continue;
-						FLOAT ratio = Vector3DMultS(&normal, &lightToRender->getForwardLookDirection());
+						FLOAT ratio = Vector3DMultS(normal, lightToRender->getForwardLookDirection());
 						if (ratio < -EPSILON)
 							ratio = power - ratio;
 						else
@@ -230,20 +234,24 @@ BOOL clsViewport::Render() {
 							else
 								ratio = (FLOAT)DARK_SIDE;
 
-						COLOR3D newColor	= objToRender->getColor();								
-						UINT red	= (UINT)(min((newColor.Red + lightColor.Red)/2, 255)     * ratio);
-						UINT green	= (UINT)(min((newColor.Green + lightColor.Green)/2, 255) * ratio);
-						UINT blue	= (UINT)(min((newColor.Blue + lightColor.Blue)/2, 255)   * ratio);
+						COLORREF newColor = objToRender->getColor();								
+						UINT red	= (UINT)(min((RED(newColor) + RED(lightColor))/2, 255)     * ratio);
+						UINT green	= (UINT)(min((GREEN(newColor) + GREEN(lightColor))/2, 255) * ratio);
+						UINT blue	= (UINT)(min((BLUE(newColor) + BLUE(lightColor))/2, 255)   * ratio);
 
 						if (scenePolyColorBuffer[j] != BLACK) {
-							newColor.Red	= (UINT)(min((red	+ scenePolyColorBuffer[j].Red)  , 255));
-							newColor.Green	= (UINT)(min((green + scenePolyColorBuffer[j].Green), 255));
-							newColor.Blue	= (UINT)(min((blue	+ scenePolyColorBuffer[j].Blue) , 255));
+							newColor = RGB(
+								(BYTE)min((red	+ RED(scenePolyColorBuffer[j])), 255),
+								(BYTE)min((green + GREEN(scenePolyColorBuffer[j])), 255),
+								(BYTE)min((blue + BLUE(scenePolyColorBuffer[j])), 255)
+							);
 						}
 						else {
-							newColor.Red	= ( red > 255	? 255 : red );
-							newColor.Green	= ( green > 255	? 255 : green );
-							newColor.Blue	= ( blue > 255	? 255 : blue );
+							newColor = RGB( 
+								red > 255	? 255 : red,
+								green > 255	? 255 : green,
+								blue > 255	? 255 : blue 
+							);
 						}
 						scenePolyColorBuffer[j] = newColor;
 					}
@@ -254,26 +262,27 @@ BOOL clsViewport::Render() {
 			for ( UINT j = 0; j < objVertCount; j++ ) 
 			{
 				Matrix3DTransformCoord(
-						&cameraMatrix,
-						objVertBuffer + j,
-						objVertBuffer + j
+						cameraMatrix,
+						objVertBuffer[j],
+						objVertBuffer[j]
 					);
 
-				divisor = objVertBuffer[j].z + (farClip - nearClip) / 2;
 				Matrix3DTransformCoord(
-								&projectionMatrix,
-								objVertBuffer + j,
-								objVertBuffer + j
+								projectionMatrix,
+								objVertBuffer[j],
+								objVertBuffer[j]
 							);
-				if ( camToRender->getProjectionType() == PT_CENTRAL )
-					objVertBuffer[j] /= divisor;
+				if ( projectionMatrix._44 < .0f )
+					objVertBuffer[j] /= objVertBuffer[j].z 
+									+ projectionMatrix._34;
 				else
-					objVertBuffer[j].z /= divisor;
+					objVertBuffer[j].z /= objVertBuffer[j].z 
+									+ projectionMatrix._34;
 
 				Matrix3DTransformCoord(
-						&viewportMatrix,
-						objVertBuffer + j,
-						objVertBuffer + j
+						viewportMatrix,
+						objVertBuffer[j],
+						objVertBuffer[j]
 					);
 			}
 
@@ -283,16 +292,14 @@ BOOL clsViewport::Render() {
 				// filling a part of scene buffer
 				for (UINT j = 0; j < objPolyCount; j++) {
 					VECTOR3D normal(objPolyBuffer[j].Normal(objVertBuffer, 1));
-					float cosCam = Vector3DMultS(&normal, &VECTOR3D(0,0,1)) 
-													/ Vector3DLength(&normal);
+					float cosCam = Vector3DMultS(normal, VECTOR3D(0,0,1)) 
+													/ Vector3DLength(normal);
 					if (cosCam >= -1 && cosCam < 0) {
 						DIRECTPOLY3D tmp;
 						tmp.first	= objVertBuffer[ objPolyBuffer[j].first ];
 						tmp.second	= objVertBuffer[ objPolyBuffer[j].second ];
 						tmp.third	= objVertBuffer[ objPolyBuffer[j].third ];
-						tmp.colorRef = RGB(scenePolyColorBuffer[j + sceneLightedPolyCount].Red, 
-										   scenePolyColorBuffer[j + sceneLightedPolyCount].Green,
-										   scenePolyColorBuffer[j + sceneLightedPolyCount].Blue);
+						tmp.colorRef = scenePolyColorBuffer[j + sceneLightedPolyCount];
 						scenePolyBuffer.push_back(pair<DIRECTPOLY3D,int>(tmp,i));
 					}
 				}
@@ -303,7 +310,7 @@ BOOL clsViewport::Render() {
 				objEdgeCount	= objToRender->getEdgesCount();
 				objEdgeBuffer	= objToRender->getEdgesRaw();
 
-				hPenCurrent		= CreatePen(PS_SOLID, 1, objToRender->getColorRef());
+				hPenCurrent		= CreatePen(PS_SOLID, 1, objToRender->getColor());
 				hPenOld			= (HPEN)SelectObject(hMemDC, hPenCurrent);
 				for ( UINT j = 0; j < objEdgeCount; j++ ) 
 				{
@@ -375,7 +382,7 @@ BOOL clsViewport::Render() {
 
 					hBrCurrent = CreateSolidBrush(scenePolyBuffer[i].first.colorRef);
 					if ( rMode == RM_SHADEDWF ) 
-						hPenCurrent = CreatePen(PS_SOLID, 1, objToRender->getColorRef());
+						hPenCurrent = CreatePen(PS_SOLID, 1, objToRender->getColor());
 					else
 						hPenCurrent = CreatePen(PS_SOLID, 1, scenePolyBuffer[i].first.colorRef);
 					
@@ -425,50 +432,52 @@ BOOL clsViewport::Render() {
 
 VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 {
-	VECTOR3D	defCamPos;
-	FLOAT		perspCoords = VIEW_DISTANCE_DEFAULT;
+	VECTOR3D		defCamPos;
+	FLOAT			perspCoords = VIEW_DISTANCE_DEFAULT;
 
-	switch ( vt )
+	if ( vp != NULL )
 	{
-		case VIEW_LEFT:
-			defCamPos.y = perspCoords;
-			break;
+		LPTARGCAMERA3D cam = vp->getCamera();
+		switch ( vt )
+		{
+			case VIEW_LEFT:
+				defCamPos.y = perspCoords;
+				break;
 
-		case VIEW_RIGHT:
+			case VIEW_RIGHT:
 
-			defCamPos.y = -perspCoords;
-			break;
+				defCamPos.y = -perspCoords;
+				break;
 
-		case VIEW_FRONT:
+			case VIEW_FRONT:
+				defCamPos.x = perspCoords;
+				break;	
 
-			defCamPos.x = perspCoords;
-			break;	
+			case VIEW_BACK:
+				defCamPos.x = -perspCoords;
+				break;	
 
-		case VIEW_BACK:
+			case VIEW_TOP:
+				defCamPos.z = perspCoords;
+				break;
 
-			defCamPos.x = -perspCoords;
-			break;	
+			case VIEW_BOTTOM:
 
-		case VIEW_TOP:
-			defCamPos.z = perspCoords;
-			vp->camDefault.Roll((FLOAT)M_PI);
-			break;
+				defCamPos.z = -perspCoords;
+				break;
 
-		case VIEW_BOTTOM:
+			case VIEW_PERSPECTIVE:
+				perspCoords = sqrt((perspCoords * perspCoords) / 3);
+				defCamPos.x = perspCoords;
+				defCamPos.y = perspCoords;
+				defCamPos.z = perspCoords;
+				cam->setProjectionType(PT_CENTRAL);
+				break;
+		}
 
-			defCamPos.z = -perspCoords;
-			break;
-
-		case VIEW_PERSPECTIVE:
-			perspCoords = sqrt((perspCoords * perspCoords) / 3);
-			defCamPos.x = perspCoords;
-			defCamPos.y = perspCoords;
-			defCamPos.z = perspCoords;
-			vp->camDefault.setProjectionType(PT_CENTRAL);
-			break;
+		cam->Translate(defCamPos);
+		cam->TargetTranslate(.0f, .0f, .0f);
 	}
-
-	vp->camDefault.Translate(defCamPos);
 }
 
 // ============================================================================
@@ -518,7 +527,7 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 
 		vp->Viewport->Render();
 
-		vp->Viewport->camDefault.getName(vpName, MAX_OBJECT_NAME_LEN);
+		vp->Viewport->getCamera()->getName(vpName, MAX_OBJECT_NAME_LEN);
 		vp->Viewport->getDC(&hDC);
 		if ( vp->isActive ) 
 		{
@@ -534,7 +543,7 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 		SetTextColor(hDC, FRAME_FONT_COLOR);
 		TextOut(
 			hDC, 
-			FRAME_STROKE_WIDTH, 
+			FRAME_STROKE_WIDTH + 2, 
 			FRAME_STROKE_WIDTH, 
 			vpName, 
 			_tcslen(vpName)

@@ -46,6 +46,7 @@ enum TOOLS {
 #define ROTATION_ASPECT	.1f
 #define SCALE_ASPECT	.95f
 #define ZOOM_ASPECT		.01f
+#define WHEEL_SENS		3.0f
 
 enum MF_LISTBOX {
 	LIST_OBJECTS	= 10,
@@ -88,16 +89,16 @@ enum MF_BUTTON {
 	BT_CAMSPHERE	= 1009,
 	BT_LOOK_AROUND	= 1010,
 	BT_MIC			= 1011,
-	BT_QMAKE		= 1012,
-	BT_FMAKE		= 1013,
-	BT_LIGHT		= 1014,
-	BT_CAMERA		= 1015,
-	BT_SETMODIF		= 1016,
-	BT_MAKELIGHT	= 1017,
-	BT_MAKECAM		= 1018,
-	BT_MODIF		= 1019,
-	BT_ZOOM			= 1020,
-	BT_DELETE		= 1021
+	BT_LIGHT		= 1012,
+	BT_CAMERA		= 1013,
+	BT_MAKEMIC		= 1014,
+	BT_MAKELIGHT	= 1015,
+	BT_MAKECAM		= 1016,
+	BT_ZOOM			= 1017,
+	BT_DELETE		= 1018,
+	BT_BIND			= 1019,
+	BT_RELEASE		= 1020,
+	BT_PROJSET		= 1021
 };
 
 // Draw interface functions
@@ -122,26 +123,33 @@ VOID RefreshObjectsList();
 VOID RemoveSceneObject();
 
 // Controls functions
-BOOL CreateMicFast();
-UINT CreateMicFull();
+UINT CreateMic();
+UINT ModifMic();
 BOOL CreateLight(); 
+BOOL ModifLight();
 BOOL CreateCam();
+BOOL ModifCam();
 
 // Form event handler functions
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
-LRESULT mainForm_onFocusLost(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 
-LRESULT viewport_lbMouseClick(LPOBJECT, WPARAM, LPARAM);
+LRESULT viewport_lbMouseDown(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
+LRESULT viewport_lbMouseUp(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
+LRESULT viewport_mouseMove(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
+LRESULT viewport_whMouseRotate(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 
 INT_PTR CALLBACK About_DialogBox_Handler(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK Save_DialogBox_Handler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
+VOID RefreshTextBoxes();
 VOID GetActiveViewport();
 VOID GetActiveObject();
+VOID ActiveObjectHighlight();
+VOID ActiveObjectColorReset();
 VOID DeleteActiveObject();
 VOID SceneCleanUp();
 // TODO: define any new event handler prototype here

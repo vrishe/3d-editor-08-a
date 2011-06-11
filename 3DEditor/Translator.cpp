@@ -15,8 +15,8 @@ void clsTranslator::pasteName(LPOBJECT3D obj, FILE* file) {
 	dataBuffer[MAX_OBJECT_NAME_LEN - 1] = '\0';
 	delete [] dataBuffer;
 }
-void clsTranslator::pasteColor(COLOR3D in, FILE* file) {
-	errno_t bErrorFlag = _ftprintf_s(file, _T("Color: %d %d %d\n"), in.Red, in.Green, in.Blue );
+void clsTranslator::pasteColor(COLORREF in, FILE* file) {
+	errno_t bErrorFlag = _ftprintf_s(file, _T("Color: %d %d %d\n"), RED(in), GREEN(in), BLUE(in) );
 }
 void clsTranslator::pastePosition(LPOBJECT3D obj, FILE* file) {
 	VECTOR3D pos = obj->getPosition();
@@ -354,9 +354,9 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	obj = new MICROPHONE3D(r, g, j, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	obj->setName(name, 256);
 	obj->Translate(pos);
-	obj->setForwardLookDirection(&fwd);
-	obj->setUpLookDirection(&uwd);
-	obj->setRightLookDirection(&rwd);
+	obj->setForwardLookDirection(fwd);
+	obj->setUpLookDirection(uwd);
+	obj->setRightLookDirection(rwd);
 
 	Scene->AddObject(obj);
 }
@@ -447,9 +447,9 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		bErrorFlag = _ftscanf_s(file, _T("%24c"), buffer);
 		VECTOR3D fwd, rwd, uwd;
 		readRotation(fwd, uwd, rwd, file);
-		camera->setForwardLookDirection(&fwd);
-		camera->setUpLookDirection(&uwd);
-		camera->setRightLookDirection(&rwd);
+		camera->setForwardLookDirection(fwd);
+		camera->setUpLookDirection(uwd);
+		camera->setRightLookDirection(rwd);
 
 		bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 		float tmp;
@@ -487,9 +487,9 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		bErrorFlag = _ftscanf_s(file, _T("%24c"), buffer);
 		VECTOR3D fwd, rwd, uwd;
 		readRotation(fwd, uwd, rwd, file);
-		light->setForwardLookDirection(&fwd);
-		light->setUpLookDirection(&uwd);
-		light->setRightLookDirection(&rwd);
+		light->setForwardLookDirection(fwd);
+		light->setUpLookDirection(uwd);
+		light->setRightLookDirection(rwd);
 
 		bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 		float tmp;

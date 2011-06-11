@@ -8,21 +8,26 @@
 
 class clsDifLight : public clsObject {
 	float	power;		// must be 0 <= power
-	COLOR3D color;
+	COLORREF color;
 
 public:
 	clsDifLight( 
-		unsigned char red	= 255,
-		unsigned char green	= 255,
-		unsigned char blue	= 255
+		unsigned char red		= 255,
+		unsigned char green		= 255,
+		unsigned char blue		= 255
 		);
 	clsDifLight(float p);
 
 	float getPower();
-	COLOR3D getColor();
+	COLORREF getColor();
 
 	void setPower(float);
-	void setColor(unsigned char r, unsigned char g, unsigned char b);
+	void setColor(
+			unsigned char r, 
+			unsigned char g, 
+			unsigned char b
+		);
+	void setColor(COLORREF c);
 };
 typedef clsDifLight DIFLIGHT3D, *LPDIFLIGHT3D;
 

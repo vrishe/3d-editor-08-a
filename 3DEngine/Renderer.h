@@ -51,12 +51,12 @@ typedef vector < VECTOR3D > SCENEVERT;
 class clsViewport : public clsForm {
 private:
 	UINT			ID;
-	UINT			cameraObjectID;
 	RENDER_MODE		rMode;
 	LPSCENE3D		Scene;
+	TARGCAMERA3D	camDefault;
+	LPTARGCAMERA3D	camOutput;
 
 public:
-	TARGCAMERA3D		camDefault;
 
 	clsViewport();
 	clsViewport(
@@ -76,12 +76,14 @@ public:
 				UINT	vpHeight
 			);
 
-	LPSCENE3D	getScene();	
-	UINT		getCameraObjectID();
-	RENDER_MODE	getRenderMode();
+	LPSCENE3D		getScene();	
+	UINT			getCameraObjectID();
+	LPTARGCAMERA3D	getCamera();
+	RENDER_MODE		getRenderMode();
 
 	BOOL		setScene(LPSCENE3D lpSceneHost);
-	BOOL		setCameraObjectID(UINT uCameraObjectID);
+	BOOL		setCameraByObjectID(UINT uCameraObjectID);
+	BOOL		setCamera(const LPTARGCAMERA3D cam);
 	VOID		setRenderMode(RENDER_MODE renderMode);
 
 	BOOL		Render();
@@ -102,19 +104,19 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt);
 
 #ifndef FRAME_STROKE_COLORREF
 #define FRAME_STROKE_COLORREF	RGB(0, 0, 0)
-#endif //FRAME_STROKE_COLORREF
+#endif // FRAME_STROKE_COLORREF
 #ifndef FRAME_STROKE_WIDTH
 #define FRAME_STROKE_WIDTH		3
-#endif //FRAME_STROKE_WIDTH
+#endif // FRAME_STROKE_WIDTH
 #ifndef FRAME_FONT_COLOR
 #define FRAME_FONT_COLOR		RGB(50, 50, 50)
-#endif //FRAME_FONT_COLOR
+#endif // FRAME_FONT_COLOR
 #ifndef FRAME_FONT_SIZE
 #define FRAME_FONT_SIZE			14
-#endif //FRAME_FONT_SIZE
+#endif // FRAME_FONT_SIZE
 #ifndef FRAME_FONT_FAMILY
 #define FRAME_FONT_FAMILY		_T("Arial narrow")
-#endif //FRAME_FONT_FAMILY
+#endif // FRAME_FONT_FAMILY
 
 
 #define NO_ACTIVE_VIEWPORT UINT_MAX

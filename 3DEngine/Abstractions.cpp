@@ -57,7 +57,7 @@ VECTOR3D tagDirectPolygon::Normal(size_t startVert) {
 					second.y - third.y,
 					second.z - third.z);
 	}
-	Vector3DMultV(&v1, &v2, &ans);
+	Vector3DMultV(v1, v2, ans);
 	return ans;
 }
 
@@ -68,7 +68,7 @@ tagPolygon::tagPolygon()
 tagPolygon::tagPolygon(size_t a, size_t b, size_t c) 
 	: first(a), second(b), third(c) { }
 
-VECTOR3D tagPolygon::Normal(LPVERT_LIST vs, size_t startVert) {
+VECTOR3D tagPolygon::Normal(const LPVERT_LIST vs, size_t startVert) {
 	VECTOR3D v1, v2, ans;
 	switch (startVert) {
 	case 1:
@@ -95,11 +95,11 @@ VECTOR3D tagPolygon::Normal(LPVERT_LIST vs, size_t startVert) {
 					vs->at(second).y - vs->at(third).y,
 					vs->at(second).z - vs->at(third).z);
 	}
-	Vector3DMultV(&v1, &v2, &ans);
+	Vector3DMultV(v1, v2, ans);
 	return ans;
 }
 
-VECTOR3D tagPolygon::Normal(LPVECTOR3D vs, size_t startVert) {
+VECTOR3D tagPolygon::Normal(const LPVECTOR3D vs, size_t startVert) {
 	VECTOR3D v1, v2, ans;
 	switch (startVert) {
 	case 1:
@@ -126,7 +126,7 @@ VECTOR3D tagPolygon::Normal(LPVECTOR3D vs, size_t startVert) {
 					vs[second].y - vs[third].y,
 					vs[second].z - vs[third].z);
 	}
-	Vector3DMultV(&v1, &v2, &ans);
+	Vector3DMultV(v1, v2, ans);
 	return ans;
 }
 
@@ -153,7 +153,7 @@ bool tagPolygon::isContainingVertex(size_t vi)
 		|| third	== vi; 
 }
 
-bool tagPolygon::isContainingEdge(EDGE3D e)
+bool tagPolygon::isContainingEdge(const EDGE3D &e)
 {
 	return isContainingVertex(e.first) 
 		&& isContainingVertex(e.second);
@@ -217,7 +217,7 @@ clsObject::clsObject(CLASS_ID clsID)
 }
 
 clsObject::clsObject(
-			VECTOR3D pt, 
+			const VECTOR3D &pt, 
 			float p, 
 			float y, 
 			float r, 
@@ -286,7 +286,7 @@ VECTOR3D clsObject::getPosition() { return pos; }
 void clsObject::Follow(float units)	{ pos += fWd * units; }
 void clsObject::Strafe(float units)	{ pos += rWd * units; }
 void clsObject::Fly(float units)	{ pos += uWd * units; }
-void clsObject::LocalTranslate(VECTOR3D tV)
+void clsObject::LocalTranslate(const VECTOR3D &tV)
 {
 	pos += fWd * tV.x;
 	pos += rWd * tV.y;
@@ -298,7 +298,7 @@ void clsObject::LocalTranslate(float tX, float tY, float tZ)
 	pos += rWd * tY;
 	pos += uWd * tZ;
 }
-void clsObject::Translate(VECTOR3D tV) { pos = tV; }
+void clsObject::Translate(const VECTOR3D &tV) { pos = tV; }
 void clsObject::Translate(float tX, float tY, float tZ) 
 { 
 	pos = VECTOR3D(tX, tY, tZ); 
@@ -325,59 +325,59 @@ void clsObject::Pitch(float angle)
 {
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&rWd, angle, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DRotateAxis(rWd, angle, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
 
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(fWd, rWd, uWd);
+	Vector3DNormalize(uWd, uWd);
 }
 
 void clsObject::Yaw(float angle) 
 {
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&uWd, angle, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
+	Matrix3DRotateAxis(uWd, angle, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
 
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(uWd, fWd, rWd);
+	Vector3DNormalize(rWd, rWd);
 }
 
 void clsObject::Roll(float angle) 
 {
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&fWd, angle, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
+	Matrix3DRotateAxis(fWd, angle, M);
+	Matrix3DTransformNormal(M, rWd, rWd);
 
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(fWd, rWd, uWd);
+	Vector3DNormalize(uWd, uWd);
 }
 
 void clsObject::LocalRotate(float pitch, float yaw, float roll)
 {
 	MATRIX3D M;
 
-	Matrix3DRotateAxis(&rWd, pitch, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
+	Matrix3DRotateAxis(rWd, pitch, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(fWd, rWd, uWd);
+	Vector3DNormalize(uWd, uWd);
 
-	Matrix3DRotateAxis(&uWd, yaw, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&uWd, &fWd, &rWd);
-	Vector3DNormalize(&rWd, &rWd);
+	Matrix3DRotateAxis(uWd, yaw, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(uWd, fWd, rWd);
+	Vector3DNormalize(rWd, rWd);
 
-	Matrix3DRotateAxis(&fWd, roll, &M);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DMultV(&fWd, &rWd, &uWd);
-	Vector3DNormalize(&uWd, &uWd);
+	Matrix3DRotateAxis(fWd, roll, M);
+	Matrix3DTransformNormal(M, rWd, rWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DMultV(fWd, rWd, uWd);
+	Vector3DNormalize(uWd, uWd);
 }
 
 void clsObject::Rotate(float y, float z, float x)
@@ -388,144 +388,166 @@ void clsObject::Rotate(float y, float z, float x)
 	world.y = y;
 	world.z = z;
 
-	Matrix3DRotateAxis(&VECTOR3D(.0f, 1.0f, .0f), world.y, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
-	Matrix3DTransformCoord(&M, &pos, &pos);
+	Matrix3DRotateAxis(VECTOR3D(.0f, 1.0f, .0f), world.y, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
+	Matrix3DTransformNormal(M, rWd, rWd);
+	Matrix3DTransformNormal(M, uWd, uWd);
+	Matrix3DTransformCoord(M, pos, pos);
 
-	Matrix3DRotateAxis(&VECTOR3D(.0f, .0f, 1.0f), world.z, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
-	Matrix3DTransformCoord(&M, &pos, &pos);
+	Matrix3DRotateAxis(VECTOR3D(.0f, .0f, 1.0f), world.z, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
+	Matrix3DTransformNormal(M, rWd, rWd);
+	Matrix3DTransformNormal(M, uWd, uWd);
+	Matrix3DTransformCoord(M, pos, pos);
 
-	Matrix3DRotateAxis(&VECTOR3D(1.0f, .0f, .0f), world.x, &M);
-	Matrix3DTransformNormal(&M, &fWd, &fWd);
-	Matrix3DTransformNormal(&M, &rWd, &rWd);
-	Matrix3DTransformNormal(&M, &uWd, &uWd);
-	Matrix3DTransformCoord(&M, &pos, &pos);
+	Matrix3DRotateAxis(VECTOR3D(1.0f, .0f, .0f), world.x, M);
+	Matrix3DTransformNormal(M, fWd, fWd);
+	Matrix3DTransformNormal(M, rWd, rWd);
+	Matrix3DTransformNormal(M, uWd, uWd);
+	Matrix3DTransformCoord(M, pos, pos);
 
-	Vector3DNormalize(&fWd, &fWd);
-	Vector3DNormalize(&rWd, &rWd);
-	Vector3DNormalize(&uWd, &uWd);
+	Vector3DNormalize(fWd, fWd);
+	Vector3DNormalize(rWd, rWd);
+	Vector3DNormalize(uWd, uWd);
 
 }
 
-float clsObject::Distance(VECTOR3D vDst)
+float clsObject::Distance(const VECTOR3D &vDst)
 {
 	VECTOR3D v = VECTOR3D(
 					pos.x - vDst.x,
 					pos.y - vDst.y,
 					pos.z - vDst.z
 				);
-	return Vector3DLength(&v);
+	return Vector3DLength(v);
 }
 
-float clsObject::Distance(const clsObject *objDst)
+float clsObject::Distance(const clsObject &objDst)
 {
-	return Distance(objDst->pos);
+	return Distance(objDst.pos);
 }
 
-void clsObject::LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient)
+void clsObject::LookAt(const VECTOR3D &lookAt, const LPVECTOR3D upOrient)
 {
 	VECTOR3D lookDir	= lookAt - pos;
-	VECTOR3D vUp		= uWd.z < EPSILON ? uWd : VECTOR3D(0, 0, 1) * uWd.z;
+	VECTOR3D vUp		= abs(uWd.z) < EPSILON ? uWd : VECTOR3D(0, 0, 1) * uWd.z;
 
-	if ( Vector3DLength(&lookDir) > EPSILON )
+	if ( Vector3DLength(lookDir) > EPSILON )
 	{
 		if ( 
-			upOrient != NULL 
-			&& Vector3DLength(upOrient) > EPSILON 
-		)
-			Vector3DNormalize(upOrient, &vUp);
+			upOrient != NULL
+			&& Vector3DLength(*upOrient) > EPSILON 
+		) Vector3DNormalize(*upOrient, vUp);
 
-		Vector3DNormalize(&lookDir, &fWd);
-		Vector3DMultV(&vUp, &fWd, &rWd);
-		Vector3DNormalize(&rWd, &rWd);
-		if ( Vector3DLength(&rWd) < EPSILON )
+		Vector3DNormalize(lookDir, fWd);
+		Vector3DMultV(vUp, fWd, rWd);
+		Vector3DNormalize(rWd, rWd);
+		if ( Vector3DLength(rWd) < EPSILON )
 			rWd = VECTOR3D(0, 1, 0) 
 				* (FLOAT)((uWd.z >= 0) - (uWd.z < 0));
-		Vector3DMultV(&fWd, &rWd, &uWd);
+		Vector3DMultV(fWd, rWd, uWd);
 	}
 }
-void clsObject::LookAt(clsObject *objToLookAt) { LookAt(objToLookAt->pos, &objToLookAt->uWd); }
-void clsObject::LookAt(float lX, float lY, float lZ) { LookAt(VECTOR3D(lX, lY, lZ), NULL); }
-
-void clsObject::GetMoveMatrix(LPMATRIX3D mOut) 
-{
-	mOut->_41 = pos.x;
-	mOut->_42 = pos.y;
-	mOut->_43 = pos.z;
+void clsObject::LookAt(const clsObject &objToLookAt) 
+{ 
+	LookAt(objToLookAt.pos, (LPVECTOR3D)&objToLookAt.uWd); 
 }
 
-void clsObject::GetLocalScaleMatrix(LPMATRIX3D mOut)
-{
-	mOut->_11 = localScale.x;
-	mOut->_22 = localScale.y;
-	mOut->_33 = localScale.z;
+void clsObject::LookAt(float lX, float lY, float lZ) 
+{ 
+	LookAt(VECTOR3D(lX, lY, lZ), NULL); 
 }
 
-void clsObject::GetScaleMatrix(LPMATRIX3D mOut) 
+void clsObject::GetMoveMatrix(MATRIX3D &mOut) 
 {
-	mOut->_11 = worldScale.x;
-	mOut->_22 = worldScale.y;
-	mOut->_33 = worldScale.z;
+	mOut._41 = pos.x;
+	mOut._42 = pos.y;
+	mOut._43 = pos.z;
 }
 
-void clsObject::GetRotationMatrix(LPMATRIX3D mOut) 
+void clsObject::GetLocalScaleMatrix(MATRIX3D &mOut)
 {
-	mOut->_11 = rWd.x;
-	mOut->_21 = fWd.x;
-	mOut->_31 = uWd.x;
-	mOut->_41 = .0f;
+	mOut._11 = localScale.x;
+	mOut._22 = localScale.y;
+	mOut._33 = localScale.z;
+}
 
-	mOut->_12 = rWd.y;
-	mOut->_22 = fWd.y;
-	mOut->_32 = uWd.y;
-	mOut->_42 = .0f;
+void clsObject::GetScaleMatrix(MATRIX3D &mOut) 
+{
+	mOut._11 = worldScale.x;
+	mOut._22 = worldScale.y;
+	mOut._33 = worldScale.z;
+}
 
-	mOut->_13 = rWd.z;
-	mOut->_23 = fWd.z;
-	mOut->_33 = uWd.z;
-	mOut->_43 = .0f;
+void clsObject::GetRotationMatrix(MATRIX3D &mOut) 
+{
+	mOut._11 = rWd.x;
+	mOut._21 = fWd.x;
+	mOut._31 = uWd.x;
+	mOut._41 = .0f;
 
-	mOut->_14 = 0.f;
-	mOut->_24 = 0.f;
-	mOut->_34 = 0.f;
-	mOut->_44 = 1.0f;
+	mOut._12 = rWd.y;
+	mOut._22 = fWd.y;
+	mOut._32 = uWd.y;
+	mOut._42 = .0f;
+
+	mOut._13 = rWd.z;
+	mOut._23 = fWd.z;
+	mOut._33 = uWd.z;
+	mOut._43 = .0f;
+
+	mOut._14 = 0.f;
+	mOut._24 = 0.f;
+	mOut._34 = 0.f;
+	mOut._44 = 1.0f;
 }
 
 VECTOR3D clsObject::getForwardLookDirection() { return fWd; }
 VECTOR3D clsObject::getRightLookDirection() { return rWd; }
 VECTOR3D clsObject::getUpLookDirection() { return uWd; }
+VECTOR3D clsObject::getRotation() { return world; }
+VECTOR3D clsObject::getScale() { return worldScale; }
 
-void clsObject::setForwardLookDirection(LPVECTOR3D v) { fWd.x = v->x; fWd.y = v->y; fWd.z = v->z; }
-void clsObject::setRightLookDirection(LPVECTOR3D v) { rWd.x = v->x; rWd.y = v->y; rWd.z = v->z; }
-void clsObject::setUpLookDirection(LPVECTOR3D v) { uWd.x = v->x; uWd.y = v->y; uWd.z = v->z; }
+void clsObject::setForwardLookDirection(const VECTOR3D &v) { fWd = v; }
+void clsObject::setRightLookDirection(const VECTOR3D &v) { rWd = v; }
+void clsObject::setUpLookDirection(const VECTOR3D &v) { uWd = v; }
+void clsObject::inheritOrientation(
+					const VECTOR3D &forward,
+					const VECTOR3D &rightward,
+					const VECTOR3D &upward
+) {
+	fWd = forward;
+	rWd = rightward;
+	uWd = upward;
+}
+void clsObject::inheritOrientation(const clsObject &obj)
+{
+	fWd = obj.fWd;
+	rWd = obj.rWd;
+	uWd = obj.uWd;
+}
+
 
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
 { 
-	UINT bSize = bufSize > MAX_OBJECT_NAME_LEN 
-		? MAX_OBJECT_NAME_LEN : bufSize;
+	UINT bSize = bufSize >= MAX_OBJECT_NAME_LEN 
+		? MAX_OBJECT_NAME_LEN - 1 : bufSize;
 
-	bSize--;
 	_tcsncpy_s(objName, bufSize, Name, bSize);
 	objName[bSize] = '\0';
 }
 void clsObject::setName(LPTSTR objName, size_t srcSize)
 {
-	UINT bSize = srcSize > MAX_OBJECT_NAME_LEN 
-		? MAX_OBJECT_NAME_LEN : srcSize;
+	UINT bSize = srcSize >= MAX_OBJECT_NAME_LEN 
+		? MAX_OBJECT_NAME_LEN - 1 : srcSize;
 
-	bSize--;
 	_tcsncpy_s(Name, MAX_OBJECT_NAME_LEN, objName, bSize);
 	Name[bSize] = '\0';
 }
 
 // ============================================================================
 // Inplementation of clsScene class:
-bool clsScene::findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex)
+bool clsScene::findObjectIndex(const LPOBJECT3D lpObject, size_t *objIndex)
 {
 	CONTENT::iterator finder = objects.find(lpObject->clsID());
 	bool bResult 
@@ -592,7 +614,7 @@ clsScene::clsScene()
 }
 clsScene::~clsScene() { }
 
-bool clsScene::AddObject(LPOBJECT3D lpObject)
+bool clsScene::AddObject(const LPOBJECT3D lpObject)
 {
 	CONTENT::iterator finder = objects.find(lpObject->clsID());
 	bool bResult 
@@ -630,7 +652,7 @@ bool clsScene::DeleteObject(size_t objID)
 	return bResult;
 }
 
-bool clsScene::DeleteObject(LPOBJECT3D lpObject)
+bool clsScene::DeleteObject(const LPOBJECT3D lpObject)
 {
 	size_t objIndex;
 	return findObjectIndex(lpObject, &objIndex)
@@ -721,10 +743,20 @@ size_t clsScene::getObjectClassCount(CLASS_ID clsID)
 }
 
 // ============================================================================
-// Implementation of clsMesh class:
-MESH_ID clsMesh::MeshID() { return meshID; }
+// Implementation of clsHull class:
+// ============================================================================
+clsHull::clsHull(CLASS_ID clsID) : clsObject(clsID) { color = RGB(0, 0, 0); }
 
-size_t clsMesh::findVertex(VECTOR3D v) 
+clsHull::clsHull(COLORREF c, CLASS_ID clsID) : clsObject(clsID), color(c) { }
+
+clsHull::clsHull(
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue,
+		CLASS_ID clsID
+) : clsObject(clsID), color(RGB(red, green, blue)) { }
+
+size_t clsHull::findVertex(const VECTOR3D &v) 
 {
 	size_t vCount = vertices.size();
 
@@ -734,7 +766,7 @@ size_t clsMesh::findVertex(VECTOR3D v)
 	return vCount;
 }
 
-size_t clsMesh::findEdge(EDGE3D e) 
+size_t clsHull::findEdge(const EDGE3D &e) 
 {
 	size_t eCount = edges.size();
 
@@ -744,7 +776,7 @@ size_t clsMesh::findEdge(EDGE3D e)
 	return eCount;
 }
 
-size_t clsMesh::findPolygon(POLY3D p) 
+size_t clsHull::findPolygon(const POLY3D &p) 
 {
 	size_t pCount = polygons.size();
 
@@ -754,133 +786,34 @@ size_t clsMesh::findPolygon(POLY3D p)
 	return pCount;
 }
 
-// DO NOT DELETE THIS:
-//size_t clsMesh::dropUnusedVertices() 
-//{
-//	size_t result = 0,
-//				 vCount = vertices.size(),
-//				 pCount = polygons.size();
-//
-//	for (size_t i  = 0; i < vCount; i++) {
-//		bool found = false;
-//		for (size_t j = 0; j < pCount; j++)
-//			if (polygons[j].first == i || polygons[j].second == i || polygons[j].third) {
-//				found = true;
-//				break;
-//			}
-//		if (!found) {
-//			delVertex(i);
-//			result++;
-//		}
-//	}
-//	return result;
-//}
-//
-//size_t clsMesh::dropRedundantPolygons() 
-//{
-//	size_t result = 0,
-//				 vCount = vertices.size(),
-//				 pCount = polygons.size();
-//
-//	for (size_t i = 0; i < pCount; i++) {
-//		bool firstFound = false, secondFound = false, thirdFound = false;
-//		for (size_t j = 0; j < vCount; j++) {
-//			if (polygons[i].first == j) {
-//				firstFound = true;
-//				continue;
-//			}
-//			if (polygons[i].second == j) {
-//				secondFound = true;
-//				continue;
-//			}
-//			if (polygons[i].third == j) {
-//				secondFound = true;
-//				continue;
-//			}
-//		}
-//		if (!firstFound || !secondFound || !thirdFound) {
-//			delPolygon(i);
-//			result++;
-//		}
-//	}
-//	return result;
-//}
+COLORREF	clsHull::getColor()			{ return color; }
+size_t		clsHull::getVerticesCount()	{ return vertices.size(); }
+size_t		clsHull::getEdgesCount()	{ return edges.size(); }
+size_t		clsHull::getPolygonsCount()	{ return polygons.size(); }
+LPVECTOR3D	clsHull::getVerticesRaw()	{ return vertices.data(); }
+LPEDGE3D	clsHull::getEdgesRaw()		{ return edges.data(); }
+LPPOLY3D	clsHull::getPolygonsRaw()	{ return polygons.data(); }
+VERT_LIST	clsHull::getVertices()		{ return vertices; }
+EDGE_LIST	clsHull::getEdges()			{ return edges; }
+POLY_LIST	clsHull::getPolygons()		{ return polygons; }
 
-clsMesh::clsMesh(MESH_ID mID) : clsObject(CLS_MESH), meshID(mID) { setColor(COLOR3D()); }
+POLY3D		clsHull::getPolygon(int i)	{ return polygons[i]; }
 
-clsMesh::clsMesh(MESH_ID mID, COLOR3D c) : clsObject(CLS_MESH), meshID(mID) { setColor(c); }
-
-clsMesh::clsMesh(
-		MESH_ID mID,
-		unsigned char red, 
-		unsigned char green, 
-		unsigned char blue
-) : clsObject(CLS_MESH), meshID(mID) { setColor( red, green, blue ); }
-
-clsMesh::~clsMesh() { }
-
-//clsMesh::clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps)
-//	: clsObject(CLS_MESH), meshID(mID)
-//{ 
-//	addListOfVertices(vs);
-//	addListOfPolygons(ps);
-//	setColor(c);
-//}
-
-//clsMesh::clsMesh(
-//		MESH_ID mID,
-//		unsigned char red, 
-//		unsigned char green, 
-//		unsigned char blue,
-//		VERT_LIST vs, 
-//		POLY_LIST ps
-//) : clsObject(CLS_MESH), meshID(mID)
-//{ 
-//	addListOfVertices(vs);
-//	addListOfPolygons(ps);
-//	setColor( red, green, blue ); 
-//}
-
-// DO NOT DELETE THIS:
-//void clsMesh::dropRedundant() 
-//{	
-//	dropRedundantPolygons();	
-//	dropUnusedVertices();
-//}
-
-COLOR3D		clsMesh::getColor()			{ return color; }
-
-DWORD		clsMesh::getColorRef()		{ return RGB(
-													color.Red, 
-													color.Green, 
-													color.Blue); }
-size_t		clsMesh::getVerticesCount()	{ return vertices.size(); }
-size_t		clsMesh::getEdgesCount()	{ return edges.size(); }
-size_t		clsMesh::getPolygonsCount()	{ return polygons.size(); }
-LPVECTOR3D	clsMesh::getVerticesRaw()	{ return vertices.data(); }
-LPEDGE3D	clsMesh::getEdgesRaw()		{ return edges.data(); }
-LPPOLY3D	clsMesh::getPolygonsRaw()	{ return polygons.data(); }
-VERT_LIST	clsMesh::getVertices()		{ return vertices; }
-EDGE_LIST	clsMesh::getEdges()			{ return edges; }
-POLY_LIST	clsMesh::getPolygons()		{ return polygons; }
-
-POLY3D		clsMesh::getPolygon(int i)	{ return polygons[i]; }
-
-void clsMesh::getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps) 
+void clsHull::getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps) 
 {
 	if ( vs != NULL ) *vs = vertices.data();
 	if ( es != NULL ) *es = edges.data();
 	if ( ps != NULL ) *ps = polygons.data();
 }
 
-void clsMesh::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps) 
+void clsHull::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps) 
 {
 	if ( vs != NULL ) *vs = vertices;
 	if ( es != NULL ) *es = edges;
 	if ( ps != NULL ) *ps = polygons;
 }
 
-void clsMesh::getVerticesTransformed(LPVECTOR3D v)
+void clsHull::getVerticesTransformed(LPVECTOR3D v)
 {
 	VECTOR3D	vertex;
 	MATRIX3D	mTransScalePos(true),
@@ -889,153 +822,56 @@ void clsMesh::getVerticesTransformed(LPVECTOR3D v)
 	size_t vertCount = getVerticesCount();
 	if ( v != NULL )
 	{
-		GetLocalScaleMatrix(&mLocalScale);
-		GetRotationMatrix(&mLocalRot);
-		GetMoveMatrix(&mTransScalePos);
-		GetScaleMatrix(&mTransScalePos);
+		GetLocalScaleMatrix(mLocalScale);
+		GetRotationMatrix(mLocalRot);
+		GetMoveMatrix(mTransScalePos);
+		GetScaleMatrix(mTransScalePos);
 		
 		for ( size_t i = 0; i < vertCount; i++ )
 		{
 			vertex = vertices[i];
 			Matrix3DTransformNormal(
-					&mLocalScale,
-					&vertex,
-					&vertex
+					mLocalScale,
+					vertex,
+					vertex
 				);		
 			Matrix3DTransformNormal(
-					&mLocalRot,
-					&vertex,
-					&vertex
+					mLocalRot,
+					vertex,
+					vertex
 				);
 			Matrix3DTransformCoord(
-					&mTransScalePos,
-					&vertex,
-					&vertex
+					mTransScalePos,
+					vertex,
+					vertex
 				);
 			*(v+i) = vertex;
 		}
 	}
 }
 
-void clsMesh::setColor(
+void clsHull::setColor(
 		unsigned char red, 
 		unsigned char green, 
 		unsigned char blue
 ) {
-	color.Red	= red;
-	color.Green = green;
-	color.Blue	= blue;
+	color = RGB(red, green, blue);
 }
 
-void clsMesh::setColor(COLOR3D c)	{ color = c; }
+void clsHull::setColor(COLORREF c) { color = c; }
 
-// DO NOT DELETE THIS:
-//void clsMesh::addVertex(VECTOR3D v) { vertices.push_back(v); }
-//
-//void clsMesh::addListOfVertices(VERT_LIST v) 
-//{ 
-//	vertices.insert(vertices.end(), v.begin(), v.end()); 
-//}
-//
-//bool clsMesh::delVertex(VECTOR3D v) 
-//{
-//	size_t pos = findVertex(v);
-//	return delVertex(pos);
-//}
-//
-//bool clsMesh::delVertex(size_t vi) 
-//{ 
-//	size_t limit;
-//	POLY3D p;
-//	EDGE3D e;
-//
-//	if (vi >= vertices.size()) return false;
-//	vertices.erase(vertices.begin() + vi);
-//
-//	limit = polygons.size();
-//	for (size_t i = 0; i < limit; i++)
-//	{
-//		p = polygons[i];
-//		if ( p.isContainingVertex(vi) ) 
-//				delPolygon(i);
-//	}
-//	return true;
-//}
-//
-//size_t clsMesh::delListOfVertices(VERT_LIST v) {
-//	size_t	result = 0,
-//			vCount = v.size();
-//
-//	for (size_t i = 0; i < vCount; i++) 
-//		if ( delVertex(v[i]) ) result++;
-//
-//	return result;
-//}
-//
-//bool clsMesh::delEdge(EDGE3D e) 
-//{
-//	size_t pos = findEdge(e);
-//	return delEdge(pos);
-//}
-//
-//bool clsMesh::delEdge(size_t ei) 
-//{ 
-//	if (ei >= edges.size()) return false;
-//	edges.erase(edges.begin() + ei);
-//
-//	return true;
-//}
-//
-//void clsMesh::addPolygon(POLY3D p) { polygons.push_back(p); }
-//
-//void clsMesh::addListOfPolygons(POLY_LIST p) { 
-//	polygons.insert(polygons.end(), p.begin(), p.end());
-//}
-//
-//bool clsMesh::delPolygon(POLY3D p) {
-//	size_t pos = findPolygon(p);
-//	return delPolygon(pos);
-//}
-//
-//bool clsMesh::delPolygon(size_t pi) {
-//	POLY3D	pErased;
-//	EDGE3D	eSupposed;
-//	size_t	i,
-//			coOwners;
-//
-//	if ( pi >= polygons.size() ) return false;
-//
-//	pErased = polygons[pi];
-//	polygons.erase(polygons.begin() + pi);
-//	for ( 
-//		EDGE_LIST::iterator e	= edges.begin(),
-//		eLast					= edges.end();
-//		e != eLast;
-//		e++
-//	) {
-//		if ( pErased.isContainingEdge(*e) ) 
-//		{
-//			coOwners = 0;
-//			for (
-//				POLY_LIST::iterator p	= polygons.begin(),
-//				pLast					= polygons.end();
-//				p != pLast;
-//				p++
-//			) { 
-//				if ( p->isContainingEdge(*e) ) coOwners++;
-//				}
-//		}
-//	}
-//	return true;
-//}
-//
-//size_t clsMesh::delListOfPolygons(POLY_LIST p) {
-//	size_t	result = 0,
-//			pCount = p.size();
-//			
-//	for (size_t i = 0; i < pCount; i++) 
-//		if ( delPolygon(p[i]) ) result++;			
-//
-//	return result;
-//}
+// ============================================================================
+// Implementation of clsMesh class:
+// ============================================================================
+MESH_ID clsMesh::MeshID() { return meshID; }
 
+clsMesh::clsMesh(MESH_ID mID) : clsHull(CLS_MESH), meshID(mID) { }
+
+clsMesh::clsMesh(MESH_ID mID, COLORREF c) : clsHull(c, CLS_MESH), meshID(mID) { }
+
+clsMesh::clsMesh(
+		MESH_ID mID,
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue
+) : clsHull(red, green, blue, CLS_MESH), meshID(mID) { }

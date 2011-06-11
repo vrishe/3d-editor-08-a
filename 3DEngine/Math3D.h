@@ -42,17 +42,19 @@ public:
 	bool			operator!= (const tagVector3D& u) const;
 } VECTOR3D, *LPVECTOR3D;
 
-float Vector3DLength(const LPVECTOR3D src);
-void Vector3DNormalize(const LPVECTOR3D in, LPVECTOR3D out);
+float Vector3DLength(const VECTOR3D &src);
+void Vector3DNormalize(const VECTOR3D &in, VECTOR3D &out);
 void Vector3DMultV(
-				const LPVECTOR3D in1, 
-				const LPVECTOR3D in2, 
-				tagVector3D* out
+				const VECTOR3D &in1, 
+				const VECTOR3D &in2, 
+				VECTOR3D &out
 			);
 float Vector3DMultS(
-				const LPVECTOR3D in1, 
-				const LPVECTOR3D in2
+				const VECTOR3D &in1, 
+				const VECTOR3D &in2
 			);
+
+#define _sign(x) ((x >= 0) - (x < 0))
 
 // ============================================================================
 // Представление матрицы:
@@ -85,17 +87,17 @@ public:
 } MATRIX3D, *LPMATRIX3D;
 
 void Matrix3DRotateAxis(
-			const LPVECTOR3D axis, 
+			const VECTOR3D &axis, 
 			float angle, 
-			LPMATRIX3D rslt
+			MATRIX3D &rslt
 		);
 void Matrix3DTransformCoord(
-			const LPMATRIX3D T, 
-			const LPVECTOR3D in, 
-			LPVECTOR3D out
+			const MATRIX3D &T, 
+			const VECTOR3D &in, 
+			VECTOR3D &out
 		);
-void Matrix3DTransformNormal
-			(const LPMATRIX3D T, 
-			const LPVECTOR3D in,
-			LPVECTOR3D out
+void Matrix3DTransformNormal(
+			const MATRIX3D &T, 
+			const VECTOR3D &in,
+			VECTOR3D &out
 		);

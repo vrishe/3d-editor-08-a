@@ -51,13 +51,13 @@ typedef struct tagPolygon {
 
 	tagPolygon();
 	tagPolygon(size_t a, size_t b, size_t c);
-	VECTOR3D Normal(LPVERT_LIST, size_t startVert);
-	VECTOR3D Normal(LPVECTOR3D, size_t startVert);
+	VECTOR3D Normal(const LPVERT_LIST, size_t startVert);
+	VECTOR3D Normal(const LPVECTOR3D, size_t startVert);
 
 	tagPolygon& operator+= (const UINT& p);
 	bool operator==(const tagPolygon &b) const;
 	bool operator!=(const tagPolygon &b) const;
-	bool isContainingEdge (EDGE3D e);
+	bool isContainingEdge (const EDGE3D &e);
 	bool isContainingVertex (size_t vi);
 } POLY3D, *LPPOLY3D;
 
@@ -74,6 +74,11 @@ typedef struct tagColor
 
 #define BLACK 0
 
+// This is for simple colorref colo extraction 
+#define RED(c)		(BYTE)(c>>16)
+#define GREEN(c)	(BYTE)(c>>8)
+#define BLUE(c)		(BYTE)(c)
+
 // ============================================================================
 // Object class that represents current object
 // space position
@@ -82,9 +87,10 @@ typedef struct tagColor
 
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
-	CLS_CAMERA		= 1,
-	CLS_MESH		= 2,
-	CLS_LIGHT		= 3
+	CLS_HULL		= 1,
+	CLS_CAMERA		= 2,
+	CLS_MESH		= 3,
+	CLS_LIGHT		= 4
 };
 
 enum MESH_ID {
@@ -124,7 +130,6 @@ private:
 protected:
 
 	LPTSTR			Name;
-	//LPCOORD_SPACE3D	UCS;
 
 	// Position
 	VECTOR3D		pos;
@@ -145,7 +150,7 @@ protected:
 public:
 	clsObject(CLASS_ID clsID = CLS_OBJECT);
 	clsObject(
-		VECTOR3D	pt, 
+		const VECTOR3D	&pt, 
 		float		p, 
 		float		y, 
 		float		r, 
@@ -164,15 +169,13 @@ public:
 	CLASS_ID clsID();
 	size_t	 objID();
 
-	VECTOR3D getPosition();
-
 	// Positioning
 	void Follow(float units);	// Along local-x
 	void Strafe(float units);	// Along local-y
 	void Fly(float units);		// Along local-z
-	void LocalTranslate(VECTOR3D tV);
+	void LocalTranslate(const VECTOR3D &tV);
 	void LocalTranslate(float tX, float tY, float tZ);
-	void Translate(VECTOR3D tV);
+	void Translate(const VECTOR3D &tV);
 	void Translate(float tX, float tY, float tZ);	 
 
 	// Scaling
@@ -189,26 +192,35 @@ public:
 	void LocalRotate(float pitch, float yaw, float roll);
 	void Rotate(float y, float z, float x);
 
-	float Distance(VECTOR3D vDst);
-	float Distance(const clsObject *objDst);
+	float Distance(const VECTOR3D &vDst);
+	float Distance(const clsObject &objDst);
 
 	// Take a look at point or object
-	void LookAt(VECTOR3D lookAt, const LPVECTOR3D upOrient);
-	void LookAt(clsObject *objToLookAt);
+	void LookAt(const VECTOR3D &lookAt, const LPVECTOR3D upOrient);
+	void LookAt(const clsObject &objToLookAt);
 	void LookAt(float lX, float lY, float lZ);
 
-	void GetMoveMatrix(LPMATRIX3D mOut);
-	void GetLocalScaleMatrix(LPMATRIX3D mOut);
-	void GetScaleMatrix(LPMATRIX3D mOut);
-	void GetRotationMatrix(LPMATRIX3D mOut);
+	void GetMoveMatrix(MATRIX3D &mOut);
+	void GetLocalScaleMatrix(MATRIX3D &mOut);
+	void GetScaleMatrix(MATRIX3D &mOut);
+	void GetRotationMatrix(MATRIX3D &mOut);
 
 	VECTOR3D getForwardLookDirection();
 	VECTOR3D getRightLookDirection();
 	VECTOR3D getUpLookDirection();	
+	VECTOR3D getPosition();
+	VECTOR3D getRotation();
+	VECTOR3D getScale();
 
-	void setForwardLookDirection(LPVECTOR3D);
-	void setRightLookDirection(LPVECTOR3D);
-	void setUpLookDirection(LPVECTOR3D);
+	void setForwardLookDirection(const VECTOR3D &);
+	void setRightLookDirection(const VECTOR3D &);
+	void setUpLookDirection(const VECTOR3D &);
+	void inheritOrientation(
+				const VECTOR3D &forward,
+				const VECTOR3D &rightward,
+				const VECTOR3D &upward
+			);
+	void inheritOrientation(const clsObject &obj);
 
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
@@ -230,17 +242,17 @@ public:
 	clsScene();
 	~clsScene();
 
-	bool AddObject(LPOBJECT3D lpObject);
+	bool AddObject(const LPOBJECT3D lpObject);
 	bool DeleteObject(CLASS_ID clsID, size_t objIndex); 
 	bool DeleteObject(size_t objID);
-	bool DeleteObject(LPOBJECT3D lpObject);
+	bool DeleteObject(const LPOBJECT3D lpObject);
 	void Clear();
 
-	bool findObjectIndex(LPOBJECT3D lpObject, size_t *objIndex = NULL);
+	bool findObjectIndex(const LPOBJECT3D lpObject, size_t *objIndex = NULL);
 	bool findObjectIndex(
 				size_t objID, 
 				CLASS_ID *objClsID	= NULL, 
-				size_t *objIndex	= NULL
+				size_t *objIndex		= NULL
 			);
 
 	bool		getFirstObject(CLASS_ID *objID);
@@ -258,58 +270,35 @@ public:
 typedef clsScene SCENE3D, *LPSCENE3D;
 
 // ============================================================================
-// Abstract mesh class that represents EVERY POSSIBLE
-// 3d mesh object. Provides basic mesh operations.
+// Class clsHull
+// ============================================================================
 typedef vector<EDGE3D> EDGE_LIST, *LPEDGE_LIST;
 typedef vector<POLY3D> POLY_LIST, *LPPOLY_LIST;
 
-class clsMesh : public clsObject {
+class clsHull : public clsObject {
 protected:
 	VERT_LIST		vertices;	// list of vertexes
 	EDGE_LIST		edges;		// list of edges
 	POLY_LIST		polygons;	// list of polygons
 
-	COLOR3D			color;
+	COLORREF		color;
 
-	MESH_ID			meshID;
-
-	size_t findVertex(VECTOR3D v);	// returns a vertex position
-	size_t findEdge(EDGE3D e);
-	size_t findPolygon(POLY3D p);	// returns a Polygon_ position
-
-	//// delete ver/edge/polys that can't be a part of the object no more
-	//size_t	dropUnusedVertices();		// delete vertexes if no polygons use them	
-	//size_t	dropRedundantPolygons();	// delete polygons if there are null vertexes in it
+	size_t findVertex(const VECTOR3D &v);	// returns a vertex position
+	size_t findEdge(const EDGE3D &e);
+	size_t findPolygon(const POLY3D &p);	// returns a Polygon_ position
 
 public:
-	clsMesh(MESH_ID mID);
-	clsMesh(MESH_ID mID, COLOR3D c);
-	clsMesh(
-		MESH_ID mID,
+	clsHull(CLASS_ID clID = CLS_HULL);
+	clsHull(COLORREF c, CLASS_ID clID = CLS_HULL);
+	clsHull(
 		unsigned char red, 
 		unsigned char green, 
-		unsigned char blue
+		unsigned char blue,
+		CLASS_ID clID = CLS_HULL
 	);
-	//clsMesh(MESH_ID mID, COLOR3D c, VERT_LIST vs, POLY_LIST ps);
-	//clsMesh(
-	//	MESH_ID mID,
-	//	unsigned char red, 
-	//	unsigned char green, 
-	//	unsigned char blue, 
-	//	VERT_LIST vs, 
-	//	POLY_LIST ps
-	//);
-	~clsMesh();
-
-	MESH_ID MeshID();
-
-	// functionality
-	//void			dropRedundant();
-	// add some modifying functionality here
 
 	// getters
-	COLOR3D			getColor();
-	DWORD			getColorRef();
+	COLORREF		getColor();
 	size_t			getVerticesCount();
 	size_t			getEdgesCount();
 	size_t			getPolygonsCount();
@@ -327,29 +316,42 @@ public:
 	void			getVerticesTransformed(LPVECTOR3D v);
 
 	// setters
+	void			setColor(COLORREF c);
 	void			setColor(
 						unsigned char red, 
 						unsigned char green, 
 						unsigned char blue
 					);
-	void			setColor(COLOR3D c);
 
-	//void			addVertex(VECTOR3D);
-	//void			addListOfVertices(VERT_LIST);
-	//bool			delVertex(VECTOR3D);
-	//bool			delVertex(size_t);
-	//size_t	delListOfVertices(VERT_LIST);	// returns 0 if everything's deleted, 
-	//												// -n otherwise, where n - number of 
-	//												// undeleted elements
+	void			addVertices(const LPVECTOR3D vs, UINT vsCount);
+	bool			delVertices();
+	
+	void			addEdges(const LPEDGE3D es, UINT esCount);
+	bool			delEdges(EDGE3D);
 
-	//bool			delEdge(EDGE3D);
-	//bool			delEdge(size_t);
+	void			addPolygons(const LPPOLY3D ps, UINT psCount);
+	bool			delPolygon(POLY3D);
+};
+typedef clsHull HULL3D, *LPHULL3D;
 
-	//void			addPolygon(POLY3D);
-	//void			addListOfPolygons(POLY_LIST);
-	//bool			delPolygon(POLY3D);
-	//bool			delPolygon(size_t);
-	//size_t	delListOfPolygons(POLY_LIST);
+// ============================================================================
+// Abstract mesh class that represents EVERY POSSIBLE
+// 3d mesh object. Provides basic mesh operations.
+class clsMesh : public clsHull {
+protected:
+	MESH_ID			meshID;
+
+public:
+	clsMesh(MESH_ID mID);
+	clsMesh(MESH_ID mID, COLORREF c);
+	clsMesh(
+		MESH_ID mID,
+		unsigned char red, 
+		unsigned char green, 
+		unsigned char blue
+	);
+
+	MESH_ID MeshID();
 };
 typedef clsMesh MESH3D, *LPMESH3D;
 

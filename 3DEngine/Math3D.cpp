@@ -96,35 +96,35 @@ bool tagVector3D::operator== (const tagVector3D& u) const
 
 bool tagVector3D::operator!= (const tagVector3D& u) const {	return !operator==(u); }
 
-float Vector3DLength(const LPVECTOR3D src) {
-	return sqrt(src->x*src->x + src->y*src->y + src->z*src->z);
+float Vector3DLength(const VECTOR3D &src) {
+	return sqrt(src.x*src.x + src.y*src.y + src.z*src.z);
 }
 
-void Vector3DNormalize(const LPVECTOR3D src, LPVECTOR3D rslt) {
+void Vector3DNormalize(const VECTOR3D &src, VECTOR3D &rslt) {
 	float vLen = Vector3DLength(src);
 	if ( vLen > EPSILON )
-		*rslt = (*src) / vLen;
+		rslt = src / vLen;
 }
 
 void Vector3DMultV(
-	const LPVECTOR3D in1, 
-	const LPVECTOR3D in2, 
-	LPVECTOR3D out)
+	const VECTOR3D &in1,
+	const VECTOR3D &in2, 
+	VECTOR3D &out)
 {
-	*out = VECTOR3D(
-				in1->y * in2->z - in1->z * in2->y,
-				in1->z * in2->x - in1->x * in2->z,
-				in1->x * in2->y - in1->y * in2->x
+	out = VECTOR3D(
+				in1.y * in2.z - in1.z * in2.y,
+				in1.z * in2.x - in1.x * in2.z,
+				in1.x * in2.y - in1.y * in2.x
 			);
 }
 
 float Vector3DMultS(					
-	const LPVECTOR3D in1, 
-	const LPVECTOR3D in2)
+	const VECTOR3D &in1, 
+	const VECTOR3D &in2)
 {
-	return in1->x * in2->x 
-			+ in1->y * in2->y 
-			+ in1->z * in2->z;
+	return in1.x * in2.x 
+			+ in1.y * in2.y 
+			+ in1.z * in2.z;
 }
 
 // ============================================================================
@@ -155,92 +155,72 @@ void tagMatrix3D::SetIdentity()
 	) { *((float*)m + i) = 1.0; }
 }
 
-void Matrix3DRotateAxis(const LPVECTOR3D axis, float rads, LPMATRIX3D rslt)
+void Matrix3DRotateAxis(const VECTOR3D &axis, float rads, MATRIX3D &rslt)
 {
 	float	sinTheta	= sin(rads),
 			cosTheta	= cos(rads),
 			_1mCosTheta	= 1 - cosTheta;
 
-	rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
-	rslt->_12 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
-	rslt->_13 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
-	rslt->_14 = .0f;
+	rslt._11 = _1mCosTheta * axis.x * axis.x + cosTheta;
+	rslt._12 = _1mCosTheta * axis.x * axis.y - axis.z * sinTheta;
+	rslt._13 = _1mCosTheta * axis.x * axis.z + axis.y * sinTheta;
+	rslt._14 = .0f;
 
-	rslt->_21 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
-	rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
-	rslt->_23 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
-	rslt->_24 = .0f;
+	rslt._21 = _1mCosTheta * axis.x * axis.y + axis.z * sinTheta;;
+	rslt._22 = _1mCosTheta * axis.y * axis.y + cosTheta;
+	rslt._23 = _1mCosTheta * axis.y * axis.z - axis.x * sinTheta;
+	rslt._24 = .0f;
 
-	rslt->_31 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
-	rslt->_32 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
-	rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
-	rslt->_34 = .0f;
+	rslt._31 = _1mCosTheta * axis.x * axis.z - axis.y * sinTheta;
+	rslt._32 = _1mCosTheta * axis.y * axis.z + axis.x * sinTheta;
+	rslt._33 = _1mCosTheta * axis.z * axis.z + cosTheta;
+	rslt._34 = .0f;
 
-	rslt->_41 = .0f;
-	rslt->_42 = .0f;
-	rslt->_43 = .0f;
-	rslt->_44 =	1.0f; 
-
-	//rslt->_11 = _1mCosTheta * axis->x * axis->x + cosTheta;
-	//rslt->_21 = _1mCosTheta * axis->x * axis->y - axis->z * sinTheta;
-	//rslt->_31 = _1mCosTheta * axis->x * axis->z + axis->y * sinTheta;
-	//rslt->_41 = .0f;
-
-	//rslt->_12 = _1mCosTheta * axis->x * axis->y + axis->z * sinTheta;;
-	//rslt->_22 = _1mCosTheta * axis->y * axis->y + cosTheta;
-	//rslt->_32 = _1mCosTheta * axis->y * axis->z - axis->x * sinTheta;
-	//rslt->_42 = .0f;
-
-	//rslt->_13 = _1mCosTheta * axis->x * axis->z - axis->y * sinTheta;
-	//rslt->_23 = _1mCosTheta * axis->y * axis->z + axis->x * sinTheta;
-	//rslt->_33 = _1mCosTheta * axis->z * axis->z + cosTheta;
-	//rslt->_43 = .0f;
-
-	//rslt->_14 = .0f;
-	//rslt->_24 = .0f;
-	//rslt->_34 = .0f;
-	//rslt->_44 =	1.0f; 
+	rslt._41 = .0f;
+	rslt._42 = .0f;
+	rslt._43 = .0f;
+	rslt._44 =	1.0f; 
 }
 
 void Matrix3DTransformCoord(
-			const LPMATRIX3D T, 
-			const LPVECTOR3D in, 
-			LPVECTOR3D out
+			const MATRIX3D &T, 
+			const VECTOR3D &in, 
+			VECTOR3D &out
 ) {
-	*out = VECTOR3D(
-			T->_11 * in->x 
-			+ T->_21 * in->y 
-			+ T->_31 * in->z
-			+ T->_41,
+	out = VECTOR3D(
+			T._11 * in.x 
+			+ T._21 * in.y 
+			+ T._31 * in.z
+			+ T._41,
 
-			T->_12 * in->x 
-			+ T->_22 * in->y 
-			+ T->_32 * in->z
-			+ T->_42,
+			T._12 * in.x 
+			+ T._22 * in.y 
+			+ T._32 * in.z
+			+ T._42,
 
-			T->_13 * in->x 
-			+ T->_23 * in->y 
-			+ T->_33 * in->z
-			+ T->_43
+			T._13 * in.x 
+			+ T._23 * in.y 
+			+ T._33 * in.z
+			+ T._43
 		);
 }
 
 void Matrix3DTransformNormal(
-			const LPMATRIX3D T, 
-			const LPVECTOR3D in, 
-			LPVECTOR3D out
+			const MATRIX3D &T, 
+			const VECTOR3D &in, 
+			VECTOR3D &out
 ) {
-	*out = VECTOR3D(
-			T->_11 * in->x 
-			+ T->_21 * in->y 
-			+ T->_31 * in->z,
+	out = VECTOR3D(
+			T._11 * in.x 
+			+ T._21 * in.y 
+			+ T._31 * in.z,
 
-			T->_12 * in->x 
-			+ T->_22 * in->y 
-			+ T->_32 * in->z,
+			T._12 * in.x 
+			+ T._22 * in.y 
+			+ T._32 * in.z,
 
-			T->_13 * in->x 
-			+ T->_23 * in->y 
-			+ T->_33 * in->z
+			T._13 * in.x 
+			+ T._23 * in.y 
+			+ T._33 * in.z
 		);
 }
