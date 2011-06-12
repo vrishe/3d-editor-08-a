@@ -359,11 +359,12 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	obj->setRightLookDirection(rwd);
 
 	Scene->AddObject(obj);
+	obj->Transform();
 }
 
 bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	FILE* file;
-	errno_t bErrorFlag = _wfopen_s(&file, fileName, _T("w"));
+	errno_t bErrorFlag = _tfopen_s(&file, fileName, _T("w"));
 	if (bErrorFlag)
 		return false;
 
@@ -421,7 +422,7 @@ bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 
 bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	FILE* file;
-	errno_t bErrorFlag = _wfopen_s(&file, fileName, _T("r"));
+	errno_t bErrorFlag = _tfopen_s(&file, fileName, _T("r"));
 	if (bErrorFlag)
 		return false;
 
@@ -472,6 +473,7 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 
 		bErrorFlag = _ftscanf_s(file, _T("%77c"), buffer, 256);
 		Scene->AddObject(camera);
+		camera->Transform();
 	}
 
 		// loading lighters

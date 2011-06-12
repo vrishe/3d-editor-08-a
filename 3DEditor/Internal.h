@@ -10,4 +10,5 @@
 #include "..\3DEngine\Lighters.h"
 #include "..\3DEngine\Primitives.h"
 #include "..\3DEngine\Microphone.h"
+#include "..\3DEngine\Jagdpanther.h"
 #include "Translator.h"

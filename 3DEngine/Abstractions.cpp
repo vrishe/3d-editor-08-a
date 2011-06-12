@@ -511,21 +511,21 @@ VECTOR3D clsObject::getScale() { return worldScale; }
 void clsObject::setForwardLookDirection(const VECTOR3D &v) { fWd = v; }
 void clsObject::setRightLookDirection(const VECTOR3D &v) { rWd = v; }
 void clsObject::setUpLookDirection(const VECTOR3D &v) { uWd = v; }
-void clsObject::inheritOrientation(
-					const VECTOR3D &forward,
-					const VECTOR3D &rightward,
-					const VECTOR3D &upward
-) {
-	fWd = forward;
-	rWd = rightward;
-	uWd = upward;
-}
-void clsObject::inheritOrientation(const clsObject &obj)
-{
-	fWd = obj.fWd;
-	rWd = obj.rWd;
-	uWd = obj.uWd;
-}
+//void clsObject::inheritOrientation(
+//					const VECTOR3D &forward,
+//					const VECTOR3D &rightward,
+//					const VECTOR3D &upward
+//) {
+//	fWd = forward;
+//	rWd = rightward;
+//	uWd = upward;
+//}
+//void clsObject::inheritOrientation(const clsObject &obj)
+//{
+//	fWd = obj.fWd;
+//	rWd = obj.rWd;
+//	uWd = obj.uWd;
+//}
 
 
 void clsObject::getName(LPTSTR objName, size_t bufSize) 
@@ -756,6 +756,13 @@ clsHull::clsHull(
 		CLASS_ID clsID
 ) : clsObject(clsID), color(RGB(red, green, blue)) { }
 
+void clsHull::flushVertices()
+{
+	cache.clear();
+	cache.insert(cache.begin(), vertices.begin(), vertices.end());
+	cache.shrink_to_fit();
+}
+
 size_t clsHull::findVertex(const VECTOR3D &v) 
 {
 	size_t vCount = vertices.size();
@@ -815,38 +822,41 @@ void clsHull::getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps)
 
 void clsHull::getVerticesTransformed(LPVECTOR3D v)
 {
-	VECTOR3D	vertex;
+	CopyMemory(v, cache.data(), cache.size() * sizeof(VECTOR3D));
+}
+
+void clsHull::Transform()
+{
+	LPVECTOR3D	v;
 	MATRIX3D	mTransScalePos(true),
 				mLocalScale(true),
 				mLocalRot(true);
 	size_t vertCount = getVerticesCount();
-	if ( v != NULL )
+	flushVertices();
+	
+	GetLocalScaleMatrix(mLocalScale);
+	GetRotationMatrix(mLocalRot);
+	GetMoveMatrix(mTransScalePos);
+	GetScaleMatrix(mTransScalePos);
+	
+	v = cache.data();
+	for ( size_t i = 0; i < vertCount; i++ )
 	{
-		GetLocalScaleMatrix(mLocalScale);
-		GetRotationMatrix(mLocalRot);
-		GetMoveMatrix(mTransScalePos);
-		GetScaleMatrix(mTransScalePos);
-		
-		for ( size_t i = 0; i < vertCount; i++ )
-		{
-			vertex = vertices[i];
-			Matrix3DTransformNormal(
-					mLocalScale,
-					vertex,
-					vertex
-				);		
-			Matrix3DTransformNormal(
-					mLocalRot,
-					vertex,
-					vertex
-				);
-			Matrix3DTransformCoord(
-					mTransScalePos,
-					vertex,
-					vertex
-				);
-			*(v+i) = vertex;
-		}
+		Matrix3DTransformNormal(
+				mLocalScale,
+				*(v + i),
+				*(v + i)
+			);		
+		Matrix3DTransformNormal(
+				mLocalRot,
+				*(v + i),
+				*(v + i)
+			);
+		Matrix3DTransformCoord(
+				mTransScalePos,
+				*(v + i),
+				*(v + i)
+			);
 	}
 }
 

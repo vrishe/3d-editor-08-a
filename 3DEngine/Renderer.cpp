@@ -484,6 +484,7 @@ VOID SetViewportDefaultView(LPVIEWPORT vp, VIEW_TYPE vt)
 // clsViewportPool Implementation
 DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 {
+	clock_t		time;
 	HDC			hDC;
 	UINT		vpWidth,
 				vpHeight;
@@ -523,6 +524,9 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 						FALSE,
 						INFINITE
 					);
+
+		time = clock();
+
 		bAlive = dwWaitResult != WAIT_OBJECT_0 + 1;
 
 		vp->Viewport->Render();
@@ -550,6 +554,9 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 		);
 		SelectObject(hDC, hFontOld);
 		vp->Viewport->dropDC(&hDC);
+
+		time = CLOCKS_PER_FRAME - clock() + time;
+		if ( time > 0 ) Sleep(time);
 
 		ResetEvent(vp->threadControls.doRender);
 		SetEvent(vp->threadControls.jobDone);

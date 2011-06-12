@@ -8,6 +8,8 @@
 #include "External.h"
 #include "Internal.h"
 
+#define OPEN_FILE_FILTER _T("All files\0*.*\0\nText\0*.txt\0\n3DEditor\0*.3de\0\0")
+
 #define MAX_LOADSTRING 100
 #define MAX_PARAMS_NUM 20
 
@@ -133,7 +135,7 @@ BOOL ModifCam();
 // Form event handler functions
 LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
-LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
+LRESULT mainForm_OnClose(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_OnPaint(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam);
 

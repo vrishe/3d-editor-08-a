@@ -303,9 +303,9 @@ void clsTargCamera::TargetFly(float units)
 }
 
 // Deprecated methods
-void clsTargCamera::setFDist() {}
-void clsTargCamera::Pitch() {}
-void clsTargCamera::Yaw() {}
-void clsTargCamera::LookAt(VECTOR3D lookAt) { /* doing nothing */ }
-void clsTargCamera::LookAt(const clsObject &objToLookAt) { /* doing nothing */ }
-void clsTargCamera::LookAt(float lX, float lY, float lZ) { /* doing nothing */ }
+void clsTargCamera::setFDist(float dist)					{ /* doing nothing */ }
+void clsTargCamera::Pitch(float angle)						{ /* doing nothing */ }
+void clsTargCamera::Yaw(float angle)						{ /* doing nothing */ }
+void clsTargCamera::LookAt(VECTOR3D lookAt)					{ /* doing nothing */ }
+void clsTargCamera::LookAt(const clsObject &objToLookAt)	{ /* doing nothing */ }
+void clsTargCamera::LookAt(float lX, float lY, float lZ)	{ /* doing nothing */ }

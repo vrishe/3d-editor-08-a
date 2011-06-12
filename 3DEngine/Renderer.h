@@ -1,5 +1,6 @@
 #pragma once
 
+#include <time.h>
 #include <tchar.h>
 #include <vector>
 #include <algorithm>
@@ -33,6 +34,7 @@ enum RENDER_MODE {
 };
 
 #define MAX_VIEWPORT_COUNT	6
+#define CLOCKS_PER_FRAME	50
 #define THREAD_WAIT_TIMEOUT	5000
 #define VIEWPORT_CLASS_NAME	_T("RenderPool Viewport Class")
 

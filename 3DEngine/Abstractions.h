@@ -87,10 +87,10 @@ typedef struct tagColor
 
 enum CLASS_ID {
 	CLS_OBJECT		= 0,
-	CLS_HULL		= 1,
-	CLS_CAMERA		= 2,
-	CLS_MESH		= 3,
-	CLS_LIGHT		= 4
+	CLS_LIGHT		= 1,
+	CLS_HULL		= 2,
+	CLS_MESH		= 4,
+	CLS_CAMERA		= 3
 };
 
 enum MESH_ID {
@@ -98,7 +98,8 @@ enum MESH_ID {
 	MSH_CONE		= 1,
 	MSH_EXCONE		= 2,
 	MSH_HOLE		= 3,
-	MSH_MIC			= 4  
+	MSH_MIC			= 4,
+	MSH_TANK		= 5
 };
 
 enum CONSTRAINTS {
@@ -215,12 +216,12 @@ public:
 	void setForwardLookDirection(const VECTOR3D &);
 	void setRightLookDirection(const VECTOR3D &);
 	void setUpLookDirection(const VECTOR3D &);
-	void inheritOrientation(
-				const VECTOR3D &forward,
-				const VECTOR3D &rightward,
-				const VECTOR3D &upward
-			);
-	void inheritOrientation(const clsObject &obj);
+	//void inheritOrientation(
+	//			const VECTOR3D &forward,
+	//			const VECTOR3D &rightward,
+	//			const VECTOR3D &upward
+	//		);
+	//void inheritOrientation(const clsObject &obj);
 
 	void getName(LPTSTR objName, size_t bufSize);
 	void setName(LPTSTR objName, size_t srcSize);
@@ -278,11 +279,13 @@ typedef vector<POLY3D> POLY_LIST, *LPPOLY_LIST;
 class clsHull : public clsObject {
 protected:
 	VERT_LIST		vertices;	// list of vertexes
+	VERT_LIST		cache;		// list of transformed vertices
 	EDGE_LIST		edges;		// list of edges
 	POLY_LIST		polygons;	// list of polygons
 
 	COLORREF		color;
 
+	void flushVertices();
 	size_t findVertex(const VECTOR3D &v);	// returns a vertex position
 	size_t findEdge(const EDGE3D &e);
 	size_t findPolygon(const POLY3D &p);	// returns a Polygon_ position
@@ -314,6 +317,7 @@ public:
 	void			getBuffersRaw(LPVECTOR3D *vs, LPEDGE3D *es, LPPOLY3D *ps);
 	void			getBuffers(LPVERT_LIST vs, LPEDGE_LIST es, LPPOLY_LIST ps);
 	void			getVerticesTransformed(LPVECTOR3D v);
+	void			Transform();
 
 	// setters
 	void			setColor(COLORREF c);

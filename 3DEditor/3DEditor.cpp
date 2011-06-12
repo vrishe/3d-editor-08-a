@@ -48,6 +48,7 @@ VECTOR3D			Crosshair[] = {
 						VECTOR3D(.0f, -5.0f, .0f), VECTOR3D(.0f, 5.0f, .0f),
 						VECTOR3D(.0f, .0f, -5.0f), VECTOR3D(.0f, .0f, 5.0f)
 					};
+
 // Win API entry point:
 // ===================================
 
@@ -79,7 +80,7 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 	
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	mainForm.setText(szTitle);
-	mainForm.AssignEventHandler(WM_DESTROY,		mainForm_OnDestroy,		TRUE);
+	mainForm.AssignEventHandler(WM_CLOSE,		mainForm_OnClose,		TRUE);
 	mainForm.AssignEventHandler(WM_COMMAND,		mainForm_InterfClick,	TRUE);
 	mainForm.AssignEventHandler(WM_MOUSEWHEEL,	viewport_whMouseRotate,	TRUE);
 	mainForm.AssignEventHandler(WM_PAINT,		mainForm_OnPaint,		TRUE);
@@ -180,6 +181,8 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 										TRUE
 									);
 	}
+
+	Scene.AddObject(new TANKBODY(445, 220, 200, 30));
 
 	Draw_MainToolbars();
 	RefreshObjectsList();
@@ -1331,21 +1334,19 @@ BOOL ModifCam()
 }
 
 BOOL ToPoint() {
-	INT i = listObjects.getCurSel();
-	if ( i < 0 ) return false;
+	if ( activeObject == NULL ) return false;
 
 	FLOAT	m_pi_d_180	= (FLOAT)M_PI / 180.0f;
-
 	TCHAR *buf = new TCHAR[256];
-	LPOBJECT3D activeObject = NULL;
-	listObjects.getItem(i, buf, 256, (LPVOID*)&activeObject);
 
-	tbX.getText(buf, 256 * sizeof(TCHAR));
+	tbX.getText(buf, 256);
 	FLOAT x = (FLOAT)_ttof(buf);
-	tbY.getText(buf, 256 * sizeof(TCHAR));
+	tbY.getText(buf, 256);
 	FLOAT y = (FLOAT)_ttof(buf);
-	tbZ.getText(buf, 256 * sizeof(TCHAR));
+	tbZ.getText(buf, 256);
 	FLOAT z = (FLOAT)_ttof(buf);
+
+	delete[] buf;
 
 	switch ( activeTool ) {
 	case IS_MOVE:
@@ -1358,6 +1359,8 @@ BOOL ToPoint() {
 		activeObject->Scale(x, y, z);
 		break;
 	}
+
+	if ( activeObject->clsID() >= CLS_HULL ) ((LPHULL3D)activeObject)->Transform();
 	return true;
 }
 
@@ -1396,7 +1399,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 	BYTE	keyBrd[256];
 	if ( wParam == VK_DELETE ) DeleteActiveObject();
 
-	if ( activeViewport == NULL 
+	if ( activeViewport == NULL
+		|| activeObject == NULL
 		|| 	!GetKeyboardState(keyBrd) ) return 1L;
 	if ( wParam == VK_SPACE )
 	{
@@ -1423,6 +1427,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
 		activeObject->Follow(dirD);
 
+		if ( activeObject->clsID() >= CLS_HULL ) 
+				((LPHULL3D)activeObject)->Transform();
 		RefreshTextBoxes();
 		break;
 
@@ -1439,6 +1445,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_END] & 0x80 )	dirD -= ROTATION_ASPECT;
 		activeObject->Roll(dirD);
 
+		if ( activeObject->clsID() >= CLS_HULL ) 
+				((LPHULL3D)activeObject)->Transform();
 		RefreshTextBoxes();
 		break;
 
@@ -1455,6 +1463,9 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_HOME] & 0x80 )	dirD /= SCALE_ASPECT;
 		if ( keyBrd[VK_END] & 0x80 )	dirD *= SCALE_ASPECT;
 		activeObject->ScaleHAcross(dirD);
+		
+		if ( activeObject->clsID() >= CLS_HULL ) 
+				((LPHULL3D)activeObject)->Transform();
 		break;
 
 	case IS_PAN:
@@ -1469,6 +1480,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
 		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
 		cam->Follow(dirD);
+
+		cam->Transform();
 		break;
 
 	case IS_ZOOM:
@@ -1482,6 +1495,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_UP] & 0x80 )		dirH += ZOOM_ASPECT;
 		if ( keyBrd[VK_DOWN] & 0x80 )	dirH -= ZOOM_ASPECT;
 		cam->setHFov(dirH);
+
+		cam->Transform();
 		break;
 
 	case IS_CAMROTATE:
@@ -1496,6 +1511,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
 		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
 		cam->FollowLookAxis(dirD);
+
+		cam->Transform();
 		break;
 
 	case IS_LOOK:
@@ -1510,6 +1527,8 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
 		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
 		cam->TargetFollow(dirD);
+
+		cam->Transform();
 		break;
 	}
 
@@ -1753,8 +1772,8 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			ofn.lpstrFile		= new TCHAR[256];
 			ofn.lpstrFile[0]	= '\0';
 			ofn.nMaxFile		= 256;
-			ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
-			ofn.nFilterIndex	= 1;
+			ofn.lpstrFilter		= OPEN_FILE_FILTER;
+			ofn.nFilterIndex	= 2;
 			ofn.lpstrFileTitle	= NULL;
 			ofn.nMaxFileTitle	= 0;
 			ofn.lpstrInitialDir = NULL;
@@ -1775,8 +1794,8 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			ofn.lpstrFile		= new TCHAR[256];
 			ofn.lpstrFile[0]	= '\0';
 			ofn.nMaxFile		= 256;
-			ofn.lpstrFilter		= _T("All\0*.*\0Text\0*.3de\0");
-			ofn.nFilterIndex	= 1;
+			ofn.lpstrFilter		= OPEN_FILE_FILTER;
+			ofn.nFilterIndex	= 2;
 			ofn.lpstrFileTitle	= NULL;
 			ofn.nMaxFileTitle	= 0;
 			ofn.lpstrInitialDir = NULL;
@@ -1806,8 +1825,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDM_EXIT:
-			SceneCleanUp();
-			mainForm.Destroy();
+			mainForm_OnClose(&mainForm, 0, 0);
 			break;
 
 		default: return 1L;
@@ -1818,8 +1836,10 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 LRESULT mainForm_ProcKeys(LPOBJECT Sender, WPARAM wParam, LPARAM lParam) 
 { return DLGC_WANTALLKEYS; }
 
-LRESULT mainForm_OnDestroy(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
+LRESULT mainForm_OnClose(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 {
+	SceneCleanUp();
+	((LPFORM)Sender)->Destroy();
 	PostQuitMessage(0);
 	return 0;
 }

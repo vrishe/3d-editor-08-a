@@ -62,6 +62,7 @@ void Pyramid::Triangulate() {
 	polygons.push_back(POLY3D(5,1,0));	// 10
 	polygons.push_back(POLY3D(4,5,0));	// 11
 
+	flushVertices();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();
@@ -234,6 +235,7 @@ void Cone::Triangulate() {
 	polygons.push_back(POLY3D(precision*2 + 1, precision*2, 2));
 	polygons.push_back(POLY3D(precision*2 + 1, 2, 3));
 
+	flushVertices();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();
@@ -514,6 +516,7 @@ void ExCone::Triangulate() {
 	polygons.push_back(POLY3D(N*2 + 1, N*2, 2));
 	polygons.push_back(POLY3D(N*2 + 1, 2, 3));
 
+	flushVertices();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();
@@ -726,6 +729,7 @@ void Hole::Triangulate() {
 	polygons.push_back(POLY3D(precision*4 - 2, precision*4 - 1, precision*2));
 	polygons.push_back(POLY3D(precision*4 - 1, precision*2 + 1, precision*2));
 
+	flushVertices();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();

@@ -83,42 +83,67 @@ void Microphone::Triangulate() {
 	Cone			core	 (hD * 1.43333f,  cR, cR, precision);
 
 	base.Yaw(-(FLOAT)M_PI_2);
+	base.Transform();
 
 	buttonL.Translate(-bR * 0.2588f, bR * 0.824f, bH * 1.1f);
 	buttonL.Pitch((FLOAT)M_PI);
+	buttonL.Transform();
+
 	buttonR.Translate(bR * 0.2588f, bR * 0.824f, bH * 1.1f);
 	buttonR.Pitch((FLOAT)M_PI);
+	buttonR.Transform();
 
 	upright.Fly(bH);
+	upright.Transform();
+
 	shroudLow.Fly(base.getHeight() + uH * .04f);
+	shroudLow.Transform();
+
 	shroudHi.Fly(shroudLow.getPosition().z + shroudLow.getHeight() + uG);
+	shroudHi.Transform();
+
 	bridge.Fly(shroudHi.getPosition().z + shroudHi.getHeight());
+	bridge.Transform();
 
 	handleBridgeUp.Fly(uH * 0.8f);
 	handleBridgeUp.Follow(uR + hI / 2);
+	handleBridgeUp.Transform();
+
 	handleBridgeDown.Fly(bH + uH * 0.15f);
 	handleBridgeDown.Follow(handleBridgeUp.getPosition().x);
+	handleBridgeDown.Transform();
+
 	handle.Translate(uR * 1.5f + hI, bR * 0.0059f, uH * .95f);
 	handle.Pitch((FLOAT)M_PI);
 	handle.Yaw((FLOAT)M_PI_2);
+	handle.Transform();
+
 	handleTop.Translate(handle.getPosition().x, handle.getPosition().y, handle.getPosition().z);
 	handleTop.Yaw((FLOAT)M_PI_2);
+	handleTop.Transform();
 
 	head.Fly(bridge.getPosition().z + bridge.getHeight() + hR);
 	head.Strafe(-hD/2);
 	head.Pitch((FLOAT)M_PI_2);
 	head.Roll((FLOAT)M_PI_2);
+	head.Transform();
+
 	headFront.Fly(head.getPosition().z);
 	headFront.Strafe(-head.getPosition().y);
 	headFront.Pitch((FLOAT)M_PI_2);
 	headFront.Roll((FLOAT)M_PI_2);
+	headFront.Transform();
+
 	headBack.Translate(head.getPosition());
 	headBack.Pitch((FLOAT)M_PI_2);
 	headBack.Roll((FLOAT)M_PI_2);
+	headBack.Transform();
+
 	core.Fly(head.getPosition().z);
 	core.Strafe(-core.getHeight() / 2.1f);
 	core.Pitch((FLOAT)M_PI_2);
 	core.Roll((FLOAT)M_PI_2);
+	core.Transform();
 
 	addMesh(MIC_BASE,		base);
 	addMesh(MIC_BUTTON_L,	buttonL);
@@ -136,6 +161,7 @@ void Microphone::Triangulate() {
 	addMesh(MIC_HEAD_BACK,	headBack);
 	addMesh(MIC_CORE,		core);
 
+	Transform();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();
 	polygons.shrink_to_fit();

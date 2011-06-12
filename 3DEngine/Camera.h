@@ -55,9 +55,9 @@ class clsTargCamera : public clsCamera {
 private:
 	HULL3D target;
 
-	void setFDist();
-	void Pitch();
-	void Yaw();
+	void setFDist(float dist);
+	void Pitch(float angle);
+	void Yaw(float angle);
 	void LookAt(VECTOR3D lookAt);
 	void LookAt(const clsObject &objToLookAt);
 	void LookAt(float lX, float lY, float lZ);
@@ -91,5 +91,7 @@ public:
 	void TargetFollow(float units);	// Along local-x
 	void TargetStrafe(float units);	// Along local-y
 	void TargetFly(float units);	// Along local-z
+
+	// Override useful protected methods
 };
 typedef clsTargCamera TARGCAMERA3D, *LPTARGCAMERA3D;
