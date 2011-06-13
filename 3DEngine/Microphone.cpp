@@ -461,7 +461,7 @@ void Microphone::setCoreRadius (float r) {
 	cR =r;
 	setHeadDepth(hD);
 }
-void Microphone::setPrecission	(int prec) {
+void Microphone::setPrecision	(int prec) {
 	precision = prec;
 
 	delete [] micParts;
@@ -482,4 +482,4 @@ float Microphone::getHeadRadius		() { return hR; }
 float Microphone::getHeadDepth		() { return hD; }
 float Microphone::getCoreRadius		() { return cR; }
 float Microphone::getTotalHeight	() { return tH; }
-int Microphone::getPrecission		() { return precision; }
+int Microphone::getPrecision		() { return precision; }

@@ -5,29 +5,27 @@
 class clsTankBody : public clsMesh {
 private:
 	float Length;
-
 	float Width;
-	float FrontWidth;	// 0.9f
-	float BaseWidth;	// 0.563f
-
 	float Height;
-	float bottomSlopeHeight; // 0.23
-	float backTopHeight;	 // 0.636
-
-	// Angles of armor slopes
-	float frontTop;
-	float frontBottom;
-	float top;
-	float backTop;
-	float backBottom;
-	float side;
+	
+	float fbA;
+	float ftA;
+	float bbA;
+	float btA;
+	float tA;
+	float sA;
 
 public:
 	clsTankBody(
 			float bL,
 			float bW,
 			float bH,
-			float fbA
+			float fba,
+			float fta,
+			float bba,
+			float bta,
+			float ta,
+			float sa
 		);
 	void Triangulate();
 };
