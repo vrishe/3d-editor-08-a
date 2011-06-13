@@ -27,6 +27,62 @@ clsTankBody::clsTankBody(
 	Triangulate();
 }
 
+clsTankBody::clsTankBody(
+			float bL,
+			float bW,
+			float bH,
+			float fba,
+			float fta,
+			float bba,
+			float bta,
+			float ta,
+			float sa,
+			COLORREF c
+) : clsMesh(MSH_TANK, c) {
+	float cnv2rad	= (FLOAT)M_PI / 180.0f;
+
+	Length			= bL;
+	Width			= bW;
+	Height			= bH;
+	fbA				= fba * cnv2rad;
+	ftA				= fta * cnv2rad;
+	bbA				= bba * cnv2rad;
+	btA				= bta * cnv2rad;
+	tA				= ta  * cnv2rad;
+	sA				= sa  * cnv2rad;
+
+	Triangulate();
+}
+
+clsTankBody::clsTankBody(
+			float bL,
+			float bW,
+			float bH,
+			float fba,
+			float fta,
+			float bba,
+			float bta,
+			float ta,
+			float sa,
+			unsigned char red, 
+			unsigned char green,
+			unsigned char blue
+) : clsMesh(MSH_TANK, red, green, blue) {
+	float cnv2rad	= (FLOAT)M_PI / 180.0f;
+
+	Length			= bL;
+	Width			= bW;
+	Height			= bH;
+	fbA				= fba * cnv2rad;
+	ftA				= fta * cnv2rad;
+	bbA				= bba * cnv2rad;
+	btA				= bta * cnv2rad;
+	tA				= ta  * cnv2rad;
+	sA				= sa  * cnv2rad;
+
+	Triangulate();
+}
+
 void clsTankBody::Triangulate()
 {
 	VECTOR3D v[11];
@@ -191,6 +247,42 @@ void clsTankBody::Triangulate()
 
 	for( UINT i = 0, max = vertices.size(); i < max; i++ )
 		swap(vertices[i].x, vertices[i].y);
+
+	Transform();
+	vertices.shrink_to_fit();
+	edges.shrink_to_fit();
+	polygons.shrink_to_fit();
+}
+
+
+clsJagdpanther::clsJagdpanther(
+	float bL,
+	float bW,
+	float bH,
+	float fba,
+	float fta,
+	float bba,
+	float bta,
+	float ta,
+	float sa,
+	float clen,
+	unsigned char red, 
+	unsigned char green,
+	unsigned char blue		
+) : clsMesh( MSH_TANK, red, green, blue ) {
+	jgPzParts = new LPMESH3D[JGPZ_PARTS_NUM];
+	cLen = clen;
+
+	Triangulate();
+}
+
+clsJagdpanther::~clsJagdpanther() { delete[] jgPzParts; }
+
+void clsJagdpanther::Triangulate() {
+	vertices.clear();
+	edges.clear();
+	polygons.clear();
+
 
 	Transform();
 	vertices.shrink_to_fit();

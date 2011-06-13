@@ -152,15 +152,8 @@ float clsTargCamera::getTargetDistance() { return Distance(target); }
 // Camera transformations
 void clsTargCamera::Translate(const VECTOR3D &tV) 
 { 
-	float dist = target.Distance(tV);
-	if ( 
-		dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		pos		= tV; 
-		fDist	= dist;
-		clsCamera::LookAt(target.getPosition(), NULL);
-	}
+	pos		= tV; 
+	clsCamera::LookAt(target.getPosition(), NULL);
 }
 
 void clsTargCamera::Translate(float tX, float tY, float tZ) 
@@ -172,7 +165,7 @@ void clsTargCamera::Translate(float tX, float tY, float tZ)
 void clsTargCamera::Follow(float units)	
 {
 	VECTOR3D point = fWd * units;
-	pos		+= point; 
+	pos	+= point; 
 	target.Translate(target.getPosition() + point); 
 	clsCamera::LookAt(target.getPosition(), NULL); 
 }
@@ -180,7 +173,7 @@ void clsTargCamera::Follow(float units)
 void clsTargCamera::Strafe(float units)	
 { 
 	VECTOR3D point = rWd * units;
-	pos		+= point; 
+	pos	+= point; 
 	target.Translate(target.getPosition() + point); 
 	clsCamera::LookAt(target.getPosition(), NULL); 
 }
@@ -188,7 +181,7 @@ void clsTargCamera::Strafe(float units)
 void clsTargCamera::Fly(float units)	
 { 
 	VECTOR3D point = uWd * units;
-	pos		+= point; 
+	pos	+= point; 
 	target.Translate(target.getPosition() + point); 
 	clsCamera::LookAt(target.getPosition(), NULL); 
 }
@@ -196,20 +189,8 @@ void clsTargCamera::Fly(float units)
 
 void clsTargCamera::FollowLookAxis(float units) 
 { 
-	VECTOR3D point	= pos + fWd * units,
-			 dir(target.getPosition() - point);
-	float	 dist	= Vector3DLength(dir);
-
-	Vector3DNormalize(dir, dir);
-	if ( 
-		Vector3DMultS(fWd, dir) > .0f
-		&& dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		pos		= point; 
-		fDist	= dist;
-		clsCamera::LookAt(target.getPosition(), NULL); ; 
-	}
+	pos	= pos + fWd * units;  
+	clsCamera::LookAt(target.getPosition(), NULL); ; 
 }
 
 void clsTargCamera::StrafeLongitude(float units) 
@@ -241,15 +222,8 @@ void clsTargCamera::StrafeLatitude(float units)
 // Target transformations
 void clsTargCamera::TargetTranslate(const VECTOR3D &point) 
 { 
-	float dist = Distance(point);
-	if ( 
-		dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		target.Translate(point);
-		fDist	= dist;	
-		clsCamera::LookAt(target.getPosition(), NULL); 
-	}
+	target.Translate(point);
+	clsCamera::LookAt(target.getPosition(), NULL); 
 }
 void clsTargCamera::TargetTranslate(float tX, float tY, float tZ) 
 { 
@@ -258,52 +232,29 @@ void clsTargCamera::TargetTranslate(float tX, float tY, float tZ)
 
 void clsTargCamera::TargetFollow(float units)	
 { 
-	VECTOR3D point	= target.getPosition() + fWd * units,
-			 dir(point - pos);
-	float	 dist	= Vector3DLength(dir);
+	VECTOR3D point	= target.getPosition() + fWd * units;
 
-	Vector3DNormalize(dir, dir);
-	if ( 
-		Vector3DMultS(fWd, dir) > .0f
-		&& dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		target.Translate(point); 
-		fDist	= dist;
-		clsCamera::LookAt(target.getPosition(), NULL); 
-	}
+	target.Translate(point); 
+	clsCamera::LookAt(target.getPosition(), NULL); 
 }
 
 void clsTargCamera::TargetStrafe(float units)	
 { 
 	VECTOR3D point	= target.getPosition() + rWd * units;
-	float	 dist	= clsCamera::Distance(point);
-	if ( 
-		dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		target.Translate(point); 
-		fDist	= dist;
-		clsCamera::LookAt(target.getPosition(), NULL);  
-	}
+
+	target.Translate(point); 
+	clsCamera::LookAt(target.getPosition(), NULL);  
 }
 
 void clsTargCamera::TargetFly(float units)		
 { 
 	VECTOR3D point	= target.getPosition() + uWd * units;
-	float	 dist	= clsCamera::Distance(point);
-	if ( 
-		dist - nearClip > EPSILON
-		&& farClip - dist > EPSILON
-	) {
-		target.Translate(point); 
-		fDist	= dist;
-		clsCamera::LookAt(target.getPosition(), NULL); 
-	}
+
+	target.Translate(point); 
+	clsCamera::LookAt(target.getPosition(), NULL); 
 }
 
 // Deprecated methods
-void clsTargCamera::setFDist(float dist)					{ /* doing nothing */ }
 void clsTargCamera::Pitch(float angle)						{ /* doing nothing */ }
 void clsTargCamera::Yaw(float angle)						{ /* doing nothing */ }
 void clsTargCamera::LookAt(VECTOR3D lookAt)					{ /* doing nothing */ }

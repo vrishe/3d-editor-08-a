@@ -55,7 +55,6 @@ class clsTargCamera : public clsCamera {
 private:
 	HULL3D target;
 
-	void setFDist(float dist);
 	void Pitch(float angle);
 	void Yaw(float angle);
 	void LookAt(VECTOR3D lookAt);
