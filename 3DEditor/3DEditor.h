@@ -129,7 +129,7 @@ UINT CreateMic();
 UINT ModifMic();
 BOOL CreateLight(); 
 BOOL ModifLight();
-BOOL CreateCam();
+UINT CreateCam();
 BOOL ModifCam();
 
 // Form event handler functions

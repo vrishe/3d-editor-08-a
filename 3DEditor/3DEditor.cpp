@@ -182,8 +182,6 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 									);
 	}
 
-	Scene.AddObject(new TANKBODY(445, 220, 200, 30));
-
 	Draw_MainToolbars();
 	RefreshObjectsList();
 	RefreshTextBoxes();
@@ -416,7 +414,10 @@ VOID Draw_InitMicrophoneToolbar() {
 						ufWidth - TAB_W * 2 - 11, 
 						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
 						46, 16);
-	ZeroMemory(name, 256 * sizeof(TCHAR));
+	if ( modifyMode )
+		((LPMICROPHONE3D)activeObject)->getName(name, 256);
+	else
+		ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbParams[0].Create(	TB_NAME,
 						name,
 						&mainForm,
@@ -424,62 +425,102 @@ VOID Draw_InitMicrophoneToolbar() {
 						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
 						LIST_OBJ_W - 44, BT_TOOL_H - 9);
 
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getBaseHeight();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[4].Create(	TB_BDIAM,
-						_T("12"),
+						(modifyMode ? name : _T("12")),
 						&mainForm,
 						ufWidth - 165, 
 						218,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getBaseRadius() * 2;
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[5].Create(	TB_BHEIGHT,
-						_T("114"),
+						(modifyMode ? name : _T("114")),
 						&mainForm,
 						ufWidth - 165, 
 						243,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getButtonWidth();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[6].Create(	TB_BWIDTH,
-						_T("25"),
+						(modifyMode ? name : _T("25")),
 						&mainForm,
 						ufWidth - 165, 
 						268,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightRadius() * 2;
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[7].Create(	TB_UDIAM,
-						_T("16"),
+						(modifyMode ? name : _T("16")),
 						&mainForm,
 						ufWidth - 165, 
 						293,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightHeight();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[8].Create(	TB_UHEIGHT,
-						_T("95"),
+						(modifyMode ? name : _T("95")),
 						&mainForm,
 						ufWidth - 165, 
 						318,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightGap();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[9].Create(	TB_UGAP,
-						_T("3.5"),
+						(modifyMode ? name : _T("3.5")),
 						&mainForm,
 						ufWidth - 165, 
 						343,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getHandleIndent();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[10].Create(TB_HANDIND,
-						_T("5"),
+						(modifyMode ? name : _T("5")),
 						&mainForm,
 						ufWidth - 165, 
 						368,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getHeadRadius() * 2;
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[11].Create(TB_HEADDIAM,
-						_T("55"),
+						(modifyMode ? name : _T("55")),
 						&mainForm,
 						ufWidth - 165, 
 						393,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getHeadDepth();
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[12].Create(TB_HEADDEPTH,
-						_T("21"),
+						(modifyMode ? name : _T("21")),
 						&mainForm,
 						ufWidth - 165, 
 						418,
 						75, BT_TOOL_H - 9);
+	if ( modifyMode ) {
+		float tmp = ((LPMICROPHONE3D)activeObject)->getCoreRadius() * 2;
+		swprintf_s(name, 256, _T("%.2f"), tmp);
+	}
 	tbParams[13].Create(TB_COREDIAM,
-						_T("42"),
+						(modifyMode ? name : _T("42")),
 						&mainForm,
 						ufWidth - 165, 
 						443,
@@ -581,21 +622,32 @@ VOID Draw_InitMicrophoneToolbar() {
 				147,
 				LB_V_H, LB_V_W);
 
-	ZeroMemory(name, 256 * sizeof(TCHAR));
+	if ( modifyMode ) {
+		COLORREF tmp = ((LPMICROPHONE3D)activeObject)->getColor();
+		swprintf_s(name, 256, _T("%d"), RED(tmp));
+	}
+	else
+		ZeroMemory(name, 256 * sizeof(TCHAR));
 	tbParams[14].Create(	TB_R,
 				name,
 				&mainForm, 
 				ufWidth - TAB_W * 2  + 36, 
 				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
-
+	if ( modifyMode ) {
+		COLORREF tmp = ((LPMICROPHONE3D)activeObject)->getColor();
+		swprintf_s(name, 256, _T("%d"), GREEN(tmp));
+	}
 	tbParams[15].Create(	TB_G,
 				name,
 				&mainForm, 
 				ufWidth - TAB_W * 2 + LB_V_W + 77, 
 				145,
 				BT_TOOL_W - 19, BT_TOOL_H - 9);
-
+	if ( modifyMode ) {
+		COLORREF tmp = ((LPMICROPHONE3D)activeObject)->getColor();
+		swprintf_s(name, 256, _T("%d"), BLUE(tmp));
+	}
 	tbParams[16].Create(	TB_B,
 				name,
 				&mainForm, 
@@ -1258,7 +1310,7 @@ BOOL ModifLight() {
 	return true;
 }
 
-BOOL CreateCam() {
+UINT CreateCam() {
 	TCHAR *buf = new TCHAR[256];
 
 	tbParams[1].getText(buf, 256);
@@ -1278,8 +1330,13 @@ BOOL CreateCam() {
 	tbParams[0].getText(buf, 256);
 	if ( _tcslen(buf) == 0 ) {
 		delete[] buf;
-		return false;
+		return 1;
 	}
+	if ( tx == x && ty == y && tz == z ) {
+		delete[] buf;
+		return 2;
+	}
+
 	LPTARGCAMERA3D cam = new TARGCAMERA3D();
 	cam->setName(buf, 256);
 	cam->Translate(x, y, z);
@@ -1293,7 +1350,7 @@ BOOL CreateCam() {
 	GetActiveObject();
 
 	delete[] buf;
-	return true;
+	return 0;
 }
 
 BOOL ModifCam()
@@ -1317,7 +1374,11 @@ BOOL ModifCam()
 	tbParams[0].getText(buf, 256);
 	if ( _tcslen(buf) == 0 ) {
 		delete[] buf;
-		return false;
+		return 1;
+	}
+	if ( tx == x && ty == y && tz == z ) {
+		delete[] buf;
+		return 2;
 	}
 	LPTARGCAMERA3D cam = (LPTARGCAMERA3D)activeObject;
 	cam->setName(buf, 256);
@@ -1330,7 +1391,7 @@ BOOL ModifCam()
 	GetActiveObject();
 
 	delete[] buf;
-	return true;
+	return 0;
 }
 
 BOOL ToPoint() {
@@ -1670,8 +1731,10 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			else
 				bResult = CreateCam();
 
-			if ( !bResult )
+			if ( bResult == 1 )
 				MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
+			if ( bResult == 2 )
+				MessageBox(NULL, _T("Wrong parameters"), _T("Error"), MB_OK | MB_ICONERROR );
 
 			mainForm.Invalidate();
 			break;
@@ -1748,7 +1811,10 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					break;
 			}
 
+			ToPoint();
+			RefreshTextBoxes();
 			mainForm.Invalidate();
+			mainForm.setFocus();
 			break;
 
 		case LIST_OBJECTS:
@@ -1766,6 +1832,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 
 		case IDM_NEW:
 			SceneCleanUp();
+			mainForm.Invalidate();
 			break;
 
 		case IDM_SAVE:

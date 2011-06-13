@@ -310,14 +310,14 @@ void clsObject::ScaleVAcross(float factor)	{ localScale.z *= factor; }
 void clsObject::LocalScale(float fX, float fY, float fZ)
 {
 	localScale.x *= fX;
-	localScale.x *= fY;
-	localScale.x *= fZ;
+	localScale.y *= fY;
+	localScale.z *= fZ;
 }
 void clsObject::Scale(float fX, float fY, float fZ)
 {
 	worldScale.x *= fX;
-	worldScale.x *= fY;
-	worldScale.x *= fZ;
+	worldScale.y *= fY;
+	worldScale.z *= fZ;
 }
 
 

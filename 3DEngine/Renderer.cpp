@@ -266,18 +266,26 @@ BOOL clsViewport::Render() {
 						objVertBuffer[j],
 						objVertBuffer[j]
 					);
+				
+				float z = objVertBuffer[j].z;
 
 				Matrix3DTransformCoord(
 								projectionMatrix,
 								objVertBuffer[j],
 								objVertBuffer[j]
 							);
-				if ( projectionMatrix._44 < .0f )
+				if ( projectionMatrix._44 < .0f ) {
 					objVertBuffer[j] /= objVertBuffer[j].z 
 									+ projectionMatrix._34;
-				else
+					if ( z > camOutput->getFarCP() || z < camOutput->getNearCP() )
+						objVertBuffer[j].z = 2;
+				}
+				else {
 					objVertBuffer[j].z /= objVertBuffer[j].z 
 									+ projectionMatrix._34;
+					if ( z > camOutput->getFarCP() || z < camOutput->getNearCP() )
+						objVertBuffer[j].z = 2;
+				}
 
 				Matrix3DTransformCoord(
 						viewportMatrix,
@@ -355,11 +363,11 @@ BOOL clsViewport::Render() {
 			for (UINT i = 0; i < scenePolyCount; i++ ) 
 			{
 				if ( scenePolyBuffer[i].first.first.z > 0
-					&& scenePolyBuffer[i].first.first.z <= 1
-					&& scenePolyBuffer[i].first.second.z >= 0
-					&& scenePolyBuffer[i].first.second.z <= 1
-					&& scenePolyBuffer[i].first.third.z >= 0
-					&& scenePolyBuffer[i].first.third.z <= 1 
+					&& scenePolyBuffer[i].first.first.z < 1
+					&& scenePolyBuffer[i].first.second.z > 0
+					&& scenePolyBuffer[i].first.second.z < 1
+					&& scenePolyBuffer[i].first.third.z > 0
+					&& scenePolyBuffer[i].first.third.z < 1 
 
 					&& scenePolyBuffer[i].first.first.x >= 0
 					&& scenePolyBuffer[i].first.first.x <= clientRect.right
