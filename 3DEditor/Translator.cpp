@@ -105,7 +105,7 @@ void clsTranslator::pasteMic(LPMICROPHONE3D obj, FILE* file) {
 	bErrorFlag = _ftprintf_s(file, _T("Head radius:    %.3f\n"), obj->getHeadRadius() );
 	bErrorFlag = _ftprintf_s(file, _T("Head deapth:    %.3f\n"), obj->getHeadDepth() );
 	bErrorFlag = _ftprintf_s(file, _T("Core radius:    %.3f\n"), obj->getCoreRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecision() );
 	pasteColor(obj->getColor(), file);
 }
 
@@ -348,10 +348,10 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	bErrorFlag = _ftscanf_s(file, _T("%f"), &precision);
 
 	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
-	int r, g, j;
-	bErrorFlag = _ftscanf_s(file, _T("%d %d %d"), &r, &g, &j);
+	int r, g, b;
+	bErrorFlag = _ftscanf_s(file, _T("%d %d %d"), &r, &g, &b);
 
-	obj = new MICROPHONE3D(r, g, j, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
+	obj = new MICROPHONE3D(r, g, b, bR, bH, bW, uR, uH, uG, hI, hR, hD, cR);
 	obj->setName(name, 256);
 	obj->Translate(pos);
 	obj->setForwardLookDirection(fwd);

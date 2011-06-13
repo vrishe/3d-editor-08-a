@@ -109,6 +109,6 @@ public:
 	float getHeadRadius		();
 	float getHeadDepth		();
 	float getCoreRadius		();
-	int getPrecision		();
+	int	  getPrecision		();
 };
 typedef Microphone MICROPHONE3D, *LPMICROPHONE3D;

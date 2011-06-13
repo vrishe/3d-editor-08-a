@@ -75,9 +75,9 @@ typedef struct tagColor
 #define BLACK 0
 
 // This is for simple colorref colo extraction 
-#define RED(c)		(BYTE)(c>>16)
+#define RED(c)		(BYTE)(c)
 #define GREEN(c)	(BYTE)(c>>8)
-#define BLUE(c)		(BYTE)(c)
+#define BLUE(c)		(BYTE)(c>>16)
 
 // ============================================================================
 // Object class that represents current object
