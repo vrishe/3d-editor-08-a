@@ -14,17 +14,17 @@
 #define MAX_PARAMS_NUM 20
 
 #define VIEWPORT_AREA_H 670
-#define VIEWPORT_AREA_W 968
+#define VIEWPORT_AREA_W 970
 
-#define FORM_BG_COLOR RGB(120, 120, 126)
-#define VIEWPORT_BG_COLOR RGB(90, 90, 95)
-#define TEXT_BG_COLOR RGB(155, 155, 155)
+#define FORM_BG_COLOR RGB(220, 220, 222)
+#define VIEWPORT_BG_COLOR RGB(150, 150, 153)
+#define TEXT_BG_COLOR RGB(180, 180, 180)
 
 #define LIST_OBJ_H	200
 #define LIST_OBJ_W	266
 
-#define LB_V_H	10
-#define LB_V_W	20
+#define LB_V_H	20
+#define LB_V_W	15
 
 #define BT_TOOL_H 30
 #define BT_TOOL_W 60
@@ -75,7 +75,16 @@ enum MF_TEXTBOX {
 	TB_NAME			= 127,
 	TB_TX			= 128,
 	TB_TY			= 129,
-	TB_TZ			= 130
+	TB_TZ			= 130,
+	TB_LENGTH		= 131,
+	TB_WIDTH		= 132,
+	TB_FTA			= 134,
+	TB_FBA			= 135,
+	TB_BTA			= 136,
+	TB_BBA			= 137,
+	TB_TA			= 138,
+	TB_SA			= 139,
+	TB_CLEN			= 140
 };
 
 enum MF_BUTTON {
@@ -100,7 +109,14 @@ enum MF_BUTTON {
 	BT_DELETE		= 1018,
 	BT_BIND			= 1019,
 	BT_RELEASE		= 1020,
-	BT_PROJSET		= 1021
+	BT_PROJSET		= 1021,
+	BT_BOX			= 1022,
+	BT_CONE			= 1023,
+	BT_EX_CONE		= 1024,
+	BT_HOLE			= 1025,
+	BT_SPHERE		= 1026,
+	BT_MAKETANK		= 1027,
+	BT_TANK			= 1028
 };
 
 // Draw interface functions
@@ -127,6 +143,8 @@ VOID RemoveSceneObject();
 // Controls functions
 UINT CreateMic();
 UINT ModifMic();
+UINT CreateTank();
+UINT ModifTank();
 BOOL CreateLight(); 
 BOOL ModifLight();
 UINT CreateCam();

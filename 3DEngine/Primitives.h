@@ -105,7 +105,7 @@ public:
 	float getHeight();
 	float getBRadius();
 	float getTRadius();
-	int getPrecission();
+	int getPrecision();
 
 	// setters
 	void setHeight(float); 
@@ -214,7 +214,7 @@ public:
 	float getTRadius();
 	float getBHoleRadius();
 	float getTHoleRadius();
-	int getPrecission();
+	int getPrecision();
 
 	// setters
 	void setHeight(float); 
@@ -227,3 +227,42 @@ public:
 typedef Hole HOLE3D, *LPHOLE3D;
 
 #endif // HOLE_H
+
+class clsSphere : public clsMesh {
+protected:
+	float			radius;
+	float			cropMult;
+	float			angleFrom;
+	float			angleTo;
+	unsigned int	precision;
+
+	void			Triangulate();
+public:
+	clsSphere(
+		float			Radius,
+		float			Crop,
+		float			From,
+		float			To,
+		unsigned int	Prec,
+		COLORREF		c
+	);
+	clsSphere(
+		float			Radius, 
+		float			Crop,
+		float			From,
+		float			To,
+		unsigned int	Prec,
+		unsigned char	red,
+		unsigned char	green,
+		unsigned char	blue
+	);
+
+	void	setRadius(float Radius);
+	void	setCrop(float Plane);
+	void	setPrecision(int Prec);
+
+	float	getRadius();
+	float	getCrop();
+	int		getPrecision();
+};
+typedef clsSphere SPHERE3D, *LPSPHERE3D;

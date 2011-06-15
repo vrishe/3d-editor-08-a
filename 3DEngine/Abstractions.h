@@ -98,8 +98,10 @@ enum MESH_ID {
 	MSH_CONE		= 1,
 	MSH_EXCONE		= 2,
 	MSH_HOLE		= 3,
-	MSH_MIC			= 4,
-	MSH_TANK		= 5
+	MSH_SPHERE		= 4,
+	MSH_MIC			= 5,
+	MSH_CAT			= 6,
+	MSH_TANK		= 7
 };
 
 enum CONSTRAINTS {

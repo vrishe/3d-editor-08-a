@@ -297,7 +297,7 @@ Cone::Cone(
 float Cone::getHeight()		{ return h; }
 float Cone::getBRadius()	{ return bR; }
 float Cone::getTRadius()	{ return tR; }
-int Cone::getPrecission()	{ return precision; }
+int Cone::getPrecision()	{ return precision; }
 
 
 /* ------------------------ setters ------------------------ */
@@ -802,7 +802,7 @@ float Hole::getBRadius() { return bR; }
 float Hole::getTRadius() { return tR; }
 float Hole::getBHoleRadius() { return bRh; }
 float Hole::getTHoleRadius() { return tRh; }
-int Hole::getPrecission() { return precision; }
+int Hole::getPrecision() { return precision; }
 
 
 /* ------------------------ setters ------------------------ */
@@ -815,3 +815,135 @@ void Hole::setTHoleRadius(float n) { tRh = n; }
 void Hole::setPrecission(int n) { precision = n; }
 
 #endif // HOLE_CPP
+
+clsSphere::clsSphere(
+		float			Radius,
+		float			Crop,
+		float			From,
+		float			To,
+		unsigned int	Prec,
+		COLORREF		c
+) : clsMesh(MSH_SPHERE, c) {
+	radius		= abs(Radius);
+	precision	= Prec;
+	cropMult	= Crop;
+	angleFrom	= From;
+	angleTo		= To;
+	if ( cropMult < EPSILON	)			cropMult = .0f;
+	if ( cropMult - 1.0f > EPSILON )	cropMult = 1.0f;
+
+	Triangulate();
+}
+
+clsSphere::clsSphere(
+		float			Radius, 
+		float			Crop,
+		float			From,
+		float			To,
+		unsigned int	Prec,
+		unsigned char	red,
+		unsigned char	green,
+		unsigned char	blue
+) : clsMesh(MSH_SPHERE, red, green, blue) {
+	radius		= abs(Radius);
+	precision	= Prec;
+	cropMult	= Crop;
+	angleFrom	= From;
+	angleTo		= To;
+	if ( cropMult < EPSILON	)			cropMult = .0f;
+	if ( cropMult - 1.0f > EPSILON )	cropMult = 1.0f;
+
+	Triangulate();
+}
+
+void clsSphere::Triangulate()
+{
+	if ( cropMult < 1.0f )
+	{
+		vertices.clear();
+		edges.clear();
+		polygons.clear();
+
+		float	cropZ	= radius *  (2 * cropMult - 1),
+				vAngle  = asin(cropZ / radius),
+				vDelta	= ((float)M_PI_2 - vAngle) 
+							/ (float)(precision / 2),	
+				hDelta	= abs((angleTo - angleFrom) / precision),
+				radius2p = radius * radius;
+
+		BOOL isSliced	= cos(angleFrom) != 1.0f || cos(angleTo) != 1.0f;
+		UINT perCircle	= isSliced ? precision + 2 : precision;
+		if ( abs(cropZ) < radius - EPSILON ) 
+			vertices.push_back(VECTOR3D(.0f, .0f, cropZ));
+
+		while ( (FLOAT)M_PI_2 - vAngle > -EPSILON )
+		{
+			float cropX	= radius * cos(vAngle);
+			UINT vCount	= cropX > EPSILON ? perCircle : 1;
+
+			LPVECTOR3D v	= new VECTOR3D[vCount];
+
+			float hAngle = angleFrom;
+			UINT max = isSliced ? vCount - 1 : vCount;
+			for( UINT	i	= 0; i < max; i++ ) 
+			{
+				v[i].x = cropX * cos(hAngle);
+				v[i].y = cropX * sin(hAngle);
+				v[i].z = cropZ;
+
+				hAngle += hDelta;
+			}
+			if ( isSliced ) v[max].z = cropZ;
+			vertices.insert(vertices.end(), v, v + vCount);
+			
+			delete[] v;
+
+			vAngle += vDelta;
+			cropZ = radius * sin(vAngle); 
+		}
+
+		UINT	i	= 1,
+				max = vertices.size();
+		while ( i < max )
+		{
+			for ( UINT j = i, m = i + perCircle; j < m; j++ )
+			{
+				UINT current	= j >= max ? max - 1 : j,
+					 upward		= ((INT)(current - perCircle)) <= 0 
+											? 0 : (current - perCircle),
+					 forward	= current >= m - 1 ? i : current + 1,
+					 diagonal	= upward == 0 ? 0 : upward + 1;
+
+				if ( forward == max ) 
+				{
+					upward		+= j - i;
+					diagonal	= upward + 1;
+					if ( diagonal == i ) diagonal = i - perCircle;
+					polygons.push_back(POLY3D(diagonal, current, upward));
+				}
+				else
+				{
+					edges.push_back(EDGE3D(current, forward));
+					if ( diagonal != 0 )
+					{
+						if ( diagonal == i ) diagonal = i - perCircle;
+						edges.push_back(EDGE3D(current, diagonal));
+						polygons.push_back(POLY3D(current, diagonal, forward));
+						polygons.push_back(POLY3D(upward, diagonal, current));
+					}
+					else
+					{
+						polygons.push_back(POLY3D(upward, forward, current));
+					}
+				}
+				edges.push_back(EDGE3D(current, upward));
+			}
+			i += perCircle;
+		}
+
+		flushVertices();
+		vertices.shrink_to_fit();
+		edges.shrink_to_fit();
+		polygons.shrink_to_fit();
+	}
+}

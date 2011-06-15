@@ -4,7 +4,6 @@
 // headers that come from any other project.
 
 // TODO: include any new static libraries headers below.
-#define EPSILON .005F
 #include "..\Controls\Controls.h"
 #include "..\3DEngine\Renderer.h"
 #include "..\3DEngine\Lighters.h"

@@ -546,7 +546,7 @@ DWORD WINAPI clsViewportPool::Render(LPVOID renderInfo)
 			vp->Viewport->getSize(&vpWidth, &vpHeight);
 			hPenOld = (HPEN)SelectObject(hDC, hPenCur);
 			hBrOld	= (HBRUSH)SelectObject(hDC, GetStockObject(NULL_BRUSH));
-			Rectangle(hDC, 0, 0, vpWidth, vpHeight);
+			Rectangle(hDC, 1, 1, vpWidth - 1, vpHeight - 1);
 			SelectObject(hDC, hPenOld);
 			SelectObject(hDC, hBrOld);
 		}
