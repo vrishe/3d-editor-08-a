@@ -17,6 +17,7 @@ private:
 	static void pasteExCone(LPEXCONE3D, FILE*);
 	static void pasteHole(LPHOLE3D, FILE*);
 	static void pasteMic(LPMICROPHONE3D, FILE*);
+	static void pasteTank(LPJAGDPANTHER3D, FILE*);
 
 	static void pasteCam(LPCAMERA3D, FILE*);
 	static void pasteLight(LPDIFLIGHT3D, FILE*);
@@ -32,6 +33,7 @@ private:
 	//static void readExCone(LPEXCONE3D, FILE* dataFile, LPSCENE3D Scene);
 	//static void readHole(LPHOLE3D, FILE* dataFile, LPSCENE3D Scene);
 	static void readMic(FILE* dataFile, LPSCENE3D);
+	static void readTank(FILE* dataFile, LPSCENE3D);
 public:
 	static bool saveSceneScript(LPSCENE3D, TCHAR *fileName);
 	static bool loadSceneScript(LPSCENE3D, TCHAR *fileName);

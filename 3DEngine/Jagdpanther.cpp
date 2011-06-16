@@ -120,8 +120,8 @@ void clsTankBody::Triangulate()
 	v[10].z = tangentA * (v[10].x - v[1].x) + v[1].z;
 	v[0].z = Height * 0.4f;
 	v[0].x = (v[0].z + tangentA * v[1].x - v[1].z) / tangentA;
-
-
+	
+	symmetryPoints.insert(symmetryPoints.begin(), v, v + _countof(v));
 	// Copy vertices and reallocate em. as should be.
 
 	float halfWidth		= Width		/ 2.0f;
@@ -255,6 +255,46 @@ void clsTankBody::Triangulate()
 	polygons.shrink_to_fit();
 }
 
+VERT_LIST clsTankBody::getSymmetry() { return symmetryPoints; }
+
+void CircleIntersect(
+			float o1X, float o1Y, float o1R, 
+			float o2X, float o2Y, float o2R, 
+			float *out, size_t outCount
+) {
+	if ( out != NULL )
+	{
+		float res[4]	= {0};
+		float d			= sqrtf(powf((o1X - o2X), 2) + powf((o1Y - o2Y), 2));
+
+		VECTOR3D v(o2X - o1X, o2Y - o1Y, .0f);
+		VECTOR3D P0(o1X, o1Y, .0f);
+		Vector3DNormalize(v, v);
+		if ( abs(d - (o1R + o2R)) < EPSILON )
+		{
+			P0 += v * o1R;
+			res[0] = P0.x;
+			res[1] = P0.y;
+		}
+		else
+		{
+			if ( (o1R + o2R) - d > EPSILON )
+			{
+				float a = (o1R*o1R - o2R*o2R + d*d) / (2*d);
+				float h = sqrt(o1R*o1R - a*a);
+				
+				P0 += v * a;
+				res[0] = P0.x + h * (o2Y - o1Y) / d;
+				res[1] = P0.y - h * (o2X - o1X) / d;
+				res[2] = P0.x - h * (o2Y - o1Y) / d;
+				res[3] = P0.y + h * (o2X - o1X) / d;
+			}
+		}
+		UINT cpCount = outCount <= _countof(res) ? outCount : _countof(res);
+		CopyMemory(out, res, cpCount * sizeof(float));
+	}
+}
+
 clsCaterpillar::clsCaterpillar(
 						const VECTOR3D &o1,
 						float o1rad,
@@ -264,35 +304,22 @@ clsCaterpillar::clsCaterpillar(
 						float o3rad,
 						const VECTOR3D &o4,
 						float o4rad,
-						float crad1,
-						float crad2,
-						float crad3,
-						float crad4,
-						int   prec
+						float height,
+						float thickness,
+						unsigned int   prec
 ) : clsMesh(MSH_CAT) {
-	O1 = o1;
-	O2 = o2;
-	O3 = o3;
-	O4 = o4;
-	o1Radius = o1rad;
-	o2Radius = o2rad;
-	o3Radius = o3rad;	
-	o4Radius = o4rad;
+	O1			= o1;
+	o1Radius	=o1rad;
+	O2			= o2;
+	o2Radius	= o2rad;
+	O3			= o3;
+	o3Radius	= o3rad;
+	O4			= o4;
+	o4Radius	= o4rad;
+	Height		= height;
+	Thickness	= thickness;
 
-	if ( crad1 - o1Radius > EPSILON 
-		&& crad1 - o2Radius > EPSILON ) 
-		conRad1 = crad1;
-	else
-		conRad1 = o1Radius + o2Radius;
-	conRad2 = crad2;
-	if ( crad1 - o4Radius > EPSILON 
-		&& crad1 - o3Radius > EPSILON ) 
-		conRad3 = crad3;
-	else
-		conRad3 = o4Radius + o3Radius;
-	conRad4 = crad4;
-
-	precision = prec;
+	precision	= prec;
 	Triangulate();
 }
 
@@ -302,30 +329,149 @@ void clsCaterpillar::Triangulate()
 	edges.clear();
 	polygons.clear();
 
-	float circle1rad = conRad1 - o1Radius;
-	float circle2rad = conRad1 - o2Radius;
-	float circleDist = Vector3DLength(O2 - O1); 
-	if ( circleDist > EPSILON ) 
-	{
-		float a		 = (circle1rad * circle2rad
-					- circle2rad * circle2rad
-					+ circleDist * circleDist ) / (2 * circleDist);
-		float height = sqrt(circle1rad * circle1rad  - a * a); 
-		VECTOR3D Direction;
-		Vector3DNormalize(O2 - O1, Direction);
-		VECTOR3D P2( O1 + Direction * a );
-		VECTOR3D Intersection ( 
-						P2.x + height * ( O2.z - O1.z ) / circleDist,
-						.0f,
-						P2.z + height * ( O2.x - O1.x ) / circleDist
-					);
-		VECTOR3D	v1, 
-					v2;
-		Vector3DNormalize(VECTOR3D(O1 - Intersection), v1);
-		Vector3DNormalize(VECTOR3D(O2 - Intersection), v2);
-		float cAngle = Vector3DMultS( v1, v2 );
-		Sleep(20);
+	float cjRadius = 2 * max(o1Radius, o2Radius);
+	float halfHeight = Height / 2;
 
+	float *pts = new float[4];
+	CircleIntersect(
+				O2.x, O2.z, cjRadius - o2Radius,
+				O1.x, O1.z, cjRadius - o1Radius,		
+				pts, 4
+			);
+	VECTOR3D beg(O1.x - pts[0], 0, O1.z - pts[1]),
+			 end(O2.x - pts[0], 0, O2.z - pts[1]);
+	Vector3DNormalize(beg, beg);
+	Vector3DNormalize(end, end);
+
+	VECTOR3D circle(0, 0, 1);
+	float da = fabs(acos(Vector3DMultS(beg, circle))) / precision;
+
+	for ( UINT i = 0; i < precision; i++ )
+	{
+		vertices.push_back(VECTOR3D(O1.x, -halfHeight, O1.z) + (circle * o1Radius));
+		vertices.push_back(VECTOR3D(O1.x, -halfHeight, O1.z) + (circle * (o1Radius + Thickness)));
+		MATRIX3D M(true);
+		Matrix3DRotateAxis(VECTOR3D(0, 1, 0), da, M);
+		Matrix3DTransformNormal(M, circle, circle);
+		Vector3DNormalize(circle, circle);
+	}
+
+	da	= fabs(acos(Vector3DMultS(beg, end))) / precision;
+	for ( UINT i = 0; i <= precision; i++ )
+	{
+		vertices.push_back(VECTOR3D(pts[0], -halfHeight, pts[1]) + (beg * cjRadius));
+		vertices.push_back(VECTOR3D(pts[0], -halfHeight, pts[1]) + (beg * (cjRadius + Thickness)));
+		MATRIX3D M(true);
+		Matrix3DRotateAxis(VECTOR3D(0, 1, 0), da, M);
+		Matrix3DTransformNormal(M, beg, beg);
+		Vector3DNormalize(beg, beg);
+	}	
+
+	CircleIntersect(
+				O4.x, O4.z, cjRadius - o4Radius,	
+				O3.x, O3.z, cjRadius - o3Radius,
+				pts, 4
+			);
+	beg.x = O3.x - pts[0];
+	beg.y = 0;
+	beg.z = O3.z - pts[1];
+	end.x = O4.x - pts[0];
+	end.y = 0;
+	end.z = O4.z - pts[1];
+	Vector3DNormalize(beg, beg);
+	Vector3DNormalize(end, end);
+
+	da	= fabs(acos(Vector3DMultS(beg, end))) / precision;
+	for ( UINT i = 0; i <= precision; i++ )
+	{
+		vertices.push_back(VECTOR3D(pts[0], -halfHeight, pts[1]) + (beg * cjRadius));
+		vertices.push_back(VECTOR3D(pts[0], -halfHeight, pts[1]) + (beg * (cjRadius + Thickness)));
+		MATRIX3D M(true);
+		Matrix3DRotateAxis(VECTOR3D(0, 1, 0), da, M);
+		Matrix3DTransformNormal(M, beg, beg);
+		Vector3DNormalize(beg, beg);
+	}	
+
+	da = fabs(acos(Vector3DMultS(beg, VECTOR3D(0, 0, 1)))) / precision;
+	for ( UINT i = 0; i <= precision; i++ )
+	{
+		vertices.push_back(VECTOR3D(O4.x, -halfHeight, O4.z) + (beg * o4Radius));
+		vertices.push_back(VECTOR3D(O4.x, -halfHeight, O4.z) + (beg * (o4Radius + Thickness)));
+		MATRIX3D M(true);
+		Matrix3DRotateAxis(VECTOR3D(0, 1, 0), da, M);
+		Matrix3DTransformNormal(M, beg, beg);
+		Vector3DNormalize(beg, beg);
+	}
+
+	delete[] pts;
+
+	for ( UINT i = 0, max = vertices.size() - 1; i < max; i++ )
+		edges.push_back(EDGE3D(i , i + 1));
+	edges.push_back(EDGE3D(vertices.size() - 1, 0));
+	for ( UINT i = 0, max = vertices.size() - 2; i < max; i++ )
+		edges.push_back(EDGE3D(i , i + 2));
+	edges.push_back(EDGE3D(vertices.size() - 1, 1));
+	edges.push_back(EDGE3D(vertices.size() - 2, 0));
+	for ( UINT i = 0, max = vertices.size() - 2; i < max; i++ )
+	{
+		if ( i % 2 == 0 )
+			polygons.push_back(POLY3D(i + 1, i, i + 2));
+		else
+			polygons.push_back(POLY3D(i + 2, i, i + 1));
+	}
+	polygons.push_back(POLY3D(0, vertices.size() - 1, vertices.size() - 2));
+	polygons.push_back(POLY3D(1, vertices.size() - 1, 0));
+
+	UINT baseVCount = vertices.size(),
+		 baseECount = edges.size(),
+		 basePCount = polygons.size();
+	vertices.insert(vertices.end(), vertices.begin(), vertices.end());
+	for ( UINT max = vertices.size(), i = max / 2 ; i < max; i++ )
+		vertices[i].y += Height;
+	edges.insert(edges.end(), edges.begin(), edges.end());
+	for ( UINT max = edges.size(), i = baseECount; i < max; i++ )
+		edges[i] += baseVCount;
+	polygons.insert(polygons.end(), polygons.begin(), polygons.end());
+	for ( UINT max = polygons.size(), i = basePCount; i < max; i++ )
+	{
+		polygons[i] += baseVCount;
+		swap(polygons[i].first, polygons[i].second);
+	}
+	bool parity;
+	for ( UINT i = 0; i < baseVCount; i++ )
+	{
+		parity = i % 2 == 0;
+		edges.push_back(EDGE3D(i, i + baseVCount));
+		if ( i < baseVCount - 2 )
+		{
+			edges.push_back(EDGE3D(i, i + 2));
+			edges.push_back(EDGE3D(i, i + 2 + baseVCount));
+			if ( parity )
+			{
+				polygons.push_back(POLY3D(i, i + baseVCount, i + 2 + baseVCount));
+				polygons.push_back(POLY3D(i, i + 2 + baseVCount, i + 2));
+			}
+			else
+			{
+				polygons.push_back(POLY3D(i + baseVCount, i, i + 2 + baseVCount));
+				polygons.push_back(POLY3D(i + 2 + baseVCount, i, i + 2));
+			}
+		}
+		else
+		{
+			edges.push_back(EDGE3D(i, 0));
+			edges.push_back(EDGE3D(i, baseVCount));
+			if ( parity )
+			{
+				polygons.push_back(POLY3D(i, i + baseVCount, baseVCount));
+				polygons.push_back(POLY3D(i, baseVCount, 0));
+			}
+			else
+			{
+				polygons.push_back(POLY3D(i + baseVCount, i, baseVCount + 1));
+				polygons.push_back(POLY3D(baseVCount + 1, i, 1));
+			}
+		}
 	}
 
 	Transform();
@@ -373,20 +519,22 @@ void clsJagdpanther::Triangulate() {
 	polygons.clear();
 
 	TANKBODY tBody(Length, Width, Height, fbA, ftA, bbA, btA, tA, sA);
-	tBody.Translate(.0, .0, Height * 0.25f);
 	tBody.Yaw(-(FLOAT)M_PI_2);
 	tBody.Transform();
 		addMesh(PZ_BODY,	tBody);
 
-	float CannonZ = Height * 0.93f;
-	float CannonBaseH  = Length * .11f;
-	float CannonBaseR1 = Height * .14f;
-	float CannonBaseR2 = Height * 0.075f;
-	float CannonBaseX = Length * .5f - (CannonZ + CannonBaseR1) * cos(ftA * (FLOAT)(M_PI / 180.0f));
+	float conv2rad	= (FLOAT)M_PI / 180.0f;
+
+	float CannonBaseH	= Length * .11f;
+	float CannonBaseR1	= Height * .14f;
+	float CannonBaseR2	= Height * 0.075f;
+	//float crossFront	= Height 
+	float CannonZ		= tBody.getSymmetry().at(10).z - 1.5f * CannonBaseR1;
+	float CannonBaseX	= tBody.getSymmetry().at(10).x;
 	CONE3D	CannonBase(Length * 0.11f, CannonBaseR1, CannonBaseR2, APPROX_DEFAULT_PREC);
 	CannonBase.Yaw(-(FLOAT)M_PI_2);
 	CannonBase.Pitch(-(FLOAT)M_PI_2);
-	CannonBase.Translate(.0f, CannonBaseX - CannonBaseH, CannonZ);
+	CannonBase.Translate(.0f, CannonBaseX, CannonZ);
 	CannonBase.Transform();
 		addMesh(PZ_CANNON_BASE,	CannonBase);
 
@@ -395,7 +543,7 @@ void clsJagdpanther::Triangulate() {
 	CONE3D	CannonDpfr(CannonDpfrH, CannonDpfrR1, CannonDpfrR1, APPROX_DEFAULT_PREC);
 	CannonDpfr.Yaw(-(FLOAT)M_PI_2);
 	CannonDpfr.Pitch(-(FLOAT)M_PI_2);
-	CannonDpfr.Translate(.0f, CannonBaseX, CannonZ);
+	CannonDpfr.Translate(.0f, CannonBaseX + CannonBaseH, CannonZ);
 	CannonDpfr.Transform();
 		addMesh(PZ_CANNON_DEMPFER,	CannonDpfr);
 
@@ -406,17 +554,18 @@ void clsJagdpanther::Triangulate() {
 	HOLE3D	Cannon(CannonH, CannonR1, CannonR1 * Caliber, CannonR2, CannonR2 * Caliber, APPROX_DEFAULT_PREC);
 	Cannon.Yaw(-(FLOAT)M_PI_2);
 	Cannon.Pitch(-(FLOAT)M_PI_2);
-	Cannon.Translate(.0f, CannonBaseX + CannonDpfrH, CannonZ);
+	Cannon.Translate(.0f, CannonBaseX + CannonBaseH + CannonDpfrH, CannonZ);
 	Cannon.Transform();
 		addMesh(PZ_CANNON,	Cannon);
 
-	float MgBaseR = Height * .125f;
-	float MgBaseZ = Height * .82f; 
-	float MgBaseX = Length * .5f - (MgBaseZ + 2 * MgBaseR) * cos(ftA * (FLOAT)(M_PI / 180.0f));
-	float MgBaseY = Width * .5f - MgBaseZ * sin(sA * (FLOAT)(M_PI / 180.0f));
+	float MgBaseR = Height * .12f;
+	VECTOR3D MgBaseDir = tBody.getSymmetry().at(1) - tBody.getSymmetry().at(10);
+	MgBaseDir	*= .46f;
+	MgBaseDir	= tBody.getSymmetry().at(10) + MgBaseDir;
+	MgBaseDir.y = Width / 2 * ( 1 - sin( sA * conv2rad )) - MgBaseR;
 	SPHERE3D MgBase(MgBaseR, .5f, 0, (FLOAT)M_PI * 2, APPROX_DEFAULT_PREC, 0x00fffff);
 	MgBase.Roll((90 - ftA) * (FLOAT)(M_PI / 180.0f));
-	MgBase.Translate(MgBaseY, MgBaseX, MgBaseZ);
+	MgBase.Translate(MgBaseDir.y, MgBaseDir.x, MgBaseDir.z);
 	MgBase.Transform();
 		addMesh(PZ_MG_BASE, MgBase);
 
@@ -424,85 +573,89 @@ void clsJagdpanther::Triangulate() {
 	float MgR		= Height * .02f;
 	CONE3D Mg(MgLength, MgR, MgR, APPROX_DEFAULT_PREC);
 	Mg.Roll(-(FLOAT)M_PI_2);
-	Mg.Translate(MgBaseY, MgBaseX + MgBaseR + MgLength, MgBaseZ);
+	Mg.Translate(MgBaseDir.y, MgBaseDir.x + MgBaseR + MgLength, MgBaseDir.z);
 	Mg.Transform();
 		addMesh(PZ_MG, Mg);
 
-	CONE3D  FrontWheel(Width * .16f, Height * .16f, Height * .16f, APPROX_DEFAULT_PREC); 
+	float WheelR = Height	* .15f;
+	float WheelH = Width	* .16f;
+	float WheelY = Width	* .45f;
+	float WheelX = Length	* .425f;
+	float WheelZ = Height	* .2f;
+
+	VECTOR3D O4(WheelX, 0, WheelZ);
+	float o4Radius = WheelR;
+
+	CONE3D  FrontWheel(WheelH, WheelR, WheelR, APPROX_DEFAULT_PREC); 
 	FrontWheel.Pitch((FLOAT)M_PI_2);
-	FrontWheel.Translate(-Width * .45f + Width * .16f, (Length / 2.0f) * .85f, Height * 0.44f);
+	FrontWheel.Translate(-WheelY + WheelH, WheelX, WheelZ);
 	FrontWheel.Transform();
 		addMesh(PZ_LEAD_WHL, FrontWheel);
 	FrontWheel.Pitch((FLOAT)M_PI);
-	FrontWheel.Translate(Width * .45f - Width * .16f, (Length / 2.0f) * .85f, Height * 0.44f);
+	FrontWheel.Translate(WheelY - WheelH, WheelX, WheelZ);
 	FrontWheel.Transform();
 		addMesh(PZ_LEAD_WHR, FrontWheel);
 
-	CONE3D RearWheel(Width * .16f, Height * .11f, Height * .11f, APPROX_DEFAULT_PREC); 
+
+	WheelR = Height		* .11f;
+	WheelX = -Length	* .4f;
+	WheelZ = Height		* .12f;
+
+	VECTOR3D O1(WheelX, 0, WheelZ);
+	float o1Radius = WheelR;
+
+	CONE3D RearWheel(WheelH, WheelR, WheelR, APPROX_DEFAULT_PREC); 
 	RearWheel.Pitch((FLOAT)M_PI_2);
-	RearWheel.Translate(-Width * .45f + Width * .16f, -(Length / 2.0f) * .8f, Height * 0.37f);
+	RearWheel.Translate(-WheelY + WheelH, WheelX, WheelZ);
 	RearWheel.Transform();
 		addMesh(PZ_REAR_WHL, RearWheel);
 	RearWheel.Pitch((FLOAT)M_PI);
-	RearWheel.Translate(Width * .45f - Width * .16f, -(Length / 2.0f) * .8f, Height * 0.37f);
+	RearWheel.Translate(WheelY - WheelH, WheelX, WheelZ);
 	RearWheel.Transform();
 		addMesh(PZ_REAR_WHR, RearWheel);
 
-	float delta = (Length * 0.68f) / 4;
+	float delta		= Length	* .0425f;
+	float offset	= Width		* .08f;
+
+	WheelX			= Length	* .3f;
+	WheelR			= Height	* .22f;
+	WheelZ			= Height	* .05f;
+	WheelY			= Width		* .38f;
+
+	VECTOR3D O3(WheelX, 0, WheelZ);
+	float o3Radius = WheelR;
+
 	CONE3D Wheel(Width * .06f, Height * .22f, Height * .22f, APPROX_DEFAULT_PREC);
-	Wheel.Pitch((FLOAT)M_PI_2);
-	Wheel.Translate(-Width * .45f + Width * .16f, (Length / 2.0f) * .63f, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH1, Wheel);
-	Wheel.Translate(-Width * .45f + Width * .16f, (Length / 2.0f) * .63f - delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH2, Wheel);
-	Wheel.Translate(-Width * .45f + Width * .16f, (Length / 2.0f) * .63f - 2 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH3, Wheel);
-	Wheel.Translate(-Width * .45f + Width * .16f, (Length / 2.0f) * .63f - 3 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH4, Wheel);
-	Wheel.Pitch((FLOAT)M_PI);
-	Wheel.Translate(Width * .45f - Width * .16f, (Length / 2.0f) * .63f, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH5, Wheel);
-	Wheel.Translate(Width * .45f - Width * .16f, (Length / 2.0f) * .63f - delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH6, Wheel);
-	Wheel.Translate(Width * .45f - Width * .16f, (Length / 2.0f) * .63f - 2 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH7, Wheel);
-	Wheel.Translate(Width * .45f - Width * .16f, (Length / 2.0f) * .63f - 3 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH8, Wheel);
+	Wheel.Pitch((FLOAT)M_PI_2 * 3.0f);
+	for ( UINT pair = 0, i = pair; pair < 8; pair++, i = pair * 2 )
+	{
+		float	tOffset = pair % 2 == 0 ? offset : .0f,
+				tDelta = WheelX - delta * i;
+		Wheel.Pitch((FLOAT)M_PI);
+		Wheel.Translate(-WheelY + tOffset, tDelta, WheelZ);
+		Wheel.Transform();
+			addMesh((JGPZ_PART)(PZ_BASE_WH1 + i), Wheel);
+		Wheel.Pitch((FLOAT)M_PI);
+		Wheel.Translate(WheelY - tOffset, tDelta, WheelZ);
+		Wheel.Transform();
+			addMesh((JGPZ_PART)(PZ_BASE_WH1 + i + 1), Wheel);
+	}
 
-	Wheel.Translate(-Width * .45f , (Length / 2.0f) * .44f, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH9, Wheel);
-	Wheel.Translate(-Width * .45f , (Length / 2.0f) * .44f - delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH10, Wheel);
-	Wheel.Translate(-Width * .45f , (Length / 2.0f) * .44f - 2 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH11, Wheel);
-	Wheel.Translate(-Width * .45f , (Length / 2.0f) * .44f - 3 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH12, Wheel);
-	Wheel.Pitch(-(FLOAT)M_PI);
-		Wheel.Translate(Width * .45f, (Length / 2.0f) * .44f, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH13, Wheel);
-	Wheel.Translate(Width * .45f, (Length / 2.0f) * .44f - delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH14, Wheel);
-	Wheel.Translate(Width * .45f, (Length / 2.0f) * .44f - 2 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH15, Wheel);
-	Wheel.Translate(Width * .45f, (Length / 2.0f) * .44f - 3 * delta, Height * 0.25f);
-	Wheel.Transform();
-		addMesh(PZ_BASE_WH16, Wheel);
+	VECTOR3D O2(WheelX - delta * 14, 0, WheelZ);
+	float o2Radius	= o3Radius;
+	float TrackW	= Width * .17f;
+	float Thick		= TrackW * .08f;	
+	float TrackY	= Width * .45f - TrackW * .5f; 
 
+	CATERPILLAR Track(O1, o1Radius, O2, o2Radius, O3, o3Radius, O4, o4Radius, TrackW, Thick, 5);
+	Track.Translate(TrackY, 0, 0);
+	Track.Transform();
+			addMesh(PZ_TRACK_L, Track);		
+	Track.Translate(-TrackY, 0, 0);
+	Track.Transform();
+			addMesh(PZ_TRACK_R, Track);		
+
+	Translate(.0, .0, Height * 0.25f);
 	Transform();
 	vertices.shrink_to_fit();
 	edges.shrink_to_fit();

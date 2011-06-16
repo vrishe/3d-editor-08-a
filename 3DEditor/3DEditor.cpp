@@ -184,11 +184,6 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 									);
 	}
 
-	//Scene.AddObject(new JAGDPANTHER3D(
-	//	312, 156, 100, 57, 56, 24, 13, 6.5f, 30, 120, 150, 160, 150));
-	//CATERPILLAR cat(VECTOR3D(1, 0, 0), sqrt(2.0f), VECTOR3D(-1, 0, 0), sqrt(2.0f), VECTOR3D(0,0,0), 0, VECTOR3D(0,0,0), 0, 2 * sqrt(2.0f), 2 * sqrt(2.0f), 40, 40, 1); 
-	////Scene.AddObject(new TANKBODY(624, 220, 200, 57, 56, 24, 13, 6.5f));
-
 	Draw_MainToolbars();
 	RefreshObjectsList();
 	RefreshTextBoxes();
@@ -1590,7 +1585,7 @@ UINT ModifTank() {
 	
 	tbParams[6].getText(buf, 256);
 	FLOAT tH = (FLOAT)(FLOAT)_ttof(buf);
-	if ( tH < tL * .3f  || tH > .5f * tL ) {
+	if ( tH < tL * .3f  || tH > .4f * tL ) {
 		delete [] buf;
 		return 3;
 	}
@@ -1625,7 +1620,7 @@ UINT ModifTank() {
 
 	tbParams[11].getText(buf, 256);
 	FLOAT tA = (FLOAT)(FLOAT)_ttof(buf);
-	if ( tA < 5 || tA > 15) {
+	if ( tA < 0 || tA > 15) {
 		delete [] buf;
 		return 8;
 	}
@@ -1705,7 +1700,7 @@ UINT CreateTank() {
 	
 	tbParams[6].getText(buf, 256);
 	FLOAT tH = (FLOAT)(FLOAT)_ttof(buf);
-	if ( tH < tL * .32f  || tH > .5f * tL ) {
+	if ( tH < tL * .3f  || tH > .4f * tL ) {
 		delete [] buf;
 		return 3;
 	}
@@ -1740,7 +1735,7 @@ UINT CreateTank() {
 
 	tbParams[11].getText(buf, 256);
 	FLOAT tA = (FLOAT)(FLOAT)_ttof(buf);
-	if ( tA < 5 || tA > 24) {
+	if ( tA < 0 || tA > 15) {
 		delete [] buf;
 		return 8;
 	}
@@ -2436,7 +2431,7 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 					MessageBox(NULL, _T("Width must be in range: [.5 * Length; .75 * Length]."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 3:
-					MessageBox(NULL, _T("Height must be in range: [.3 * Length; .5 * Length]."), _T("Error"), MB_OK | MB_ICONERROR );
+					MessageBox(NULL, _T("Height must be in range: [.3 * Length; .4 * Length]."), _T("Error"), MB_OK | MB_ICONERROR );
 					break;
 				case 4:
 					MessageBox(NULL, _T("Frontal top armor sheet slope must be in: [45, 59]."), _T("Error"), MB_OK | MB_ICONERROR );
@@ -2489,6 +2484,10 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDM_SAVE:
+			listObjects.setCurSel(-1);
+			GetActiveObject();
+			mainForm.Invalidate();
+
 			ofn.lpstrFile		= new TCHAR[256];
 			ofn.lpstrFile[0]	= '\0';
 			ofn.nMaxFile		= 256;
@@ -2511,6 +2510,10 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case IDM_LOAD:
+			listObjects.setCurSel(-1);
+			GetActiveObject();
+			mainForm.Invalidate();
+
 			ofn.lpstrFile		= new TCHAR[256];
 			ofn.lpstrFile[0]	= '\0';
 			ofn.nMaxFile		= 256;

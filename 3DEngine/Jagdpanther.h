@@ -14,6 +14,8 @@ private:
 	float btA;
 	float tA;
 	float sA;
+	
+	VERT_LIST symmetryPoints;
 
 	void Triangulate();
 
@@ -55,8 +57,16 @@ public:
 			unsigned char green,
 			unsigned char blue
 		);
+
+	VERT_LIST getSymmetry();
 };
 typedef clsTankBody TANKBODY, *LPTANKBODY;
+
+void CircleIntersect(
+			float o1X, float o1Y, float o1R, 
+			float o2X, float o2Y, float o2R, 
+			float *out, size_t outCount
+	); 
 
 class clsCaterpillar : public clsMesh {
 private:
@@ -69,12 +79,10 @@ private:
 	VECTOR3D O4;
 	float	 o4Radius;
 
-	float	conRad1;
-	float	conRad2;
-	float	conRad3;
-	float	conRad4;
+	float	Height;
+	float	Thickness;
 
-	int		precision;
+	unsigned int		precision;
 
 	void Triangulate();
 public:
@@ -87,11 +95,9 @@ public:
 		float o3rad,
 		const VECTOR3D &o4,
 		float o4rad,
-		float crad1,
-		float crad2,
-		float crad3,
-		float crad4,
-		int	  prec
+		float height,
+		float thickness,
+		unsigned int	  prec
 	);
 };
 typedef clsCaterpillar CATERPILLAR, *LPCATERPILLAR;

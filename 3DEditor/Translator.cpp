@@ -10,24 +10,24 @@ void clsTranslator::pasteName(LPOBJECT3D obj, FILE* file) {
 	TCHAR *dataBuffer = new TCHAR[MAX_OBJECT_NAME_LEN];
 	obj->getName(dataBuffer, 256);
 	
-	errno_t bErrorFlag = _ftprintf_s(file, _T("Name: %s\n"), dataBuffer );
+	errno_t bErrorFlag = _ftprintf_s(file, _T("Name:          %s\n"), dataBuffer );
 	
 	dataBuffer[MAX_OBJECT_NAME_LEN - 1] = '\0';
 	delete [] dataBuffer;
 }
 void clsTranslator::pasteColor(COLORREF in, FILE* file) {
-	errno_t bErrorFlag = _ftprintf_s(file, _T("Color: %d %d %d\n"), RED(in), GREEN(in), BLUE(in) );
+	errno_t bErrorFlag = _ftprintf_s(file, _T("Color:         %d %d %d\n"), RED(in), GREEN(in), BLUE(in) );
 }
 void clsTranslator::pastePosition(LPOBJECT3D obj, FILE* file) {
 	VECTOR3D pos = obj->getPosition();
-	errno_t bErrorFlag = _ftprintf_s(file, _T("Position: %.3f %.3f %.3f\n"), pos.x, pos.y, pos.z );
+	errno_t bErrorFlag = _ftprintf_s(file, _T("Position:      %.3f %.3f %.3f\n"), pos.x, pos.y, pos.z );
 }
 void clsTranslator::pasteRotation(LPOBJECT3D obj, FILE* file) {
 	VECTOR3D fWd = obj->getForwardLookDirection();
 	VECTOR3D uWd = obj->getUpLookDirection();
 	VECTOR3D rWd = obj->getRightLookDirection();
 
-	errno_t bErrorFlag = _ftprintf_s(file, _T("View vectors:\nForward: %.3f %.3f %.3f\nUpward: %.3f %.3f %.3f\nRightward: %.3f %.3f %.3f\n"), 
+	errno_t bErrorFlag = _ftprintf_s(file, _T("View vectors:\nForward:       %.3f %.3f %.3f\nUpward:        %.3f %.3f %.3f\nRightward:     %.3f %.3f %.3f\n"), 
 											fWd.x, fWd.y, fWd.z, uWd.x, uWd.y, uWd.z, rWd.x, rWd.y, rWd.z );
 }
 
@@ -38,11 +38,11 @@ void clsTranslator::pastePyramid(LPPYRAMID3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 
-	bErrorFlag = _ftprintf_s(file, _T("Height: %.3f\n"), obj->getHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Base length: %.3f\n"), obj->getBLength() );
-	bErrorFlag = _ftprintf_s(file, _T("Base width: %.3f\n"), obj->getBWidth() );
-	bErrorFlag = _ftprintf_s(file, _T("Top length: %.3f\n"), obj->getTLength() );
-	bErrorFlag = _ftprintf_s(file, _T("Top width: %.3f\n"), obj->getTWidth() );
+	bErrorFlag = _ftprintf_s(file, _T("Height:         %.3f\n"), obj->getHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Base length:    %.3f\n"), obj->getBLength() );
+	bErrorFlag = _ftprintf_s(file, _T("Base width:     %.3f\n"), obj->getBWidth() );
+	bErrorFlag = _ftprintf_s(file, _T("Top length:     %.3f\n"), obj->getTLength() );
+	bErrorFlag = _ftprintf_s(file, _T("Top width:      %.3f\n"), obj->getTWidth() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteCone(LPCONE3D obj, FILE* file) {
@@ -52,10 +52,10 @@ void clsTranslator::pasteCone(LPCONE3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 
-	bErrorFlag = _ftprintf_s(file, _T("Height: %.3f\n"), obj->getHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Height:         %.3f\n"), obj->getHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Base radius:    %.3f\n"), obj->getBRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Top radius:     %.3f\n"), obj->getTRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecision() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteExCone(LPEXCONE3D obj, FILE* file) {
@@ -65,11 +65,11 @@ void clsTranslator::pasteExCone(LPEXCONE3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 
-	bErrorFlag = _ftprintf_s(file, _T("Height: %.3f\n"), obj->getHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Secant: %.3f\n"), obj->getSecant() );
-	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Height:         %.3f\n"), obj->getHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Base radius:    %.3f\n"), obj->getBRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Top radius:     %.3f\n"), obj->getTRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Secant:         %.3f\n"), obj->getSecant() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecision() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteHole(LPHOLE3D obj, FILE* file) {
@@ -79,12 +79,12 @@ void clsTranslator::pasteHole(LPHOLE3D obj, FILE* file) {
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 
-	bErrorFlag = _ftprintf_s(file, _T("Height: %.3f\n"), obj->getHeight() );
-	bErrorFlag = _ftprintf_s(file, _T("Base radius: %.3f\n"), obj->getBRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Base hole radius: %.3f\n"), obj->getBHoleRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Top radius: %.3f\n"), obj->getTRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Top hole radius: %.3f\n"), obj->getTHoleRadius() );
-	bErrorFlag = _ftprintf_s(file, _T("Precision: %.3f\n"), obj->getPrecission() );
+	bErrorFlag = _ftprintf_s(file, _T("Height:         %.3f\n"), obj->getHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("Base radius:    %.3f\n"), obj->getBRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Bhole radius:   %.3f\n"), obj->getBHoleRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Top radius:     %.3f\n"), obj->getTRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Thole radius:   %.3f\n"), obj->getTHoleRadius() );
+	bErrorFlag = _ftprintf_s(file, _T("Precision:      %.3f\n"), obj->getPrecision() );
 	pasteColor(obj->getColor(), file);
 }
 void clsTranslator::pasteMic(LPMICROPHONE3D obj, FILE* file) {
@@ -109,21 +109,41 @@ void clsTranslator::pasteMic(LPMICROPHONE3D obj, FILE* file) {
 	pasteColor(obj->getColor(), file);
 }
 
+void clsTranslator::pasteTank(LPJAGDPANTHER3D obj, FILE* file) {
+	errno_t bErrorFlag = _ftprintf_s(file, _T("------------------------------------- JAGDPANTHER --------------------------------------\n") );
+
+	pasteName(obj, file);
+	pastePosition(obj, file);
+	pasteRotation(obj, file);
+
+	bErrorFlag = _ftprintf_s(file, _T("Body length:    %.3f\n"), obj->getBodyLength() );
+	bErrorFlag = _ftprintf_s(file, _T("Body width:     %.3f\n"), obj->getBodyWidth() );
+	bErrorFlag = _ftprintf_s(file, _T("Body height:    %.3f\n"), obj->getBodyHeight() );
+	bErrorFlag = _ftprintf_s(file, _T("F-top slope:    %.3f\n"), obj->getFTArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("F-bottom slope: %.3f\n"), obj->getFBArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("B-top slope:    %.3f\n"), obj->getBTArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("B-b slope:      %.3f\n"), obj->getBBArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("Top slope:      %.3f\n"), obj->getTopArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("Side slope:     %.3f\n"), obj->getSideArmSlope() );
+	bErrorFlag = _ftprintf_s(file, _T("Cannon length:  %.3f\n"), obj->getCannonLength() );
+	pasteColor(obj->getColor(), file);
+}
+
 void clsTranslator::pasteCam(LPCAMERA3D obj, FILE* file) {
 	pasteName(obj, file);
 	pastePosition(obj, file);
 	pasteRotation(obj, file);
 	errno_t bErrorFlag;
-	bErrorFlag = _ftprintf_s(file, _T("hFOV:      %.3f\n"), obj->getHFov() );
-	bErrorFlag = _ftprintf_s(file, _T("vFOV:      %.3f\n"), obj->getVFov() );
-	bErrorFlag = _ftprintf_s(file, _T("Near clip: %.3f\n"), obj->getNearCP() );
-	bErrorFlag = _ftprintf_s(file, _T("Far clip:  %.3f\n"), obj->getFarCP() );
+	bErrorFlag = _ftprintf_s(file, _T("hFOV:           %.3f\n"), obj->getHFov() );
+	bErrorFlag = _ftprintf_s(file, _T("vFOV:           %.3f\n"), obj->getVFov() );
+	bErrorFlag = _ftprintf_s(file, _T("Near clip:      %.3f\n"), obj->getNearCP() );
+	bErrorFlag = _ftprintf_s(file, _T("Far clip:       %.3f\n"), obj->getFarCP() );
 }
 void clsTranslator::pasteLight(LPDIFLIGHT3D obj, FILE* file) {
 	pasteName(obj, file);
 	pasteRotation(obj, file);
 	errno_t bErrorFlag;
-	bErrorFlag = _ftprintf_s(file, _T("Power:     %.3f\n"), obj->getPower() );
+	bErrorFlag = _ftprintf_s(file, _T("Power:          %.3f\n"), obj->getPower() );
 	pasteColor(obj->getColor(), file);
 }
 
@@ -155,6 +175,8 @@ MESH_ID clsTranslator::readMeshID(FILE* file) {
 
 	if ( !_tcscmp(name, _T("MICROPHONE")) )
 		return MSH_MIC;
+	if ( !_tcscmp(name, _T("JAGDPANTHER")) )
+		return MSH_TANK;
 	if ( !_tcscmp(name, _T("PYRAMID")) )
 		return MSH_PYRAMID;
 	if ( !_tcscmp(name, _T("CONE")) ) 
@@ -164,7 +186,7 @@ MESH_ID clsTranslator::readMeshID(FILE* file) {
 	if ( !_tcscmp(name, _T("HOLE")) )
 		return MSH_HOLE;
 
-	return MSH_MIC;
+	return MSH_TANK;
 }
 
 //void clsTranslator::readPyramid(LPPYRAMID3D obj, FILE* file, LPSCENE3D Scene) {
@@ -362,6 +384,85 @@ void clsTranslator::readMic(FILE* file, LPSCENE3D Scene) {
 	obj->Transform();
 }
 
+void clsTranslator::readTank(FILE* file, LPSCENE3D Scene) {
+	LPJAGDPANTHER3D obj;
+	TCHAR buffer[256], name[256];
+	errno_t bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), name, 256);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	VECTOR3D pos = readVector(file);
+
+	bErrorFlag = _ftscanf_s(file, _T("%24c"), buffer);
+	VECTOR3D fwd, rwd, uwd;
+	readRotation(fwd, uwd, rwd, file);
+
+	float bL;
+	float bW;
+	float bH;
+	float fta;
+	float fba;
+	float bta;
+	float bba;
+	float ta;
+	float sa;
+	float clen;		
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &bL);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &bW);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &bH);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &fta);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &fba);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &bta);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &bba);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &ta);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &sa);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	bErrorFlag = _ftscanf_s(file, _T("%f"), &clen);
+
+	bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+	int r, g, b;
+	bErrorFlag = _ftscanf_s(file, _T("%d %d %d"), &r, &g, &b);
+
+	obj = new JAGDPANTHER3D(bL, bW, bH, fba, fta, bba, bta, ta, sa, clen, r, g, b);
+	obj->setName(name, 256);
+	obj->Translate(pos);
+	obj->setForwardLookDirection(fwd);
+	obj->setUpLookDirection(uwd);
+	obj->setRightLookDirection(rwd);
+
+	Scene->AddObject(obj);
+	obj->Transform();
+}
+
 bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 	FILE* file;
 	errno_t bErrorFlag = _tfopen_s(&file, fileName, _T("w"));
@@ -412,6 +513,10 @@ bool clsTranslator::saveSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		case MSH_MIC:
 			pasteMic((LPMICROPHONE3D)meshToSave, file);
 			break;
+		case MSH_TANK:
+			pasteTank((LPJAGDPANTHER3D)meshToSave, file);
+			break;
+
 		}
 	}
 	bErrorFlag = _ftprintf_s(file, _T("----------------------------------------------------------------------------\n"), NULL );
@@ -529,6 +634,10 @@ bool clsTranslator::loadSceneScript(LPSCENE3D Scene, TCHAR *fileName) {
 		case MSH_MIC:
 			bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
 			readMic(file, Scene);
+			break;
+		case MSH_TANK:
+			bErrorFlag = _ftscanf_s(file, _T("%s"), buffer, 256);
+			readTank(file, Scene);
 			break;
 		}
 	}
