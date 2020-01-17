@@ -125,7 +125,7 @@ VOID Draw_MainToolbars();
 VOID Draw_InitCreateToolbar();
 //VOID Draw_InitModifyToolbar();
 
-VOID Draw_InitObjectsToolbar();
+VOID Draw_InitObjectsToolbar(int);
 VOID Draw_InitLightsToolbar();
 VOID Draw_InitCamsToolbar();
 
@@ -142,9 +142,9 @@ VOID RemoveSceneObject();
 
 // Controls functions
 UINT CreateMic();
-UINT ModifMic();
+UINT ModyfMic();
 UINT CreateTank();
-UINT ModifTank();
+UINT ModifyTank();
 BOOL CreateLight(); 
 BOOL ModifLight();
 UINT CreateCam();

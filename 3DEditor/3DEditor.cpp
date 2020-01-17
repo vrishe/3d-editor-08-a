@@ -75,7 +75,7 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
 							| WS_CLIPSIBLINGS ), 
 				WS_EX_APPWINDOW | WS_EX_CONTROLPARENT,
 				CW_USEDEFAULT, 0,
-				1270, 770,
+				1276, 768,
 				NULL,
 				LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MY3DEDITOR))
 			); 
@@ -204,31 +204,32 @@ int APIENTRY _tWinMain(HINSTANCE hInst,
  //============================================================================
 VOID Draw_MainToolbars() {
 	TCHAR *name = new TCHAR[256];
-		// object toolbar buttons	
+
+	// object toolbar buttons	
 	LoadString(hInstance, N_BT_MOVE, name, 256);
 	btMove.Create(	BT_MOVE,
-					name,
-					&mainForm,
-					VIEWPORT_AREA_W / 2 + 50,
-					VIEWPORT_AREA_H + 10,
-					BT_TOOL_W, BT_TOOL_H,
-					FALSE);
+				name,
+				&mainForm,
+				VIEWPORT_AREA_W / 2 + 50,
+				VIEWPORT_AREA_H + 10,
+				BT_TOOL_W, BT_TOOL_H,
+				FALSE);
 	LoadString(hInstance, N_BT_ROTATE, name, 256);
-	btRotate.Create(BT_ROTATE,
-					name,
-					&mainForm,
-					VIEWPORT_AREA_W / 2 + BT_TOOL_W + 55, 
-					VIEWPORT_AREA_H + 10,
-					BT_TOOL_W, BT_TOOL_H,
-					FALSE);
+	btRotate.Create( BT_ROTATE,
+				name,
+				&mainForm,
+				VIEWPORT_AREA_W / 2 + BT_TOOL_W + 55, 
+				VIEWPORT_AREA_H + 10,
+				BT_TOOL_W, BT_TOOL_H,
+				FALSE);
 	LoadString(hInstance, N_BT_SCALE, name, 256);
-	btScale.Create(BT_SCALE,
-					name,
-					&mainForm,
-					VIEWPORT_AREA_W / 2 + BT_TOOL_W * 2 + 60, 
-					VIEWPORT_AREA_H + 10,
-					BT_TOOL_W, BT_TOOL_H,
-					FALSE);
+	btScale.Create( BT_SCALE,
+				name,
+				&mainForm,
+				VIEWPORT_AREA_W / 2 + BT_TOOL_W * 2 + 60, 
+				VIEWPORT_AREA_H + 10,
+				BT_TOOL_W, BT_TOOL_H,
+				FALSE);
 	LoadString(hInstance, N_LB_X, name, 256);
 	lbX.Create(	name,
 				&mainForm, 
@@ -270,7 +271,7 @@ VOID Draw_MainToolbars() {
 	tbY.setBgFillColor(TEXT_BG_COLOR);
 	tbZ.setBgFillColor(TEXT_BG_COLOR);
 
-		// right toolbar
+	// right toolbar
 	LoadString(hInstance, N_TAB_CREATE, name, 256);
 	tabCreate.Create(TAB_CREATE,
 					name,
@@ -309,7 +310,7 @@ VOID Draw_MainToolbars() {
 					BT_TOOL_W, BT_TOOL_H - 10
 				);
 
-		// camera toolbar buttons
+	// camera toolbar buttons
 	LoadString(hInstance, N_BT_PAN, name, 256);
 	btPan.Create(BT_PAN,
 					name,
@@ -372,79 +373,80 @@ VOID Draw_InitCreateToolbar() {
 
 	delete [] name;
 }
-//VOID Draw_InitModifyToolbar (HINSTANCE hInstance) {}
-VOID Draw_InitObjectsToolbar() {
+
+VOID Draw_InitObjectsToolbar(int button = 0) {
 	TCHAR *name = new TCHAR[256];
 
-	LoadString(hInstance, N_BT_TANK, name, 256);
-	btTank.Create(
-				BT_TANK,
-				name,
-				&mainForm,
-				ufWidth - TAB_W * 2 - 17, 
-				20 + TAB_H + SUB_TAB_H,				
-				TAB_W, SUB_TAB_H,
-				FALSE);
-	/*LoadString(hInstance, N_BT_CONE, name, 256);
-	btCone.Create(
-				BT_CONE,
-				name,
-				&mainForm,
-				ufWidth - TAB_W - 10, 
-				20 + TAB_H + SUB_TAB_H,				
-				TAB_W, SUB_TAB_H,
-				FALSE);
-	LoadString(hInstance, N_BT_EX_CONE, name, 256);
-	btExCone.Create(
-				BT_EX_CONE,
-				name,
-				&mainForm,
-				ufWidth - TAB_W * 2 - 17, 
-				22 + TAB_H + SUB_TAB_H * 2,				
-				TAB_W, SUB_TAB_H,
-				FALSE);
-	LoadString(hInstance, N_BT_HOLE, name, 256);
-	btHole.Create(
-				BT_HOLE,
-				name,
-				&mainForm,
-				ufWidth - TAB_W - 10, 
-				22 + TAB_H + SUB_TAB_H * 2,				
-				TAB_W, SUB_TAB_H,
-				FALSE);
-	LoadString(hInstance, N_BT_SPHERE, name, 256);
-	btSphere.Create(
-				BT_SPHERE,
-				name,
-				&mainForm,
-				ufWidth - TAB_W * 2 - 17, 
-				24 + TAB_H + SUB_TAB_H * 3,				
-				TAB_W, SUB_TAB_H,
-				FALSE);	
-
-	btBox.Disable();
-	btCone.Disable();
-	btExCone.Disable();
-	btHole.Disable();
-	btSphere.Disable();*/
-
-	//LoadString(hInstance, N_BT_MIC, name, 256);
-	//btMicrophone.Create(BT_MIC,
-	//				name,
-	//				&mainForm,
-	//				ufWidth - TAB_W * 2 - 17, 
-	//				35 + TAB_H + SUB_TAB_H * 4,				
-	//				TAB_W, SUB_TAB_H,
-	//				FALSE);
-
-	/*LoadString(hInstance, N_BT_TANK, name, 256);
-	btTank.Create(BT_TANK,
+	if (!button || button == BT_TANK) {
+		LoadString(hInstance, N_BT_TANK, name, 256);
+		btTank.Create(
+			BT_TANK,
+			name,
+			&mainForm,
+			ufWidth - TAB_W * 2 - 17,
+			20 + TAB_H + SUB_TAB_H,
+			TAB_W, SUB_TAB_H,
+			FALSE);
+	}
+	if (!button || button == BT_MIC) {
+		LoadString(hInstance, N_BT_MIC, name, 256);
+		btMicrophone.Create(
+					BT_MIC,
+					name,
+					&mainForm,
+					ufWidth - TAB_W - 10, 
+					20 + TAB_H + SUB_TAB_H,				
+					TAB_W, SUB_TAB_H,
+					FALSE);
+	}
+	if (!button || button == BT_CONE) {
+		LoadString(hInstance, N_BT_CONE, name, 256);
+		btCone.Create(
+					BT_CONE,
 					name,
 					&mainForm,
 					ufWidth - TAB_W * 2 - 17, 
-					26 + TAB_H + SUB_TAB_H * 4,				
+					button ? 20 + TAB_H + SUB_TAB_H : 22 + TAB_H + SUB_TAB_H * 2,
 					TAB_W, SUB_TAB_H,
-					FALSE);*/
+					FALSE);
+		btCone.Disable();
+	}
+	if (!button || button == BT_EX_CONE) {
+		LoadString(hInstance, N_BT_EX_CONE, name, 256);
+		btExCone.Create(
+					BT_EX_CONE,
+					name,
+					&mainForm,
+					ufWidth - TAB_W - 10, 
+					button ? 20 + TAB_H + SUB_TAB_H : 22 + TAB_H + SUB_TAB_H * 2,
+					TAB_W, SUB_TAB_H,
+					FALSE);
+		btExCone.Disable();
+	}
+	if (!button || button == BT_HOLE) {
+		LoadString(hInstance, N_BT_HOLE, name, 256);
+		btHole.Create(
+					BT_HOLE,
+					name,
+					&mainForm,
+					ufWidth - TAB_W * 2 - 17, 
+					button ? 20 + TAB_H + SUB_TAB_H : 24 + TAB_H + SUB_TAB_H * 3,
+					TAB_W, SUB_TAB_H,
+					FALSE);
+		btHole.Disable();
+	}
+	if (!button || button == BT_SPHERE) {
+		LoadString(hInstance, N_BT_SPHERE, name, 256);
+		btSphere.Create(
+			BT_SPHERE,
+			name,
+			&mainForm,
+			ufWidth - TAB_W - 10,
+			button ? 20 + TAB_H + SUB_TAB_H : 24 + TAB_H + SUB_TAB_H * 3,
+			TAB_W, SUB_TAB_H,
+			FALSE);
+		btSphere.Disable();
+	}
 
 	delete [] name;
 }
@@ -478,24 +480,27 @@ VOID Draw_InitCamsToolbar() {
 }
 VOID Draw_InitMicrophoneToolbar() {
 	TCHAR *name = new TCHAR[256];
-	name[0]		= '\0';
+	name[0] = '\0';
 
 	LoadString(hInstance, N_LB_NAME, name, 256);
-	lbParams[0].Create(	name,
-						&mainForm,
-						ufWidth - TAB_W * 2 - 11, 
-						37 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,				
-						46, 16);
-	if ( modifyMode )
+	lbParams[0].Create(
+		name,
+		&mainForm,
+		ufWidth - TAB_W * 2 - 11, 
+		37 + TAB_H + SUB_TAB_H * 2,
+		46, 16);
+
+	if (modifyMode)
 		((LPMICROPHONE3D)activeObject)->getName(name, 256);
 	else
 		ZeroMemory(name, 256 * sizeof(TCHAR));
-	tbParams[0].Create(	TB_NAME,
-						name,
-						&mainForm,
-						ufWidth - TAB_W * 2 + 36, 
-						35 + BT_TOOL_H / 2 + TAB_H + SUB_TAB_H * 2,
-						LIST_OBJ_W - 44, BT_TOOL_H - 9);
+	tbParams[0].Create(
+		TB_NAME,
+		name,
+		&mainForm,
+		ufWidth - TAB_W * 2 + 36, 
+		35 + TAB_H + SUB_TAB_H * 2,
+		LIST_OBJ_W - 44, BT_TOOL_H - 9);
 
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getBaseHeight();
@@ -505,7 +510,7 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("12")),
 						&mainForm,
 						ufWidth - 165, 
-						218,
+						190,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getBaseRadius() * 2;
@@ -515,7 +520,7 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("114")),
 						&mainForm,
 						ufWidth - 165, 
-						243,
+						215,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getButtonWidth();
@@ -525,7 +530,7 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("25")),
 						&mainForm,
 						ufWidth - 165, 
-						268,
+						240,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightRadius() * 2;
@@ -535,7 +540,7 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("16")),
 						&mainForm,
 						ufWidth - 165, 
-						293,
+						265,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightHeight();
@@ -545,7 +550,7 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("95")),
 						&mainForm,
 						ufWidth - 165, 
-						318,
+						290,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getUprightGap();
@@ -555,47 +560,47 @@ VOID Draw_InitMicrophoneToolbar() {
 						(modifyMode ? name : _T("3.5")),
 						&mainForm,
 						ufWidth - 165, 
-						343,
+						315,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getHandleIndent();
 		swprintf_s(name, 256, _T("%.2f"), tmp);
 	}
-	tbParams[10].Create(TB_HANDIND,
+	tbParams[10].Create( TB_HANDIND,
 						(modifyMode ? name : _T("5")),
 						&mainForm,
 						ufWidth - 165, 
-						368,
+						340,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getHeadRadius() * 2;
 		swprintf_s(name, 256, _T("%.2f"), tmp);
 	}
-	tbParams[11].Create(TB_HEADDIAM,
+	tbParams[11].Create( TB_HEADDIAM,
 						(modifyMode ? name : _T("55")),
 						&mainForm,
 						ufWidth - 165, 
-						393,
+						365,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getHeadDepth();
 		swprintf_s(name, 256, _T("%.2f"), tmp);
 	}
-	tbParams[12].Create(TB_HEADDEPTH,
+	tbParams[12].Create( TB_HEADDEPTH,
 						(modifyMode ? name : _T("21")),
 						&mainForm,
 						ufWidth - 165, 
-						418,
+						390,
 						75, BT_TOOL_H - 9);
 	if ( modifyMode ) {
 		float tmp = ((LPMICROPHONE3D)activeObject)->getCoreRadius() * 2;
 		swprintf_s(name, 256, _T("%.2f"), tmp);
 	}
-	tbParams[13].Create(TB_COREDIAM,
+	tbParams[13].Create( TB_COREDIAM,
 						(modifyMode ? name : _T("42")),
 						&mainForm,
 						ufWidth - 165, 
-						443,
+						415,
 						75, BT_TOOL_H - 9);
 	
 	if ( !modifyMode )
@@ -607,72 +612,72 @@ VOID Draw_InitMicrophoneToolbar() {
 		LoadString(hInstance, N_TAB_MODIFY, name, 256);
 	}
 
-	btMake.Create(	BT_MAKEMIC,
+	btMake.Create( BT_MAKEMIC,
 				name,
 				&mainForm,
-				ufWidth - 157, 
-				470,
+				ufWidth - SUB_TAB_W * 3 - 18 + LIST_OBJ_W - BT_TOOL_W,
+				407,
 				BT_TOOL_W, BT_TOOL_H);
 
 	LoadString(hInstance, N_LB_BHEIGHT, name, 256);
 	lbParams[3].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						220,				
+						192,				
 						100, 16);
 	LoadString(hInstance, N_LB_BDIAM, name, 256);
 	lbParams[4].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						245,				
+						217,				
 						100, 16);
 	LoadString(hInstance, N_LB_BWIDTH, name, 256);
 	lbParams[5].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						270,				
+						242,				
 						100, 16);
 	LoadString(hInstance, N_LB_UDIAM, name, 256);
 	lbParams[6].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						295,				
+						267,				
 						100, 16);
 	LoadString(hInstance, N_LB_UHEIGHT, name, 256);
 	lbParams[7].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						320,				
+						292,				
 						100, 16);
 	LoadString(hInstance, N_LB_UGAP, name, 256);
 	lbParams[8].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						345,				
+						317,				
 						100, 16);
 	LoadString(hInstance, N_LB_HANDIND, name, 256);
 	lbParams[9].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						370,				
+						342,				
 						100, 16);
 	LoadString(hInstance, N_LB_HEADDIAM, name, 256);
 	lbParams[10].Create(	name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						395,				
+						367,				
 						100, 16);
 	LoadString(hInstance, N_LB_HEADDEPTH, name, 256);
 	lbParams[11].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						420,				
+						392,				
 						100, 16);
 	LoadString(hInstance, N_LB_COREDIAM, name, 256);
 	lbParams[12].Create(name,
 						&mainForm,
 						ufWidth - TAB_W * 2 - 12, 
-						445,				
+						417,				
 						100, 16);
 
 	LoadString(hInstance, N_LB_R, name, 256);
@@ -1320,7 +1325,7 @@ VOID Draw_DestroyRightToolbar () {
 	btLights.Destroy();
 
 
-	//btMicrophone.Destroy();
+	btMicrophone.Destroy();
 	btTank.Destroy();
 	btBox.Destroy();
 	btCone.Destroy();
@@ -1467,7 +1472,7 @@ UINT CreateMic() {
 	return 0;
 }
 
-UINT ModifMic() {
+UINT ModyfMic() {
 	if ( activeObject == NULL ) return 100;
 
 	TCHAR *buf = new TCHAR[256];
@@ -1566,7 +1571,7 @@ UINT ModifMic() {
 	return 0;
 }
 
-UINT ModifTank() {
+UINT ModifyTank() {
 	TCHAR *buf = new TCHAR[256];
 
 	tbParams[4].getText(buf, 256);
@@ -2062,9 +2067,76 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		mainForm.Invalidate();
 	}
 
+	LPTARGCAMERA3D cam = activeViewport->getCamera();
+
+	switch ( activeTool ) {
+
+	case IS_PAN:
+		if (keyBrd[VK_LEFT] & 0x80)	dirH -= PAN_ASPECT;
+		if (keyBrd[VK_RIGHT] & 0x80)	dirH += PAN_ASPECT;
+		cam->Strafe(dirH);
+
+		if (keyBrd[VK_UP] & 0x80)		dirV += PAN_ASPECT;
+		if (keyBrd[VK_DOWN] & 0x80)	dirV -= PAN_ASPECT;
+		cam->Fly(dirV);
+
+		if (keyBrd[VK_HOME] & 0x80)	dirD += PAN_ASPECT;
+		if (keyBrd[VK_END] & 0x80)	dirD -= PAN_ASPECT;
+		cam->Follow(dirD);
+
+		cam->Transform();
+		break;
+
+	case IS_ZOOM:
+		dirH = cam->getHFov();
+		dirV = cam->getVFov();
+
+		if (keyBrd[VK_LEFT] & 0x80)	dirV -= ZOOM_ASPECT;
+		if (keyBrd[VK_RIGHT] & 0x80)	dirV += ZOOM_ASPECT;
+		cam->setVFov(dirV);
+
+		if (keyBrd[VK_UP] & 0x80)		dirH += ZOOM_ASPECT;
+		if (keyBrd[VK_DOWN] & 0x80)	dirH -= ZOOM_ASPECT;
+		cam->setHFov(dirH);
+
+		cam->Transform();
+		break;
+
+	case IS_CAMROTATE:
+		if (keyBrd[VK_LEFT] & 0x80)	dirH -= PAN_ASPECT;
+		if (keyBrd[VK_RIGHT] & 0x80)	dirH += PAN_ASPECT;
+		cam->StrafeLatitude(dirH);
+
+		if (keyBrd[VK_UP] & 0x80)		dirV += PAN_ASPECT;
+		if (keyBrd[VK_DOWN] & 0x80)	dirV -= PAN_ASPECT;
+		cam->StrafeLongitude(dirV);
+
+		if (keyBrd[VK_HOME] & 0x80)	dirD += PAN_ASPECT;
+		if (keyBrd[VK_END] & 0x80)	dirD -= PAN_ASPECT;
+		cam->FollowLookAxis(dirD);
+
+		cam->Transform();
+		break;
+
+	case IS_LOOK:
+		if (keyBrd[VK_LEFT] & 0x80)	dirH -= PAN_ASPECT;
+		if (keyBrd[VK_RIGHT] & 0x80)	dirH += PAN_ASPECT;
+		cam->TargetStrafe(dirH);
+
+		if (keyBrd[VK_UP] & 0x80)		dirV += PAN_ASPECT;
+		if (keyBrd[VK_DOWN] & 0x80)	dirV -= PAN_ASPECT;
+		cam->TargetFly(dirV);
+
+		if (keyBrd[VK_HOME] & 0x80)	dirD += PAN_ASPECT;
+		if (keyBrd[VK_END] & 0x80)	dirD -= PAN_ASPECT;
+		cam->TargetFollow(dirD);
+
+		cam->Transform();
+		break;
+	}
+
 	if ( activeObject == NULL ) return 1L;
 
-	LPTARGCAMERA3D cam = activeViewport->getCamera();
 	switch ( activeTool ) {
 	case IS_MOVE:
 		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
@@ -2118,69 +2190,6 @@ LRESULT mainForm_keyPressed(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 		
 		if ( activeObject->clsID() >= CLS_HULL ) 
 				((LPHULL3D)activeObject)->Transform();
-		break;
-
-	case IS_PAN:
-		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
-		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
-		cam->Strafe(dirH);
-
-		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
-		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
-		cam->Fly(dirV);
-
-		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
-		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
-		cam->Follow(dirD);
-
-		cam->Transform();
-		break;
-
-	case IS_ZOOM:
-		dirH = cam->getHFov();
-		dirV = cam->getVFov();
-
-		if ( keyBrd[VK_LEFT] & 0x80 )	dirV -= ZOOM_ASPECT;
-		if ( keyBrd[VK_RIGHT] & 0x80 )	dirV += ZOOM_ASPECT;
-		cam->setVFov(dirV);
-
-		if ( keyBrd[VK_UP] & 0x80 )		dirH += ZOOM_ASPECT;
-		if ( keyBrd[VK_DOWN] & 0x80 )	dirH -= ZOOM_ASPECT;
-		cam->setHFov(dirH);
-
-		cam->Transform();
-		break;
-
-	case IS_CAMROTATE:
-		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
-		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
-		cam->StrafeLatitude(dirH);
-
-		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
-		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
-		cam->StrafeLongitude(dirV);
-
-		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
-		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
-		cam->FollowLookAxis(dirD);
-
-		cam->Transform();
-		break;
-
-	case IS_LOOK:
-		if ( keyBrd[VK_LEFT] & 0x80 )	dirH -= PAN_ASPECT;
-		if ( keyBrd[VK_RIGHT] & 0x80 )	dirH += PAN_ASPECT;
-		cam->TargetStrafe(dirH);
-
-		if ( keyBrd[VK_UP] & 0x80 )		dirV += PAN_ASPECT;
-		if ( keyBrd[VK_DOWN] & 0x80 )	dirV -= PAN_ASPECT;
-		cam->TargetFly(dirV);
-
-		if ( keyBrd[VK_HOME] & 0x80 )	dirD += PAN_ASPECT;
-		if ( keyBrd[VK_END] & 0x80 )	dirD -= PAN_ASPECT;
-		cam->TargetFollow(dirD);
-
-		cam->Transform();
 		break;
 	}
 
@@ -2274,19 +2283,19 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			Draw_InitLightsToolbar();
 			break;
 
-		//case BT_MIC:
-		//	Draw_DestroyRightToolbar();
-		//	Draw_InitCreateToolbar();
-		//	Draw_InitObjectsToolbar();
-		//	Draw_InitMicrophoneToolbar();
-		//	tbParams[0].setFocus();
-		//	break;
-
 		case BT_TANK:
 			Draw_DestroyRightToolbar();
 			Draw_InitCreateToolbar();
-			Draw_InitObjectsToolbar();
+			Draw_InitObjectsToolbar(BT_TANK);
 			Draw_InitTankToolbar();
+			tbParams[0].setFocus();
+			break;
+
+		case BT_MIC:
+			Draw_DestroyRightToolbar();
+			Draw_InitCreateToolbar();
+			Draw_InitObjectsToolbar(BT_MIC);
+			Draw_InitMicrophoneToolbar();
 			tbParams[0].setFocus();
 			break;
 
@@ -2367,58 +2376,58 @@ LRESULT mainForm_InterfClick(LPOBJECT Sender, WPARAM wParam, LPARAM lParam)
 			mainForm.Invalidate();
 			break;
 
-		//case BT_MAKEMIC:
-		//	if ( modifyMode )
-		//		error = ModifMic();
-		//	else
-		//		error = CreateMic();
+		case BT_MAKEMIC:
+			if ( modifyMode )
+				error = ModyfMic();
+			else
+				error = CreateMic();
 
-		//	switch (error) 
-		//	{
-		//		case 1:
-		//			MessageBox(NULL, _T("To small height."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 2:
-		//			MessageBox(NULL, _T("To small radius."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 3:
-		//			MessageBox(NULL, _T("Wrong button size."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 4:
-		//			MessageBox(NULL, _T("Wrong upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 5:
-		//			MessageBox(NULL, _T("To small upright."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 6:
-		//			MessageBox(NULL, _T("Wrong upright gap size."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 7:
-		//			MessageBox(NULL, _T("Wrong handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 8:
-		//			MessageBox(NULL, _T("Wrong head depth."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 9:
-		//			MessageBox(NULL, _T("Wrong head diameter size"), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 10:
-		//			MessageBox(NULL, _T("Wrong core diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//		case 11:
-		//			MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
-		//			break;
-		//	}
+			switch (error) 
+			{
+				case 1:
+					MessageBox(NULL, _T("To small height."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 2:
+					MessageBox(NULL, _T("To small radius."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 3:
+					MessageBox(NULL, _T("Wrong button size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 4:
+					MessageBox(NULL, _T("Wrong upright diameter."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 5:
+					MessageBox(NULL, _T("To small upright."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 6:
+					MessageBox(NULL, _T("Wrong upright gap size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 7:
+					MessageBox(NULL, _T("Wrong handle indent"), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 8:
+					MessageBox(NULL, _T("Wrong head depth."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 9:
+					MessageBox(NULL, _T("Wrong head diameter size"), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 10:
+					MessageBox(NULL, _T("Wrong core diameter size."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+				case 11:
+					MessageBox(NULL, _T("Enter name."), _T("Error"), MB_OK | MB_ICONERROR );
+					break;
+			}
 
-		//	ToPoint();
-		//	RefreshTextBoxes();
-		//	mainForm.Invalidate();
-		//	mainForm.setFocus();
-		//	break;
+			ToPoint();
+			RefreshTextBoxes();
+			mainForm.Invalidate();
+			mainForm.setFocus();
+			break;
 
 		case BT_MAKETANK:
 			if ( modifyMode )
-				error = ModifTank();
+				error = ModifyTank();
 			else
 				error = CreateTank();
 
