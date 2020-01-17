@@ -89,9 +89,9 @@ tagVector3D tagVector3D::operator- () const
 
 bool tagVector3D::operator== (const tagVector3D& u) const
 {
-	return abs(x - u.x) < EPSILON
-		&& abs(y - u.y) < EPSILON
-		&& abs(z - u.z) < EPSILON;
+	return fabs(x - u.x) < EPSILON
+		&& fabs(y - u.y) < EPSILON
+		&& fabs(z - u.z) < EPSILON;
 }
 
 bool tagVector3D::operator!= (const tagVector3D& u) const {	return !operator==(u); }
